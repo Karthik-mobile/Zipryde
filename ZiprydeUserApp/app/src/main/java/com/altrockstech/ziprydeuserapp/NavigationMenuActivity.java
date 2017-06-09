@@ -22,6 +22,8 @@ import android.widget.TextView;
 public class NavigationMenuActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
+    TextView titleText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,11 +46,12 @@ public class NavigationMenuActivity extends AppCompatActivity
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.MATCH_PARENT);
         toolbar.addView(mCustomView, layoutParams);
-        TextView titleText = (TextView) mCustomView.findViewById(R.id.titleText);
+        titleText = (TextView) mCustomView.findViewById(R.id.titleText);
         titleText.setText("ZIPRYDE");
         ImageView menuImg = (ImageView) mCustomView.findViewById(R.id.menuImg);
         menuImg.setOnClickListener(this);
 
+        navigationView.setCheckedItem(R.id.nav_home);
         showBookingFragment();
     }
 
@@ -88,8 +91,10 @@ public class NavigationMenuActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
+            titleText.setText("ZIPRYDE");
             showBookingFragment();
         } else if (id == R.id.nav_notification) {
+            titleText.setText("Notifications");
             // Creating a fragment object
             NotificationsFragment sFragment = new NotificationsFragment();
             // Creating a Bundle object
@@ -107,9 +112,25 @@ public class NavigationMenuActivity extends AppCompatActivity
             // Committing the transaction
             ft.commit();
         } else if (id == R.id.nav_history) {
-
+            titleText.setText("Your Zipryde");
+            // Creating a fragment object
+            YourZiprydeFragment sFragment = new YourZiprydeFragment();
+            // Creating a Bundle object
+            Bundle data = new Bundle();
+            // Setting the index of the currently selected item of mDrawerList
+//            data.putInt("position", position);
+            // Setting the position to the fragment
+            sFragment.setArguments(data);
+            // Getting reference to the FragmentManager
+            FragmentManager fragmentManager  = getSupportFragmentManager();
+            // Creating a fragment transaction
+            FragmentTransaction ft = fragmentManager.beginTransaction();
+            // Adding a fragment to the fragment transaction
+            ft.replace(R.id.content_frame, sFragment);
+            // Committing the transaction
+            ft.commit();
         } else if (id == R.id.nav_about) {
-
+            titleText.setText("About");
         }else if (id == R.id.nav_logout) {
 
         }
