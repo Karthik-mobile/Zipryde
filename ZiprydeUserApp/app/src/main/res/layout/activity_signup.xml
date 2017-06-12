@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#EDEDED"
+    android:background="@color/appBackground"
     tools:context="com.altrockstech.ziprydeuserapp.SignupActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -106,14 +106,14 @@
                 android:singleLine="true" />
 
             <Button
+                android:id="@+id/signupBtn"
                 android:layout_width="300dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="15dp"
                 android:background="@color/colorPrimary"
                 android:text="Signup"
-                android:textColor="@color/whiteColor"
-                android:textSize="18dp"
-                android:textStyle="bold" />
+                android:textColor="@color/primaryText"
+                android:textSize="18dp"  />
 
             <TextView
                 android:id="@+id/gotoLogin"
@@ -121,9 +121,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
                 android:text="Already have an account?"
-                android:textColor="#676F75"
-                android:textSize="16dp"
-                android:textStyle="bold" />
+                android:textColor="@color/primaryText"
+                android:textSize="16dp"  />
 
         </LinearLayout>
     </ScrollView>

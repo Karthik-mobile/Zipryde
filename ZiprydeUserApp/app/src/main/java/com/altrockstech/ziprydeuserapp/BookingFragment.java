@@ -2,14 +2,18 @@ package com.altrockstech.ziprydeuserapp;
 
 import android.*;
 import android.Manifest;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -20,6 +24,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.altrockstech.ziprydeuserapp.assist.Utils;
@@ -38,7 +48,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 
@@ -137,13 +149,13 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                 ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
             }
         } else {
-            Toast.makeText(getActivity(), "ACCESS FINE LOCATION is already granted.", Toast.LENGTH_SHORT).show();
             LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE );
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             if(statusOfGPS){
                 getGPSLocation();
             }else{
-                askSwitchOnGPS();
+                //askSwitchOnGPS();
+                showInfoDlg("Info..!", "Please switch ON GPS to get you current location..", "OPEN", "gps");
             }
         }
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -214,9 +226,39 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        crtLocation = new LatLng(-34, 151);
+        mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
+
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker marker) {
+                LayoutInflater li = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View  mWindow = li.inflate(R.layout.infowindow_layout, null);
+                TextView titleUi = ((TextView) mWindow.findViewById(R.id.title));
+                titleUi.setText("Set Pickup Location");
+                return mWindow;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                return null;
+            }
+        });
+
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Utils.location = crtLocation;
+                Log.e("Latitude",""+crtLocation.latitude);
+                Log.e("Longitude",""+crtLocation.longitude);
+                Intent ide = new Intent(getActivity(), BookingConfirmationActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                ide.putExtra("Latitude",""+crtLocation.latitude);
+                ide.putExtra("Longitude",""+crtLocation.longitude);
+                startActivity(ide);
+            }
+        });
     }
 
     public void getGPSLocation() {
@@ -228,12 +270,13 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                 Log.e("Longitude",""+String.valueOf(mLastLocation.getLongitude()));
 
                 if(mMap != null) {
-                    LatLng crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
-                    mMap.addMarker(new MarkerOptions().position(crtLocation).title("Current Location"));
+                    crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
+                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title("Current Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                    marker.showInfoWindow();
                 }
             }
             startLocationUpdates();
@@ -269,6 +312,52 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
         result.setResultCallback(this);
     }
 
+    Dialog dialog;
+    private void showInfoDlg(String title, String content, String btnText, final String navType) {
+        dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.infodialog_layout);
+        //dialog.setCanceledOnTouchOutside(true);
+
+        Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
+        positiveBtn.setText(""+btnText);
+
+        ImageView negativeBtn = (ImageView) dialog.findViewById(R.id.negativeBtn);
+        if(navType.equalsIgnoreCase("gps")){
+            negativeBtn.setVisibility(View.GONE);
+        }else{
+            negativeBtn.setVisibility(View.VISIBLE);
+        }
+
+        TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
+        dialogtitleText.setText(""+title);
+        TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
+        dialogcontentText.setText(""+content);
+
+        positiveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                if(navType.equalsIgnoreCase("gps")){
+                    startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_CHECK_SETTINGS);
+                }
+            }
+        });
+
+        negativeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -281,7 +370,8 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                     if(statusOfGPS){
                         getGPSLocation();
                     }else{
-                        askSwitchOnGPS();
+                        //askSwitchOnGPS();
+                        showInfoDlg("Info..!", "Please switch ON GPS to get you current location..", "OPEN", "gps");
                     }
                     break;
             }
@@ -291,30 +381,33 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
             if(statusOfGPS){
                 getGPSLocation();
             }else{
-                askSwitchOnGPS();
+                //askSwitchOnGPS();
+                showInfoDlg("Info..!", "Please switch ON GPS to get you current location..", "OPEN", "gps");
             }
-            Toast.makeText(getActivity(), "Permission granted", Toast.LENGTH_SHORT).show();
         }else{
             Toast.makeText(getActivity(), "Permission denied", Toast.LENGTH_SHORT).show();
         }
     }
 
+    LatLng crtLocation;
+
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
-            Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
             if (mLastLocation != null) {
                 Log.e("Latitude",""+String.valueOf(mLastLocation.getLatitude()));
                 Log.e("Longitude",""+String.valueOf(mLastLocation.getLongitude()));
 
                 if(mMap != null) {
-                    LatLng crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
-                    mMap.addMarker(new MarkerOptions().position(crtLocation).title("Current Location"));
+                    crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
+                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title("Current Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                    marker.showInfoWindow();
                 }
             }
         }
@@ -357,12 +450,13 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CHECK_SETTINGS) {
-            if (resultCode == getActivity().RESULT_OK) {
-                Toast.makeText(getActivity(), "GPS enabled", Toast.LENGTH_LONG).show();
+            LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE );
+            boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            if(statusOfGPS){
                 getGPSLocation();
-            } else {
-                Toast.makeText(getActivity(), "GPS is not enabled", Toast.LENGTH_LONG).show();
-                askSwitchOnGPS();
+            }else{
+                //askSwitchOnGPS();
+                showInfoDlg("Info..!", "Please switch ON GPS to get you current location..", "OPEN", "gps");
             }
         }else if(requestCode == Utils.REQUEST_GET_PLACES_DETAILS){
 //            if (resultCode == RESULT_OK) {
@@ -373,12 +467,13 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
             searchPlace.setText(address);
             if(mMap != null) {
                 mMap.clear();
-                LatLng crtLocation = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
-                mMap.addMarker(new MarkerOptions().position(crtLocation).title(""+address));
+                crtLocation = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title(""+address).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
                 mMap.animateCamera(CameraUpdateFactory.zoomIn());
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                marker.showInfoWindow();
             }
 //            }
         }
@@ -425,12 +520,13 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
             if (mLastLocation == null) {
                 mLastLocation = location;
                 if(mMap != null) {
-                    LatLng crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
-                    mMap.addMarker(new MarkerOptions().position(crtLocation).title("Current Location"));
+                    crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
+                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title("Current Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                    marker.showInfoWindow();
                 }
             }
         }

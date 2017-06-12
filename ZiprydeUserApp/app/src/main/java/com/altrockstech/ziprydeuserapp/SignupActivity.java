@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -30,6 +32,9 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
 
         TextView gotoLogin = (TextView) findViewById(R.id.gotoLogin);
         gotoLogin.setOnClickListener(this);
+        Button signupBtn = (Button) findViewById(R.id.signupBtn);
+        signupBtn.setOnClickListener(this);
+
     }
 
     @Override
@@ -37,6 +42,12 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         switch (v.getId()){
             case R.id.gotoLogin:
                 Intent ide = new Intent(SignupActivity.this, LoginActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
+                finish();
+                break;
+            case R.id.signupBtn:
+                ide = new Intent(SignupActivity.this, LoginActivity.class);
                 ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(ide);
                 finish();

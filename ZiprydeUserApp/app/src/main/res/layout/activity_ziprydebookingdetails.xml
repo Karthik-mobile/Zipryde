@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#EDEDED"
+    android:background="@color/appBackground"
     android:orientation="vertical"
     tools:context="com.altrockstech.ziprydeuserapp.ZiprydeBookingDetailsActivity">
 
@@ -71,6 +71,7 @@
                     android:singleLine="true"
                     android:text="Allen Chandler"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                    android:textColor="@color/primaryText"
                     android:textSize="18dp" />
 
                 <TextView
@@ -149,7 +150,7 @@
                 android:layout_marginBottom="5dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="5dp"
-                android:src="@drawable/mini_car" />
+                android:src="@drawable/car_green" />
 
             <TextView
                 android:id="@+id/bookingKM"
@@ -192,11 +193,41 @@
             android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
+            <RelativeLayout
+                android:layout_width="70dp"
+                android:layout_height="80dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/pointicon" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="58dp"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/lineicon" />
+
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:src="@drawable/pointicon" />
+
+            </RelativeLayout>
+
             <ImageView
                 android:layout_width="70dp"
                 android:layout_height="80dp"
                 android:layout_gravity="center"
-                android:src="@drawable/pick_drop_icon" />
+                android:src="@drawable/pick_drop_icon"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:layout_width="0dp"
