@@ -110,9 +110,9 @@
                 android:layout_width="300dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="15dp"
-                android:background="@color/colorPrimary"
+                android:background="@color/colorAccent"
                 android:text="Signup"
-                android:textColor="@color/primaryText"
+                android:textColor="@color/secondaryText"
                 android:textSize="18dp"  />
 
             <TextView

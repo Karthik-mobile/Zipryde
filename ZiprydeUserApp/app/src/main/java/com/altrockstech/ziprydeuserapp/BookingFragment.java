@@ -9,6 +9,8 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -52,6 +54,9 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -124,6 +129,8 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
 
     private AppCompatTextView searchPlace;
 
+    public LinearLayout infoWindowLay;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -163,13 +170,17 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-//        searchPlace.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(MapsActivity.this, PlacesSearchActivity.class);
-//                startActivityForResult(intent, Utils.REQUEST_GET_PLACES_DETAILS);
-//            }
-//        });
+        searchPlace.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), PlacesSearchActivity.class);
+                startActivityForResult(intent, Utils.REQUEST_GET_PLACES_DETAILS);
+            }
+        });
+
+        TextView titleUi = ((TextView) view.findViewById(R.id.title));
+        infoWindowLay = ((LinearLayout) view.findViewById(R.id.infoWindowLay));
+        titleUi.setText("Set Pickup Location");
 
         return view;
     }
@@ -227,7 +238,7 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
         mMap = googleMap;
         // Add a marker in Sydney and move the camera
         crtLocation = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
+        //mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
 
         mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
@@ -259,6 +270,43 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                 startActivity(ide);
             }
         });
+
+        infoWindowLay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Utils.location = crtLocation;
+                Log.e("Latitude",""+crtLocation.latitude);
+                Log.e("Longitude",""+crtLocation.longitude);
+                Intent ide = new Intent(getActivity(), BookingConfirmationActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                ide.putExtra("Latitude",""+crtLocation.latitude);
+                ide.putExtra("Longitude",""+crtLocation.longitude);
+                startActivity(ide);
+            }
+        });
+
+        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                Log.e("onCameraMove","onCameraMove");
+                infoWindowLay.setVisibility(View.GONE);
+                searchPlace.setText("Getting Address");
+            }
+        });
+
+        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                Log.e("onCameraIdle","onCameraIdle");
+                infoWindowLay.setVisibility(View.VISIBLE);
+                LatLng location = mMap.getCameraPosition().target;
+                Log.e("latitude",""+location.latitude);
+                Log.e("longitude",""+location.longitude);
+                String address = getCompleteAddressString(location.latitude, location.longitude);
+                Log.e("address",""+address);
+                searchPlace.setText(""+address);
+            }
+        });
     }
 
     public void getGPSLocation() {
@@ -271,12 +319,15 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
 
                 if(mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title("Current Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
+                    String address = getCompleteAddressString(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                    Log.e("address",""+address);
+                    searchPlace.setText(""+address);
+                    //Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title("Current Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
-                    marker.showInfoWindow();
+                    //marker.showInfoWindow();
                 }
             }
             startLocationUpdates();
@@ -402,12 +453,15 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
 
                 if(mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title("Current Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
+                    String address = getCompleteAddressString(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                    Log.e("address",""+address);
+                    searchPlace.setText(""+address);
+                    //Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title("Current Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
-                    marker.showInfoWindow();
+                    //marker.showInfoWindow();
                 }
             }
         }
@@ -460,20 +514,22 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
             }
         }else if(requestCode == Utils.REQUEST_GET_PLACES_DETAILS){
 //            if (resultCode == RESULT_OK) {
-            String latitude = data.getStringExtra("latitude");
-            String longitude = data.getStringExtra("longitude");
-            String address = data.getStringExtra("address");
-            Log.e("RESULT_OK", "Lat : "+latitude+" Lng : "+longitude);
-            searchPlace.setText(address);
-            if(mMap != null) {
-                mMap.clear();
-                crtLocation = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
-                Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title(""+address).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
-                mMap.animateCamera(CameraUpdateFactory.zoomIn());
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
-                marker.showInfoWindow();
+            if(data != null){
+                String latitude = data.getStringExtra("latitude");
+                String longitude = data.getStringExtra("longitude");
+                String address = data.getStringExtra("address");
+                Log.e("RESULT_OK", "Lat : "+latitude+" Lng : "+longitude);
+                searchPlace.setText(address);
+                if(mMap != null) {
+                    mMap.clear();
+                    crtLocation = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                    //Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title(""+address).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
+                    mMap.animateCamera(CameraUpdateFactory.zoomIn());
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                    //marker.showInfoWindow();
+                }
             }
 //            }
         }
@@ -521,12 +577,15 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                 mLastLocation = location;
                 if(mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title("Current Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
+                    String address = getCompleteAddressString(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                    Log.e("address",""+address);
+                    searchPlace.setText(""+address);
+                    //Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title("Current Location").icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
-                    marker.showInfoWindow();
+                    //marker.showInfoWindow();
                 }
             }
         }
@@ -543,5 +602,29 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             mGoogleApiClient.disconnect();
         }
+    }
+
+    private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
+        String strAdd = "";
+        Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
+            if (addresses != null) {
+                Address returnedAddress = addresses.get(0);
+                StringBuilder strReturnedAddress = new StringBuilder("");
+
+                for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
+                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
+                }
+                strAdd = strReturnedAddress.toString();
+                Log.e("loction address", "" + strReturnedAddress.toString());
+            } else {
+                Log.e("loction address", "No Address returned!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("loction address", "Canont get Address!");
+        }
+        return strAdd;
     }
 }

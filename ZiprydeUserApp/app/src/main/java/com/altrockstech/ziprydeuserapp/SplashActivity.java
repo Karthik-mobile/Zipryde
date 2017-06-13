@@ -49,7 +49,7 @@ public class SplashActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                Intent ide = new Intent(SplashActivity.this, SignupActivity.class);
+                Intent ide = new Intent(SplashActivity.this, MobileNumberActivity.class);
                 ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(ide);
                 finish();

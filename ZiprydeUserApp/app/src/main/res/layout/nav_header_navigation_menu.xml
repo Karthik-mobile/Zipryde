@@ -114,7 +114,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginLeft="30dp"
-            android:text="Your Zipry"
+            android:text="Your Ziprydes"
             android:textSize="15dp"
             android:textColor="@color/primaryText" />
 

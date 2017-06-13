@@ -15,8 +15,8 @@
         android:src="@drawable/ic_action_close" />
 
     <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
         android:layout_gravity="center"
         android:layout_marginBottom="10dp"
         android:layout_marginTop="5dp"
@@ -30,7 +30,7 @@
         android:layout_marginTop="10dp"
         android:text="Success"
         android:textColor="@color/black_overlay"
-        android:textSize="32dp" />
+        android:textSize="30dp" />
 
     <TextView
         android:id="@+id/dialogcontentText"
@@ -51,9 +51,9 @@
         android:layout_gravity="center"
         android:layout_marginBottom="15dp"
         android:layout_marginTop="15dp"
-        android:background="@color/colorPrimary"
+        android:background="@color/colorAccent"
         android:text="Yes"
-        android:textColor="@color/primaryText"
+        android:textColor="@color/secondaryText"
         android:textSize="18dp" />
 
 </LinearLayout>

@@ -47,5 +47,6 @@ dependencies {
     compile 'com.google.gms:google-services:3.0.0'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     compile 'com.android.support:multidex:1.0.1'
+    compile 'com.android.support:cardview-v7:21.0.+'
     testCompile 'junit:junit:4.12'
 }
