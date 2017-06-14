@@ -16,7 +16,8 @@
             android:layout_height="80dp"
             android:layout_margin="5dp"
             android:padding="5dp"
-            android:src="@drawable/person" />
+            android:src="@drawable/person"
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -65,9 +66,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+                android:layout_marginLeft="35dp"
                 android:layout_marginTop="5dp"
                 android:gravity="center_vertical"
                 android:text="Some information to show" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginRight="15dp"
+                android:src="@drawable/ic_action_delete" />
 
         </LinearLayout>
 

@@ -186,22 +186,14 @@
                     android:gravity="center"
                     android:orientation="horizontal">
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
-                        android:src="@drawable/ic_action_business" />
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
-                        android:text="Business"
+                        android:text="Mini"
                         android:textColor="@color/primaryText"
-                        android:textSize="15dp" />
+                        android:textSize="18dp" />
 
                 </LinearLayout>
 
@@ -232,34 +224,66 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
+                        android:layout_marginLeft="5dp"
                         android:src="@drawable/ic_action_estimate" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
-                        android:text="Fair Estimate 120$"
+                        android:layout_marginLeft="5dp"
+                        android:text="Fair Estimate"
                         android:textColor="@color/primaryText"
                         android:textSize="15dp" />
 
+                    <TextView
+                        android:layout_width="60dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"
+                        android:background="@android:drawable/dialog_holo_light_frame"
+                        android:gravity="center"
+                        android:padding="5dp"
+                        android:text="$120"
+                        android:textColor="@color/primaryText"
+                        android:textSize="15dp" />
 
-                </LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginRight="5dp"
+                        android:background="#F4F8F9"
+                        android:padding="5dp"
+                        android:gravity="center"
+                        android:text="$114"
+                        android:textColor="@color/primaryText"
+                        android:textSize="15dp" />
 
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="@color/black_overlay" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginRight="5dp"
+                        android:background="#F4F8F9"
+                        android:gravity="center"
+                        android:padding="5dp"
+                        android:text="$108"
+                        android:textColor="@color/primaryText"
+                        android:textSize="15dp" />
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginRight="5dp"
+                        android:background="#F4F8F9"
+                        android:gravity="center"
+                        android:padding="5dp"
+                        android:text="$102"
+                        android:textColor="@color/primaryText"
+                        android:textSize="15dp" />
+
 
                 </LinearLayout>
 

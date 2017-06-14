@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.altrockstech.ziprydeuserapp.assist.Utils;
+
 public class SplashActivity extends AppCompatActivity {
 
     private final Handler mHideHandler = new Handler();
@@ -49,6 +51,7 @@ public class SplashActivity extends AppCompatActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+                Utils.fromSplash = true;
                 Intent ide = new Intent(SplashActivity.this, MobileNumberActivity.class);
                 ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(ide);

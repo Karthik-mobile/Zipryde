@@ -76,8 +76,8 @@ public class NotificationsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_notifications, container, false);
 
         notificationDetailsList = new LinkedList<NotificationDetails>();
-        notificationDetailsList.add(new NotificationDetails("101", "Jone Doe", "22:03", "Create or upload Documents and share with your team", ""));
-        notificationDetailsList.add(new NotificationDetails("102", "Mark Doe", "20:28", "Create or upload Documents and share with your team", ""));
+        notificationDetailsList.add(new NotificationDetails("101", "Sat, May 27", "22:03", "Create or upload Documents and share with your team", ""));
+        notificationDetailsList.add(new NotificationDetails("102", "Sat, May 27", "20:28", "Create or upload Documents and share with your team", ""));
 
         NotificationAdapter notificationAdapter = new NotificationAdapter(notificationDetailsList, getActivity());
 

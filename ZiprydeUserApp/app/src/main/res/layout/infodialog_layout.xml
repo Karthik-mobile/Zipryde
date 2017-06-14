@@ -56,4 +56,17 @@
         android:textColor="@color/secondaryText"
         android:textSize="18dp" />
 
+    <Button
+        android:id="@+id/resendBtn"
+        android:layout_width="200dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="15dp"
+        android:visibility="gone"
+        android:background="@color/colorAccent"
+        android:text="RESEND"
+        android:textColor="@color/secondaryText"
+        android:textSize="18dp" />
+
 </LinearLayout>

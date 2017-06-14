@@ -65,7 +65,7 @@
             android:textSize="15dp" />
 
         <EditText
-            android:id="@+id/mobileEdit"
+            android:id="@+id/otpEdit"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginLeft="15dp"
@@ -73,8 +73,7 @@
             android:layout_marginTop="15dp"
             android:inputType="number"
             android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:text="12345" />
+            android:paddingRight="5dp"  />
 
         <Button
             android:id="@+id/verifyBtn"

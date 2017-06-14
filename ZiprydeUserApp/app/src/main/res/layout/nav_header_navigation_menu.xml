@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginLeft="30dp"
-            android:text="Notification"
+            android:text="Notifications"
             android:textSize="15dp"
             android:textColor="@color/primaryText" />
 
@@ -164,7 +164,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginLeft="30dp"
-            android:text="Logout"
+            android:text="Sign out"
             android:textColor="@color/primaryText"
             android:textSize="15dp" />
 

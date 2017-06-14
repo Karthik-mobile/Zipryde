@@ -69,6 +69,8 @@
                 android:hint="Phone Number"
                 android:inputType="number"
                 android:paddingLeft="10dp"
+                android:editable="false"
+                android:focusableInTouchMode="false"
                 android:paddingRight="10dp"
                 android:paddingTop="5dp"
                 android:imeOptions="actionNext"
@@ -81,7 +83,7 @@
                 android:layout_height="50dp"
                 android:layout_marginTop="15dp"
                 android:background="@drawable/rounded_edittext"
-                android:hint="Email Address"
+                android:hint="Email ID"
                 android:inputType="textEmailAddress"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
@@ -111,7 +113,7 @@
                 android:layout_height="50dp"
                 android:layout_marginTop="15dp"
                 android:background="@color/colorAccent"
-                android:text="Signup"
+                android:text="Sign up"
                 android:textColor="@color/secondaryText"
                 android:textSize="18dp"  />
 

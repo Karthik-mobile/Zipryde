@@ -1,17 +1,38 @@
 package com.altrockstech.ziprydeuserapp;
 
+import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.altrockstech.ziprydeuserapp.apis.ZiprydeApiClient;
+import com.altrockstech.ziprydeuserapp.apis.ZiprydeApiInterface;
+import com.altrockstech.ziprydeuserapp.assist.Utils;
+import com.altrockstech.ziprydeuserapp.modelget.SingleInstantResponse;
+import com.altrockstech.ziprydeuserapp.modelpost.SingleInstantParameters;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class SignupActivity extends AppCompatActivity implements View.OnClickListener {
+
+    EditText firstnameEdit, lastnameEdit, phonenoEdit, emailaddEdit, passwordEdit;
+
+    ZiprydeApiInterface apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +56,14 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         Button signupBtn = (Button) findViewById(R.id.signupBtn);
         signupBtn.setOnClickListener(this);
 
+        firstnameEdit = (EditText) findViewById(R.id.firstnameEdit);
+        lastnameEdit = (EditText) findViewById(R.id.lastnameEdit);
+        phonenoEdit = (EditText) findViewById(R.id.phonenoEdit);
+        emailaddEdit = (EditText) findViewById(R.id.emailaddEdit);
+        passwordEdit = (EditText) findViewById(R.id.passwordEdit);
+        phonenoEdit.setText(""+Utils.getOTPByMobileInstantResponse.getMobileNumber());
+        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+
     }
 
     @Override
@@ -47,11 +76,119 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 finish();
                 break;
             case R.id.signupBtn:
-                ide = new Intent(SignupActivity.this, LoginActivity.class);
-                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(ide);
-                finish();
+
+                String firstname = firstnameEdit.getText().toString();
+                String lastname = lastnameEdit.getText().toString();
+                String phoneno = phonenoEdit.getText().toString();
+                String emailadd = emailaddEdit.getText().toString();
+                String password = passwordEdit.getText().toString();
+
+                if(firstname.isEmpty()){
+                    showInfoDlg("Info..!", "Please enter the first name", "Ok", "info");
+                }else if(lastname.isEmpty()){
+                    showInfoDlg("Info..!", "Please enter the last name", "Ok", "info");
+                }else if(emailadd.isEmpty()){
+                    showInfoDlg("Info..!", "Please enter the email name", "Ok", "info");
+                }else if(password.isEmpty()){
+                    showInfoDlg("Info..!", "Please enter the password", "Ok", "info");
+                }else if(phoneno.isEmpty()){
+                    showInfoDlg("Info..!", "Please enter the mobile number", "Ok", "info");
+                }else if(phoneno.length() != 10){
+                    showInfoDlg("Info..!", "Please enter valid mobile number", "Ok", "info");
+                }else{
+                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                    loginCredentials.userType = "RIDER";
+                    loginCredentials.firstName = firstname;
+                    loginCredentials.lastName = lastname;
+                    loginCredentials.emailId = emailadd;
+                    loginCredentials.mobileNumber = phoneno;
+                    loginCredentials.password = password;
+                    loginCredentials.alternateNumber = "";
+                    callMobileService(loginCredentials);
+                }
                 break;
         }
+    }
+
+    public void callMobileService(SingleInstantParameters loginCredentials){
+
+        final Dialog dialog = new Dialog(SignupActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<SingleInstantResponse> call = apiService.saveUser(loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
+            @Override
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                dialog.dismiss();
+                if(statusCode == 200) {
+                    Utils.saveUserMobileInstantResponse = response.body();
+                    Intent ide = new Intent(SignupActivity.this, NavigationMenuActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
+                }else{
+                    showInfoDlg("Error..!", "Either there is no network connectivity or server is not available..! Please try again later..", "Ok", "server");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..!", "Either there is no network connectivity or server is not available..! Please try again later..", "Ok", "server");
+            }
+        });
+    }
+
+    Dialog dialog;
+    private void showInfoDlg(String title, String content, String btnText, final String navType) {
+        dialog = new Dialog(SignupActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.infodialog_layout);
+        //dialog.setCanceledOnTouchOutside(true);
+
+        Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
+        positiveBtn.setText(""+btnText);
+
+        ImageView negativeBtn = (ImageView) dialog.findViewById(R.id.negativeBtn);
+        if(navType.equalsIgnoreCase("gps")){
+            negativeBtn.setVisibility(View.GONE);
+        }else{
+            negativeBtn.setVisibility(View.VISIBLE);
+        }
+
+        TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
+        dialogtitleText.setText(""+title);
+        TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
+        dialogcontentText.setText(""+content);
+
+        positiveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        negativeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
     }
 }

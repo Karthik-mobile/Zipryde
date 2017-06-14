@@ -174,7 +174,7 @@ public class NavigationMenuActivity extends AppCompatActivity
                 showNotificationFragment();
                 break;
             case R.id.historyLayout:
-                titleText.setText("Your Zipryde");
+                titleText.setText("Your Ziprydes");
                 showHideNavigationMenu();
                 showHistoryFragment();
                 break;

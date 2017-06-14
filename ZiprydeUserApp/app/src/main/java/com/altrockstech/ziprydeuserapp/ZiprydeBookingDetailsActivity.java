@@ -26,7 +26,7 @@ public class ZiprydeBookingDetailsActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT);
         toolbar.addView(mCustomView, layoutParams);
         TextView titleText = (TextView) mCustomView.findViewById(R.id.titleText);
-        titleText.setText("Your Zipryde");
+        titleText.setText("Your Ziprydes");
         ImageView backImg = (ImageView) mCustomView.findViewById(R.id.backImg);
         backImg.setOnClickListener(new View.OnClickListener() {
             @Override
