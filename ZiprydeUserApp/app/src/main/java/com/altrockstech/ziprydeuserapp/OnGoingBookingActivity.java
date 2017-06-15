@@ -47,7 +47,7 @@ public class OnGoingBookingActivity extends AppCompatActivity {
         cancelBooking.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showInfoDlg("Info..!", "Are you sure you want to cancel the ride?", "Yes", "cancelBooking");
+                showInfoDlg("Information", "Are you sure you want to cancel the ride?", "Yes", "cancelBooking");
             }
         });
 
@@ -83,7 +83,7 @@ public class OnGoingBookingActivity extends AppCompatActivity {
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
         positiveBtn.setText(""+btnText);
 
-        ImageView negativeBtn = (ImageView) dialog.findViewById(R.id.negativeBtn);
+        Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
         dialogtitleText.setText(""+title);
@@ -100,7 +100,7 @@ public class OnGoingBookingActivity extends AppCompatActivity {
             }
         });
 
-        negativeBtn.setOnClickListener(new View.OnClickListener() {
+        newnegativeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();

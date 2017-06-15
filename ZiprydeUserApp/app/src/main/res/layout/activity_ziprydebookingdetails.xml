@@ -218,7 +218,7 @@
                     android:layout_height="25dp"
                     android:layout_alignParentBottom="true"
                     android:layout_centerHorizontal="true"
-                    android:src="@drawable/pointicon" />
+                    android:src="@drawable/ic_action_location_new" />
 
             </RelativeLayout>
 

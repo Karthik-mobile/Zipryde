@@ -79,7 +79,7 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
                 //getGPSLocation();
             }else{
                 //askSwitchOnGPS();
-                showInfoDlg("Info..!", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
             }
         }
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -105,11 +105,11 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
         positiveBtn.setText(""+btnText);
 
-        ImageView negativeBtn = (ImageView) dialog.findViewById(R.id.negativeBtn);
+        Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
         if(navType.equalsIgnoreCase("gps")){
-            negativeBtn.setVisibility(View.GONE);
+            newnegativeBtn.setVisibility(View.GONE);
         }else{
-            negativeBtn.setVisibility(View.VISIBLE);
+            newnegativeBtn.setVisibility(View.VISIBLE);
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
@@ -127,7 +127,7 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
             }
         });
 
-        negativeBtn.setOnClickListener(new View.OnClickListener() {
+        newnegativeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
@@ -154,7 +154,7 @@ public class TrackingActivity extends AppCompatActivity implements OnMapReadyCal
         mMap = googleMap;
         // Add a marker in Sydney and move the camera
         LatLng crtLocation =  Utils.location;
-        mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));//.title("Marker in Sydney"));
+        mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_action_location_new)));//.title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));

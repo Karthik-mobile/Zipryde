@@ -34,6 +34,8 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
     EditText otpEdit;
     ZiprydeApiInterface apiService;
 
+    TextView changeNumber, resendCode;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +65,11 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
         Button verifyBtn = (Button) findViewById(R.id.verifyBtn);
         verifyBtn.setOnClickListener(this);
 
+        changeNumber = (TextView) findViewById(R.id.changeNumber);
+        changeNumber.setOnClickListener(this);
+        resendCode = (TextView) findViewById(R.id.resendCode);
+        resendCode.setOnClickListener(this);
+
         otpEdit = (EditText) findViewById(R.id.otpEdit);
         otpEdit.setText(""+ Utils.getOTPByMobileInstantResponse.getOtp());
     }
@@ -82,12 +89,62 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
             case R.id.verifyBtn:
                 String mobile = otpEdit.getText().toString().trim();
                 if(mobile.isEmpty()){
-                    showInfoDlg("Info..!", "Please enter the OTP", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the OTP", "Ok", "info");
                 }else{
                     callMobileService(mobile);
                 }
                 break;
+            case R.id.changeNumber:
+                onBackPressed();
+                break;
+            case R.id.resendCode:
+                callMobileNumberService(Utils.getOTPByMobileInstantResponse.getMobileNumber());
+                break;
         }
+    }
+
+    public void callMobileNumberService(String mobile){
+        final Dialog dialog = new Dialog(VerifyPinActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+        SingleInstantParameters loginCredentials = new SingleInstantParameters();
+        loginCredentials.mobileNumber = mobile;
+
+        Call<SingleInstantResponse> call = apiService.getOTPByMobile(loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
+            @Override
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                dialog.dismiss();
+                if(statusCode == 200) {
+                    Log.e("response", "" + response.body());
+                    String mobileNumber = response.body().getMobileNumber();
+                    Log.e("mobileNumber", "" + mobileNumber);
+                    String otp = response.body().getOtp();
+                    Log.e("otp", "" + otp);
+                    String validity = response.body().getValidity();
+                    Log.e("validity", "" + validity);
+                    Utils.getOTPByMobileInstantResponse = response.body();
+                    otpEdit.setText(""+ Utils.getOTPByMobileInstantResponse.getOtp());
+                }else{
+                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
+            }
+        });
     }
 
     public void callMobileService(String otp){
@@ -117,12 +174,12 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
                     Log.e("otpStatus", "" + otpStatus);
                     Utils.verifyOTPByMobileInstantResponse = response.body();
                     if (otpStatus.equals("VERIFIED")) {
-                        showInfoDlg("Success..!", "PIN verified successfully.", "Ok", "verify success");
+                        showInfoDlg("Success..", "PIN verified successfully.", "Ok", "verify success");
                     } else {
-                        showInfoDlg("Error..!", "PIN is INVALID. Please try again later..", "Resend", "invalid");
+                        showInfoDlg("Error..", "PIN is INVALID. Please try again later..", "Resend", "invalid");
                     }
                 }else{
-                    showInfoDlg("Error..!", "Either there is no network connectivity or server is not available..! Please try again later..", "Ok", "info");
+                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
                 }
             }
 
@@ -131,7 +188,7 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..!", "Either there is no network connectivity or server is not available..! Please try again later..", "Ok", "info");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
             }
         });
     }
@@ -143,15 +200,22 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.infodialog_layout);
         //dialog.setCanceledOnTouchOutside(true);
-
+        ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
+        if(navType.equalsIgnoreCase("error") || navType.equalsIgnoreCase("invalid")){
+            headerIcon.setImageResource(R.drawable.erroricon);
+        }
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
         positiveBtn.setText(""+btnText);
 
-        ImageView negativeBtn = (ImageView) dialog.findViewById(R.id.negativeBtn);
+        Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
+        if(navType.equalsIgnoreCase("info")){
+            newnegativeBtn.setVisibility(View.GONE);
+        }
 
         if(navType.equalsIgnoreCase("verify success")){
+            headerIcon.setImageResource(R.drawable.successicon);
             positiveBtn.setVisibility(View.GONE);
-            negativeBtn.setVisibility(View.GONE);
+            newnegativeBtn.setVisibility(View.GONE);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -162,9 +226,6 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
                     finish();
                 }
             }, 1000);
-        } else {
-            positiveBtn.setVisibility(View.VISIBLE);
-            negativeBtn.setVisibility(View.VISIBLE);
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
@@ -177,12 +238,12 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
             public void onClick(View v) {
                 dialog.dismiss();
                 if(navType.equals("invalid")) {
-                    onBackPressed();
+                    callMobileNumberService(Utils.getOTPByMobileInstantResponse.getMobileNumber());
                 }
             }
         });
 
-        negativeBtn.setOnClickListener(new View.OnClickListener() {
+        newnegativeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();

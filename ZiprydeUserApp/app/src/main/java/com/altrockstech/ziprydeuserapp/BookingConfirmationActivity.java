@@ -80,7 +80,7 @@ public class BookingConfirmationActivity extends AppCompatActivity implements On
                 //getGPSLocation();
             }else{
                 //askSwitchOnGPS();
-                showInfoDlg("Info..!", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
             }
         }
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -104,7 +104,7 @@ public class BookingConfirmationActivity extends AppCompatActivity implements On
                     @Override
                     public void run() {
                         dialog.dismiss();
-                        showInfoDlg("Success..!", "Your Booking has been confirmed. Driver will pick up you in 4 minutes.", "Done", "successBooking");
+                        showInfoDlg("Booking Successful", "Your Zipryde has been confirmed. Driver will pick up you in 4 minutes.", "Done", "successBooking");
                     }
                 }, 1000);
 
@@ -124,11 +124,16 @@ public class BookingConfirmationActivity extends AppCompatActivity implements On
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
         positiveBtn.setText(""+btnText);
 
-        ImageView negativeBtn = (ImageView) dialog.findViewById(R.id.negativeBtn);
+        Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
         if(navType.equalsIgnoreCase("gps")){
-            negativeBtn.setVisibility(View.GONE);
+            newnegativeBtn.setVisibility(View.GONE);
         }else{
-            negativeBtn.setVisibility(View.VISIBLE);
+            newnegativeBtn.setVisibility(View.VISIBLE);
+        }
+
+        ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
+        if(navType.equalsIgnoreCase("successBooking")){
+            headerIcon.setImageResource(R.drawable.successicon);
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
@@ -151,7 +156,7 @@ public class BookingConfirmationActivity extends AppCompatActivity implements On
             }
         });
 
-        negativeBtn.setOnClickListener(new View.OnClickListener() {
+        newnegativeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
@@ -192,7 +197,7 @@ public class BookingConfirmationActivity extends AppCompatActivity implements On
         String latitude = intent.getStringExtra("Latitude");
         String longitude = intent.getStringExtra("Longitude");
         LatLng crtLocation = Utils.location;
-        mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));//.title("Marker in Sydney"));
+        mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_action_location_new)));//.title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));

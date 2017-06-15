@@ -24,10 +24,11 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_gravity="center"
-        android:orientation="vertical"
-        android:gravity="center">
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
 
         <ImageView
             android:layout_width="100dp"
@@ -71,9 +72,8 @@
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:layout_marginTop="15dp"
-            android:inputType="number"
             android:paddingLeft="5dp"
-            android:paddingRight="5dp"  />
+            android:paddingRight="5dp" />
 
         <Button
             android:id="@+id/verifyBtn"
@@ -83,7 +83,37 @@
             android:background="@color/colorAccent"
             android:text="VERIFY"
             android:textColor="@color/secondaryText"
-            android:textSize="18dp"  />
+            android:textSize="18dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@drawable/cardlayout">
+
+        <TextView
+            android:id="@+id/changeNumber"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="CHANGE NUMBER" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/black_overlay" />
+
+        <TextView
+            android:id="@+id/resendCode"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="RESEND CODE" />
 
     </LinearLayout>
 

@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -84,17 +85,17 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 String password = passwordEdit.getText().toString();
 
                 if(firstname.isEmpty()){
-                    showInfoDlg("Info..!", "Please enter the first name", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the first name", "Ok", "info");
                 }else if(lastname.isEmpty()){
-                    showInfoDlg("Info..!", "Please enter the last name", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the last name", "Ok", "info");
                 }else if(emailadd.isEmpty()){
-                    showInfoDlg("Info..!", "Please enter the email name", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the email name", "Ok", "info");
                 }else if(password.isEmpty()){
-                    showInfoDlg("Info..!", "Please enter the password", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the password", "Ok", "info");
                 }else if(phoneno.isEmpty()){
-                    showInfoDlg("Info..!", "Please enter the mobile number", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the mobile number", "Ok", "info");
                 }else if(phoneno.length() != 10){
-                    showInfoDlg("Info..!", "Please enter valid mobile number", "Ok", "info");
+                    showInfoDlg("Information", "Please enter valid mobile number", "Ok", "info");
                 }else{
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.userType = "RIDER";
@@ -130,12 +131,9 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 dialog.dismiss();
                 if(statusCode == 200) {
                     Utils.saveUserMobileInstantResponse = response.body();
-                    Intent ide = new Intent(SignupActivity.this, NavigationMenuActivity.class);
-                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(ide);
-                    finish();
+                    showInfoDlg("Success..", "Successfully registered.", "Ok", "success");
                 }else{
-                    showInfoDlg("Error..!", "Either there is no network connectivity or server is not available..! Please try again later..", "Ok", "server");
+                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
                 }
             }
 
@@ -144,7 +142,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..!", "Either there is no network connectivity or server is not available..! Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
             }
         });
     }
@@ -157,14 +155,33 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         dialog.setContentView(R.layout.infodialog_layout);
         //dialog.setCanceledOnTouchOutside(true);
 
+        ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
+        if(navType.equalsIgnoreCase("server")){
+            headerIcon.setImageResource(R.drawable.erroricon);
+        }
+
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
         positiveBtn.setText(""+btnText);
 
-        ImageView negativeBtn = (ImageView) dialog.findViewById(R.id.negativeBtn);
-        if(navType.equalsIgnoreCase("gps")){
-            negativeBtn.setVisibility(View.GONE);
-        }else{
-            negativeBtn.setVisibility(View.VISIBLE);
+        Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
+        if(navType.equalsIgnoreCase("info")){
+            newnegativeBtn.setVisibility(View.GONE);
+        }
+
+        if(navType.equalsIgnoreCase("success")){
+            headerIcon.setImageResource(R.drawable.successicon);
+            positiveBtn.setVisibility(View.GONE);
+            newnegativeBtn.setVisibility(View.GONE);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    dialog.dismiss();
+                    Intent ide = new Intent(SignupActivity.this, NavigationMenuActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
+                }
+            }, 1000);
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
@@ -179,7 +196,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
             }
         });
 
-        negativeBtn.setOnClickListener(new View.OnClickListener() {
+        newnegativeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();

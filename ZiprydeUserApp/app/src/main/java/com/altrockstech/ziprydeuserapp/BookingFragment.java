@@ -162,7 +162,7 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                 getGPSLocation();
             }else{
                 //askSwitchOnGPS();
-                showInfoDlg("Info..!", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
             }
         }
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -374,11 +374,11 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
         positiveBtn.setText(""+btnText);
 
-        ImageView negativeBtn = (ImageView) dialog.findViewById(R.id.negativeBtn);
+        Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
         if(navType.equalsIgnoreCase("gps")){
-            negativeBtn.setVisibility(View.GONE);
+            newnegativeBtn.setVisibility(View.GONE);
         }else{
-            negativeBtn.setVisibility(View.VISIBLE);
+            newnegativeBtn.setVisibility(View.VISIBLE);
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
@@ -396,7 +396,7 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
             }
         });
 
-        negativeBtn.setOnClickListener(new View.OnClickListener() {
+        newnegativeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
@@ -422,7 +422,7 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                         getGPSLocation();
                     }else{
                         //askSwitchOnGPS();
-                        showInfoDlg("Info..!", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                        showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
                     }
                     break;
             }
@@ -433,7 +433,7 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                 getGPSLocation();
             }else{
                 //askSwitchOnGPS();
-                showInfoDlg("Info..!", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
             }
         }else{
             Toast.makeText(getActivity(), "Permission denied", Toast.LENGTH_SHORT).show();
@@ -510,7 +510,7 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                 getGPSLocation();
             }else{
                 //askSwitchOnGPS();
-                showInfoDlg("Info..!", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
             }
         }else if(requestCode == Utils.REQUEST_GET_PLACES_DETAILS){
 //            if (resultCode == RESULT_OK) {

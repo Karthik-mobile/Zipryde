@@ -68,9 +68,9 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
             case R.id.pinBtn:
                 String mobile = mobileEdit.getText().toString().trim();
                 if(mobile.isEmpty()){
-                    showInfoDlg("Info..!", "Please enter the mobile number", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the mobile number", "Ok", "info");
                 }else if(mobile.length() != 10){
-                    showInfoDlg("Info..!", "Please enter valid mobile number", "Ok", "info");
+                    showInfoDlg("Information", "Please enter valid mobile number", "Ok", "info");
                 }else{
                     callMobileService(mobile);
                 }
@@ -111,7 +111,7 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
                     startActivity(ide);
                     finish();
                 }else{
-                    showInfoDlg("Error..!", "Either there is no network connectivity or server is not available..! Please try again later..", "Ok", "info");
+                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
                 }
             }
 
@@ -120,7 +120,7 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..!", "Either there is no network connectivity or server is not available..! Please try again later..", "Ok", "info");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
             }
         });
     }
@@ -133,14 +133,19 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
         dialog.setContentView(R.layout.infodialog_layout);
         //dialog.setCanceledOnTouchOutside(true);
 
+        ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
+        if(navType.equalsIgnoreCase("error")){
+            headerIcon.setImageResource(R.drawable.erroricon);
+        }
+
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
         positiveBtn.setText(""+btnText);
 
-        ImageView negativeBtn = (ImageView) dialog.findViewById(R.id.negativeBtn);
-        if(navType.equalsIgnoreCase("gps")){
-            negativeBtn.setVisibility(View.GONE);
+        Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
+        if(navType.equalsIgnoreCase("info")){
+            newnegativeBtn.setVisibility(View.GONE);
         }else{
-            negativeBtn.setVisibility(View.VISIBLE);
+            newnegativeBtn.setVisibility(View.VISIBLE);
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
@@ -155,7 +160,7 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
             }
         });
 
-        negativeBtn.setOnClickListener(new View.OnClickListener() {
+        newnegativeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
