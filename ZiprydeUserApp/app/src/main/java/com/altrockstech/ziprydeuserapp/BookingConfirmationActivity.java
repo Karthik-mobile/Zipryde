@@ -160,12 +160,6 @@ public class BookingConfirmationActivity extends AppCompatActivity implements On
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                if(navType.equalsIgnoreCase("successBooking")){
-                    Intent ide = new Intent(BookingConfirmationActivity.this, OnGoingBookingActivity.class);
-                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(ide);
-                    finish();
-                }
             }
         });
 

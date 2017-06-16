@@ -16,63 +16,25 @@
         tools:context="com.altrockstech.ziprydeuserapp.BookingFragment" />
 
     <LinearLayout
-        android:id="@+id/infoWindowLay"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_above="@+id/centerMarker"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
         android:background="@drawable/cardlayout"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="50dp"
-            android:layout_height="60dp"
-            android:layout_gravity="center"
-            android:background="@color/colorPrimary"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="5dp">
-
-            <TextView
-                android:id="@+id/timeText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="8" />
-
-            <TextView
-                android:id="@+id/specText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="Min" />
-
-        </LinearLayout>
-
-
-        <LinearLayout
+        <TextView
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:drawableRight="@drawable/ic_action_right"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:textColor="@color/primaryText"
-                android:textSize="14dp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:ellipsize="end"
+            android:textColor="@color/primaryText"
+            android:textSize="14dp"
+            android:textStyle="bold" />
     </LinearLayout>
 
     <ImageView
@@ -83,8 +45,10 @@
         android:src="@drawable/ic_action_location_new" />
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="100dp"
+        android:layout_below="@+id/titleHeader"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="25dp"
@@ -137,6 +101,9 @@
                 android:layout_gravity="center"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="10dp"
+                android:clickable="false"
+                android:editable="false"
+                android:focusableInTouchMode="false"
                 android:gravity="center_vertical"
                 android:singleLine="true"
                 android:text="Enter the place"
@@ -382,9 +349,9 @@
         android:id="@+id/gotoMyLocation"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_alignParentBottom="true"
+        android:layout_above="@+id/confirmBooking"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="25dp"
         android:layout_marginRight="15dp"
         android:background="@drawable/cardlayout"
         android:gravity="center">
@@ -396,6 +363,46 @@
             android:src="@drawable/ic_action_gps_fixed" />
 
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/confirmBooking"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:background="@color/colorAccent"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="CONFIRM BOOKING"
+            android:textColor="@color/secondaryText"
+            android:textSize="18dp" />
+
+    </LinearLayout>
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/titleHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
 
 </RelativeLayout>
 

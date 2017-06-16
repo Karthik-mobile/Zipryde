@@ -109,6 +109,7 @@
                     android:id="@+id/bookingPrice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="end"
                     android:layout_marginRight="10dp"
                     android:singleLine="true"
                     android:text="110 $"
@@ -120,10 +121,11 @@
                     android:id="@+id/bookingTime"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="end"
                     android:layout_marginRight="10dp"
                     android:layout_marginTop="10dp"
-                    android:singleLine="true"
-                    android:text="18.25"
+                    android:gravity="end"
+                    android:text="Saturday \n May 27 18:25"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:textSize="16dp" />
 

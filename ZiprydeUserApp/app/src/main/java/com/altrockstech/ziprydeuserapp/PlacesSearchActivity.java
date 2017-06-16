@@ -74,7 +74,11 @@ public class PlacesSearchActivity extends AppCompatActivity implements GoogleApi
                 LinearLayout.LayoutParams.MATCH_PARENT);
         toolbar.addView(mCustomView, layoutParams);
         TextView titleText = (TextView) mCustomView.findViewById(R.id.titleText);
-        titleText.setText("Search Place");
+        if(getIntent().hasExtra("next")) {
+            titleText.setText("Search Destination Place");
+        }else{
+            titleText.setText("Search Starting Place");
+        }
         ImageView backImg = (ImageView) mCustomView.findViewById(R.id.backImg);
         backImg.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -202,12 +206,22 @@ public class PlacesSearchActivity extends AppCompatActivity implements GoogleApi
 
             places.release();
 
-            Intent intent = new Intent();
-            intent.putExtra("latitude", "" + geoLatLng.latitude);
-            intent.putExtra("longitude", "" + geoLatLng.longitude);
-            intent.putExtra("address", "" + address);
-            setResult(Utils.REQUEST_GET_PLACES_DETAILS, intent);
-            finish();
+            if(getIntent().hasExtra("next")) {
+                Intent ide = new Intent(PlacesSearchActivity.this, DestinationActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                ide.putExtra("latitude", "" + geoLatLng.latitude);
+                ide.putExtra("longitude", "" + geoLatLng.longitude);
+                ide.putExtra("address", "" + address);
+                startActivity(ide);
+                finish();
+            }else{
+                Intent intent = new Intent();
+                intent.putExtra("latitude", "" + geoLatLng.latitude);
+                intent.putExtra("longitude", "" + geoLatLng.longitude);
+                intent.putExtra("address", "" + address);
+                setResult(Utils.REQUEST_GET_PLACES_DETAILS, intent);
+                finish();
+            }
         }
     };
 

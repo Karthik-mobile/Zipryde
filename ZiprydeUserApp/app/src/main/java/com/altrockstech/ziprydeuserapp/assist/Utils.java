@@ -19,4 +19,11 @@ public class Utils {
     public static SingleInstantResponse verifyOTPByMobileInstantResponse;
     public static SingleInstantResponse saveUserMobileInstantResponse;
 
+    public static LatLng startingLatLan;
+    public static String startingPlaceAddress = "";
+    public static LatLng endingLatLan;
+    public static String endingPlaceAddress = "";
+    public static LatLng backchkendingLatLan;
+    public static String backchkendingPlaceAddress = "";
+
 }

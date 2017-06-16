@@ -115,6 +115,9 @@ public class OnGoingBookingActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        Intent ide = new Intent(OnGoingBookingActivity.this, NavigationMenuActivity.class);
+        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(ide);
         finish();
     }
 }
