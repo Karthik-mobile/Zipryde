@@ -37,16 +37,6 @@
             app:civ_border_color="@color/dark"
             app:civ_border_width="2dp" />
 
-        <TextView
-            android:id="@+id/profileName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:text="Your Name"
-            android:textColor="@color/primaryText"
-            android:textSize="20dp"
-            android:textStyle="bold" />
-
         <EditText
             android:id="@+id/phonenoEdit"
             android:layout_width="300dp"
@@ -86,6 +76,15 @@
             android:text="Sign in"
             android:textColor="@color/secondaryText"
             android:textSize="18dp" />
+
+        <TextView
+            android:id="@+id/gotoLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="Forget Password?"
+            android:textColor="@color/primaryText"
+            android:textSize="16dp"  />
 
     </LinearLayout>
 

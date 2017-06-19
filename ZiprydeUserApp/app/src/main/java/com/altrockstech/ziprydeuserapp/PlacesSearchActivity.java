@@ -1,5 +1,6 @@
 package com.altrockstech.ziprydeuserapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
@@ -130,6 +132,9 @@ public class PlacesSearchActivity extends AppCompatActivity implements GoogleApi
 
             }
         });
+
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(mAutocompleteView, InputMethodManager.SHOW_IMPLICIT);
     }
 
     /**
@@ -194,7 +199,7 @@ public class PlacesSearchActivity extends AppCompatActivity implements GoogleApi
 
             LatLng geoLatLng = place.getLatLng();
             Log.e(TAG, "Lat : " + geoLatLng.latitude + " Lng : " + geoLatLng.longitude);
-            String address = "" + place.getAddress();
+            String address = place.getName()+ "," + place.getAddress();
 
             // Display the third party attributions if set.
             final CharSequence thirdPartyAttribution = places.getAttributions();

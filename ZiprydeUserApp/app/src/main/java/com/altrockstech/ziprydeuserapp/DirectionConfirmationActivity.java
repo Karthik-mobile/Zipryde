@@ -60,7 +60,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
 
     private AppCompatTextView searchPlace, searchPlaceDestination;
 
-    TextView microText, microInfoText, miniText, miniInfoText, sedanText, sedanInfoText;
+    TextView microText, microInfoText, miniText, miniInfoText, sedanText, sedanInfoText
+            , amountText1, amountText2, amountText3, amountText4;
     RelativeLayout microLay, miniLay, sedanLay;
     ImageView micro_circle, micro_car, mini_circle, mini_car, suv_circle, suv_car, centerMarker;
 
@@ -124,6 +125,11 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         sedanText = (TextView) findViewById(R.id.sedanText);
         sedanInfoText = (TextView) findViewById(R.id.sedanInfoText);
 
+        amountText1 = (TextView) findViewById(R.id.amountText1);
+        amountText2 = (TextView) findViewById(R.id.amountText2);
+        amountText3 = (TextView) findViewById(R.id.amountText3);
+        amountText4 = (TextView) findViewById(R.id.amountText4);
+
         microLay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -172,6 +178,34 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             }
         });
 
+        amountText1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeTextBgColorToOrange(amountText1, amountText2, amountText3, amountText4);
+            }
+        });
+
+        amountText2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeTextBgColorToOrange(amountText2, amountText1, amountText3, amountText4);
+            }
+        });
+
+        amountText3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeTextBgColorToOrange(amountText3, amountText2, amountText1, amountText4);
+            }
+        });
+
+        amountText4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                changeTextBgColorToOrange(amountText4, amountText1, amountText2, amountText3);
+            }
+        });
+
         LinearLayout reqBooking = (LinearLayout) findViewById(R.id.reqBooking);
         reqBooking.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,6 +228,14 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
 
             }
         });
+    }
+
+    private void changeTextBgColorToOrange(TextView amountText1, TextView amountText2, TextView amountText3, TextView amountText4){
+        amountText1.setBackgroundResource(R.color.colorPrimary);
+
+        amountText2.setBackgroundColor(Color.parseColor("#F4F8F9"));
+        amountText3.setBackgroundColor(Color.parseColor("#F4F8F9"));
+        amountText4.setBackgroundColor(Color.parseColor("#F4F8F9"));
     }
 
     Dialog dialog;

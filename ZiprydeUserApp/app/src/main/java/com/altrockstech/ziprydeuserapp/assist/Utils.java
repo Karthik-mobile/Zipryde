@@ -18,6 +18,7 @@ public class Utils {
     public static SingleInstantResponse getOTPByMobileInstantResponse;
     public static SingleInstantResponse verifyOTPByMobileInstantResponse;
     public static SingleInstantResponse saveUserMobileInstantResponse;
+    public static SingleInstantResponse verifyLogInUserMobileInstantResponse;
 
     public static LatLng startingLatLan;
     public static String startingPlaceAddress = "";

@@ -1,0 +1,74 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/appBackground"
+    tools:context="com.altrockstech.ziprydedriverapp.NotificationsFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <RelativeLayout
+            android:id="@+id/requestLay"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Zipryde Request"
+                android:textColor="@color/primaryText"
+                android:textSize="16dp" />
+
+            <View
+                android:id="@+id/requestHighView"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/colorAccent" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/commissionLay"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="Commission"
+                android:textColor="@color/primaryText"
+                android:textSize="16dp" />
+
+            <View
+                android:id="@+id/commissionHighView"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:visibility="gone"
+                android:layout_alignParentBottom="true"
+                android:background="@color/colorAccent" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/requestList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ListView
+        android:id="@+id/commissionList"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/appBackground"
+    tools:context="com.altrockstech.ziprydedriverapp.LoginActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <com.altrockstech.ziprydedriverapp.assist.CircleImageView
+            android:id="@+id/user_view"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="15dp"
+            android:src="@drawable/person"
+            app:civ_border_color="@color/dark"
+            app:civ_border_width="2dp" />
+
+        <EditText
+            android:id="@+id/phonenoEdit"
+            android:layout_width="300dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="25dp"
+            android:background="@drawable/rounded_edittext"
+            android:hint="Mobile Number"
+            android:inputType="number"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:imeOptions="actionNext"
+            android:paddingBottom="5dp"
+            android:singleLine="true" />
+
+        <EditText
+            android:id="@+id/passwordEdit"
+            android:layout_width="300dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/rounded_edittext"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp"
+            android:imeOptions="actionDone"
+            android:paddingBottom="5dp"
+            android:singleLine="true" />
+
+        <Button
+            android:id="@+id/sign_btn"
+            android:layout_width="300dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="15dp"
+            android:background="@color/colorAccent"
+            android:text="Sign in"
+            android:textColor="@color/secondaryText"
+            android:textSize="18dp" />
+
+        <TextView
+            android:id="@+id/gotoLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:text="Forget Password?"
+            android:textColor="@color/primaryText"
+            android:textSize="16dp"  />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -138,6 +138,8 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
 
     LatLng crtLatLan;
 
+    boolean fromSearchPlace = false;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -428,8 +430,12 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                 Log.e("longitude",""+location.longitude);
                 String address = getCompleteAddressString(location.latitude, location.longitude);
                 Log.e("address",""+address);
-                searchPlace.setText(""+address);
-                Utils.startingPlaceAddress = address;
+                if(!fromSearchPlace) {
+                    searchPlace.setText("" + address);
+                    Utils.startingPlaceAddress = address;
+                }else{
+                    fromSearchPlace = false;
+                }
                 centerMarker.setImageResource(R.drawable.ic_action_location_new);
             }
         });
@@ -646,6 +652,8 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                 String longitude = data.getStringExtra("longitude");
                 String address = data.getStringExtra("address");
                 Log.e("RESULT_OK", "Lat : "+latitude+" Lng : "+longitude);
+                fromSearchPlace = true;
+                Utils.startingPlaceAddress = address;
                 searchPlace.setText(address);
                 if(mMap != null) {
                     mMap.clear();

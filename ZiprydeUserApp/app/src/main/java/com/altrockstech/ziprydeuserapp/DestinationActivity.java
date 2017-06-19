@@ -83,6 +83,7 @@ public class DestinationActivity extends AppCompatActivity implements OnMapReady
     ImageView centerMarker;
 
     TextView title;
+    boolean fromSearchPlace = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -292,10 +293,15 @@ public class DestinationActivity extends AppCompatActivity implements OnMapReady
                 Log.e("longitude",""+location.longitude);
                 String address = getCompleteAddressString(location.latitude, location.longitude);
                 Log.e("address",""+address);
-                searchPlaceDestination.setText(""+address);
-                Utils.endingPlaceAddress = address;
-                Utils.backchkendingPlaceAddress = address;
-                title.setText(""+address);
+                if(!fromSearchPlace) {
+                    searchPlaceDestination.setText("" + address);
+                    title.setText(""+address);
+                    Utils.endingPlaceAddress = address;
+                    Utils.backchkendingPlaceAddress = address;
+                }else{
+                    searchPlaceDestination.setText("" + title.getText().toString().trim());
+                    fromSearchPlace = false;
+                }
                 centerMarker.setImageResource(R.drawable.ic_action_location_new);
             }
         });
@@ -460,7 +466,11 @@ public class DestinationActivity extends AppCompatActivity implements OnMapReady
                     String longitude = getIntent().getStringExtra("longitude");
                     address = getIntent().getStringExtra("address");
                     Log.e("RESULT_OK", "Lat : "+latitude+" Lng : "+longitude);
+                    fromSearchPlace = true;
+                    Utils.endingPlaceAddress = address;
+                    Utils.backchkendingPlaceAddress = address;
                     searchPlaceDestination.setText(address);
+                    title.setText(address);
                     mMap.clear();
                     crtLocation = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
                     //Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).title(""+address).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
@@ -526,6 +536,10 @@ public class DestinationActivity extends AppCompatActivity implements OnMapReady
                 String longitude = data.getStringExtra("longitude");
                 String address = data.getStringExtra("address");
                 Log.e("RESULT_OK", "Lat : "+latitude+" Lng : "+longitude);
+                fromSearchPlace = true;
+                title.setText(""+address);
+                Utils.endingPlaceAddress = address;
+                Utils.backchkendingPlaceAddress = address;
                 searchPlaceDestination.setText(address);
                 if(mMap != null) {
                     mMap.clear();
@@ -599,6 +613,10 @@ public class DestinationActivity extends AppCompatActivity implements OnMapReady
                     String longitude = getIntent().getStringExtra("longitude");
                     address = getIntent().getStringExtra("address");
                     Log.e("RESULT_OK", "Lat : "+latitude+" Lng : "+longitude);
+                    fromSearchPlace = true;
+                    Utils.endingPlaceAddress = address;
+                    Utils.backchkendingPlaceAddress = address;
+                    title.setText(address);
                     searchPlaceDestination.setText(address);
                     mMap.clear();
                     crtLocation = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));

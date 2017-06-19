@@ -22,4 +22,6 @@ public interface ZiprydeApiInterface {
     @POST("saveUser")
     Call<SingleInstantResponse> saveUser(@Body SingleInstantParameters parameters);
 
+    @POST("verifyLogInUser")
+    Call<SingleInstantResponse> verifyLogInUser(@Body SingleInstantParameters parameters);
 }
