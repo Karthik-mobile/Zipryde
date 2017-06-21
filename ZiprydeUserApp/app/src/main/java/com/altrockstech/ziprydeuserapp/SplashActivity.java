@@ -2,6 +2,7 @@ package com.altrockstech.ziprydeuserapp;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -52,10 +53,21 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 Utils.fromSplash = true;
-                Intent ide = new Intent(SplashActivity.this, MobileNumberActivity.class);
-                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(ide);
-                finish();
+                SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+                String phoneno = prefs.getString("phoneNumber", null);
+                if (phoneno != null) {
+                    phoneno = prefs.getString("phoneNumber", "");//"No name defined" is the default value.
+                    String password = prefs.getString("password", ""); //0 is the default value.
+                    Intent ide = new Intent(SplashActivity.this, NavigationMenuActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
+                }else{
+                    Intent ide = new Intent(SplashActivity.this, MobileNumberActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
+                }
             }
         }, 3000);
     }

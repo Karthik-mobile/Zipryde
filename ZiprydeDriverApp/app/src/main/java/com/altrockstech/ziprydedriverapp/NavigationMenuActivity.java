@@ -151,7 +151,7 @@ public class NavigationMenuActivity extends AppCompatActivity implements View.On
             case R.id.aboutLayout:
                 //titleText.setText("About");
                 showHideNavigationMenu();
-                switchLay.setVisibility(View.GONE);
+                //switchLay.setVisibility(View.GONE);
                 break;
             case R.id.logoutLayout:
                 //showHideNavigationMenu();

@@ -1,12 +1,14 @@
 package com.altrockstech.ziprydedriverapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 
@@ -121,6 +123,15 @@ public class NotificationsFragment extends Fragment {
                 requestHighView.setVisibility(View.GONE);
                 currentride_list.setVisibility(View.GONE);
                 commissionList.setVisibility(View.VISIBLE);
+            }
+        });
+
+        currentride_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent ide = new Intent(getActivity(), OnGoingBookingActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
             }
         });
 

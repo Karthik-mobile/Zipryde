@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -18,15 +19,28 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.altrockstech.ziprydedriverapp.apis.ZiprydeApiClient;
+import com.altrockstech.ziprydedriverapp.apis.ZiprydeApiInterface;
+import com.altrockstech.ziprydedriverapp.assist.Utils;
+import com.altrockstech.ziprydedriverapp.modelget.SingleInstantResponse;
+import com.altrockstech.ziprydedriverapp.modelpost.SingleInstantParameters;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class VerifyPinActivity extends AppCompatActivity implements View.OnClickListener {
 
     EditText otpEdit;
     TextView changeNumber, resendCode;
+    ZiprydeApiInterface apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verifypin);
+
+        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -56,12 +70,12 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
         resendCode.setOnClickListener(this);
 
         otpEdit = (EditText) findViewById(R.id.otpEdit);
-
+        otpEdit.setText(""+ Utils.getOTPByMobileInstantResponse.getOtp());
     }
 
     @Override
     public void onBackPressed() {
-//        Utils.fromSplash = false;
+        Utils.fromSplash = false;
         Intent ide = new Intent(VerifyPinActivity.this, MobileNumberActivity.class);
         ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(ide);
@@ -76,20 +90,106 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
                 if(mobile.isEmpty()){
                     showInfoDlg("Information", "Please enter the OTP", "Ok", "info");
                 }else{
-                    //callMobileService(mobile);
-                    Intent ide = new Intent(VerifyPinActivity.this, SignupActivity.class);
-                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(ide);
-                    finish();
+                    callMobileService(mobile);
                 }
                 break;
             case R.id.changeNumber:
                 onBackPressed();
                 break;
             case R.id.resendCode:
-                //callMobileNumberService(Utils.getOTPByMobileInstantResponse.getMobileNumber());
+                callMobileNumberService(Utils.getOTPByMobileInstantResponse.getMobileNumber());
                 break;
         }
+    }
+
+    public void callMobileNumberService(String mobile){
+        final Dialog dialog = new Dialog(VerifyPinActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+        SingleInstantParameters loginCredentials = new SingleInstantParameters();
+        loginCredentials.mobileNumber = mobile;
+
+        Call<SingleInstantResponse> call = apiService.getOTPByMobile(loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
+            @Override
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                dialog.dismiss();
+                if(statusCode == 200) {
+                    Log.e("response", "" + response.body());
+                    String mobileNumber = response.body().getMobileNumber();
+                    Log.e("mobileNumber", "" + mobileNumber);
+                    String otp = response.body().getOtp();
+                    Log.e("otp", "" + otp);
+                    String validity = response.body().getValidity();
+                    Log.e("validity", "" + validity);
+                    Utils.getOTPByMobileInstantResponse = response.body();
+                    otpEdit.setText(""+ Utils.getOTPByMobileInstantResponse.getOtp());
+                }else{
+                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
+            }
+        });
+    }
+
+    public void callMobileService(String otp){
+        final Dialog dialog = new Dialog(VerifyPinActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        SingleInstantParameters loginCredentials = new SingleInstantParameters();
+        loginCredentials.mobileNumber = Utils.getOTPByMobileInstantResponse.getMobileNumber();
+        loginCredentials.otp = otp;
+
+        Call<SingleInstantResponse> call = apiService.verifyOTPByMobile(loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
+            @Override
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                dialog.dismiss();
+                if(statusCode == 200) {
+                    Log.e("response", "" + response.body());
+                    String otpStatus = response.body().getOtpStatus();
+                    Log.e("otpStatus", "" + otpStatus);
+                    Utils.verifyOTPByMobileInstantResponse = response.body();
+                    if (otpStatus.equals("VERIFIED")) {
+                        showInfoDlg("Success..", "PIN verified successfully.", "Ok", "verify success");
+                    } else {
+                        showInfoDlg("Error..", "PIN is INVALID. Please try again later..", "Resend", "invalid");
+                    }
+                }else{
+                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
+            }
+        });
     }
 
     Dialog dialog;
@@ -119,10 +219,10 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
                 @Override
                 public void run() {
                     dialog.dismiss();
-//                    Intent ide = new Intent(VerifyPinActivity.this, SignupActivity.class);
-//                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                    startActivity(ide);
-//                    finish();
+                    Intent ide = new Intent(VerifyPinActivity.this, SignupActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
                 }
             }, 1000);
         }
@@ -137,7 +237,7 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
             public void onClick(View v) {
                 dialog.dismiss();
                 if(navType.equals("invalid")) {
-//                    callMobileNumberService(Utils.getOTPByMobileInstantResponse.getMobileNumber());
+                    callMobileNumberService(Utils.getOTPByMobileInstantResponse.getMobileNumber());
                 }
             }
         });

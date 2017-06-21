@@ -1,15 +1,10 @@
-package com.altrockstech.ziprydeuserapp.apis;
+package com.altrockstech.ziprydedriverapp.apis;
 
-import com.altrockstech.ziprydeuserapp.modelget.ListOfCarTypes;
-import com.altrockstech.ziprydeuserapp.modelget.ListOfFairEstimate;
-import com.altrockstech.ziprydeuserapp.modelget.SingleInstantResponse;
-import com.altrockstech.ziprydeuserapp.modelpost.SingleInstantParameters;
-
-import java.util.LinkedList;
+import com.altrockstech.ziprydedriverapp.modelget.SingleInstantResponse;
+import com.altrockstech.ziprydedriverapp.modelpost.SingleInstantParameters;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 /**
@@ -29,10 +24,4 @@ public interface ZiprydeApiInterface {
 
     @POST("verifyLogInUser")
     Call<SingleInstantResponse> verifyLogInUser(@Body SingleInstantParameters parameters);
-
-    @GET("getAllCabTypes")
-    Call<LinkedList<ListOfCarTypes>> getAllCabTypes();
-
-    @POST("getAllNYOPByCabTypeAndDistance")
-    Call<LinkedList<ListOfFairEstimate>> getAllNYOPByCabTypeAndDistance(@Body SingleInstantParameters parameters);
 }

@@ -89,7 +89,7 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
             case R.id.verifyBtn:
                 String mobile = otpEdit.getText().toString().trim();
                 if(mobile.isEmpty()){
-                    showInfoDlg("Information", "Please enter the OTP", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the PIN", "Ok", "info");
                 }else{
                     callMobileService(mobile);
                 }

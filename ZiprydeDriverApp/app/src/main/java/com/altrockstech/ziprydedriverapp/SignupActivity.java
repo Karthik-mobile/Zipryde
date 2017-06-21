@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -18,15 +19,28 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.altrockstech.ziprydedriverapp.apis.ZiprydeApiClient;
+import com.altrockstech.ziprydedriverapp.apis.ZiprydeApiInterface;
+import com.altrockstech.ziprydedriverapp.assist.Utils;
+import com.altrockstech.ziprydedriverapp.modelget.SingleInstantResponse;
+import com.altrockstech.ziprydedriverapp.modelpost.SingleInstantParameters;
+
+import org.json.JSONObject;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class SignupActivity extends AppCompatActivity implements View.OnClickListener {
 
     EditText firstnameEdit, lastnameEdit, phonenoEdit, emailaddEdit, vehiclenoEdit, passwordEdit;
+    ZiprydeApiInterface apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
-
+        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -50,7 +64,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         emailaddEdit = (EditText) findViewById(R.id.emailaddEdit);
         passwordEdit = (EditText) findViewById(R.id.passwordEdit);
         vehiclenoEdit = (EditText) findViewById(R.id.vehiclenoEdit);
-        phonenoEdit.setText("1234567890");
+        phonenoEdit.setText("" + Utils.getOTPByMobileInstantResponse.getMobileNumber());
     }
 
     @Override
@@ -86,17 +100,13 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 } else if (vehicleno.isEmpty()) {
                     showInfoDlg("Information", "Please enter the vehicle number", "Ok", "info");
                 } else {
-//                        SingleInstantParameters loginCredentials = new SingleInstantParameters();
-//                        loginCredentials.userType = "RIDER";
-//                        loginCredentials.firstName = firstname;
-//                        loginCredentials.lastName = lastname;
-//                        loginCredentials.emailId = emailadd;
-//                        loginCredentials.mobileNumber = phoneno;
-//                        loginCredentials.password = password;
-//                        loginCredentials.alternateNumber = "";
-//                        callMobileService(loginCredentials);
                     ide = new Intent(SignupActivity.this, DocumentUploadActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    ide.putExtra("firstName", firstname);
+                    ide.putExtra("lastName", lastname);
+                    ide.putExtra("emailId", emailadd);
+                    ide.putExtra("mobileNumber", phoneno);
+                    ide.putExtra("password", password);
                     startActivity(ide);
                     finish();
                 }
@@ -105,7 +115,6 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
     }
 
     Dialog dialog;
-
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
         dialog = new Dialog(SignupActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -114,7 +123,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         //dialog.setCanceledOnTouchOutside(true);
 
         ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
-        if (navType.equalsIgnoreCase("server")) {
+        if (navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("error")) {
             headerIcon.setImageResource(R.drawable.erroricon);
         }
 
@@ -122,7 +131,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("info")) {
+        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("error")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -134,10 +143,10 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 @Override
                 public void run() {
                     dialog.dismiss();
-//                    Intent ide = new Intent(SignupActivity.this, NavigationMenuActivity.class);
-//                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                    startActivity(ide);
-//                    finish();
+                    Intent ide = new Intent(SignupActivity.this, DocumentUploadActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
                 }
             }, 1000);
         }

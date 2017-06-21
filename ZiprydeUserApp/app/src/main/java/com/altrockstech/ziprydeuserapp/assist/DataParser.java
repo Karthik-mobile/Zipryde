@@ -1,5 +1,7 @@
 package com.altrockstech.ziprydeuserapp.assist;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -29,6 +31,11 @@ public class DataParser {
                 jLegs = ( (JSONObject)jRoutes.get(i)).getJSONArray("legs");
                 List path = new ArrayList<>();
 
+                JSONObject stepsObj = jLegs.getJSONObject(0);
+                JSONObject distanceObj = stepsObj.getJSONObject("distance");
+                Utils.parsedDistance = distanceObj.getString("text");
+                Log.e("Utils.parsedDistance",""+Utils.parsedDistance);
+                //0.6214
                 /** Traversing all legs */
                 for(int j=0;j<jLegs.length();j++){
                     jSteps = ( (JSONObject)jLegs.get(j)).getJSONArray("steps");

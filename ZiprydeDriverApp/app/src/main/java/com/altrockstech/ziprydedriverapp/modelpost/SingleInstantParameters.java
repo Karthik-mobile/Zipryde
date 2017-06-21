@@ -1,4 +1,4 @@
-package com.altrockstech.ziprydeuserapp.modelpost;
+package com.altrockstech.ziprydedriverapp.modelpost;
 
 /**
  * Created by Hari on 14-06-2017.
@@ -13,6 +13,8 @@ public class SingleInstantParameters {
     public String emailId;
     public String password;
     public String alternateNumber;
-    public String distanceInMiles;
-    public int cabTypeId;
+    public String status;
+    public String licenseNo;
+    public String licenseValidUntil;
+    public String defaultPercentageAccepted;
 }

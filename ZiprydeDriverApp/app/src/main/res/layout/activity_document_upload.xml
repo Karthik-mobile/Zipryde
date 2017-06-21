@@ -24,19 +24,30 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="175dp">
+        android:layout_height="175dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/uploadImg"
+            android:layout_width="wrap_content"
+            android:layout_height="130dp"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/licenseimg" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
+            android:layout_marginTop="10dp"
             android:gravity="center"
             android:text="TAKE A PHOTO"
             android:textSize="16dp" />
 
     </LinearLayout>
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="10dp"
@@ -45,73 +56,80 @@
         android:paddingLeft="15dp"
         android:paddingRight="10dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="LICENSE NUMBER"
-            android:textSize="14dp" />
-
-        <EditText
-            android:id="@+id/licenseEdit"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginTop="5dp"
-            android:text="12345" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginTop="10dp"
-            android:text="RESTRICTIONS"
-            android:textSize="14dp" />
+            android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/restriEdit"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginTop="5dp"
-            android:text="NONE" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="LICENSE NUMBER"
+                android:textSize="14dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="ISSUED DATE"
-            android:textSize="14dp" />
+            <EditText
+                android:id="@+id/licenseEdit"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="5dp" />
 
-        <EditText
-            android:id="@+id/issuedDateEdit"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginTop="5dp"
-            android:text="05/18/1994" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="RESTRICTIONS"
+                android:textSize="14dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="EXPIRY DATE"
-            android:textSize="14dp" />
+            <EditText
+                android:id="@+id/restriEdit"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="5dp" />
 
-        <EditText
-            android:id="@+id/expiryDateEdit"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginTop="5dp"
-            android:text="07/18/2019" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="ISSUED DATE"
+                android:textSize="14dp" />
 
-        <Button
-            android:id="@+id/continueBtn"
-            android:layout_width="300dp"
-            android:layout_height="50dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="5dp"
-            android:background="@color/colorAccent"
-            android:text="Continue"
-            android:textColor="@color/secondaryText"
-            android:textSize="18dp" />
+            <EditText
+                android:id="@+id/issuedDateEdit"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="5dp"
+                android:hint="mm-dd-yyyy" />
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="EXPIRY DATE"
+                android:textSize="14dp" />
+
+            <EditText
+                android:id="@+id/expiryDateEdit"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="5dp"
+                android:hint="mm-dd-yyyy" />
+
+            <Button
+                android:id="@+id/continueBtn"
+                android:layout_width="300dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="5dp"
+                android:background="@color/colorAccent"
+                android:text="Continue"
+                android:textColor="@color/secondaryText"
+                android:textSize="18dp" />
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </LinearLayout>

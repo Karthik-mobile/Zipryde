@@ -1,4 +1,4 @@
-package com.altrockstech.ziprydeuserapp.modelget;
+package com.altrockstech.ziprydedriverapp.modelget;
 
 import com.google.gson.annotations.SerializedName;
 

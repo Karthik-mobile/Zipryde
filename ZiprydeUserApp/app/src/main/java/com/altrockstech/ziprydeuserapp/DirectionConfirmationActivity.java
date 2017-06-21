@@ -23,8 +23,14 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.altrockstech.ziprydeuserapp.apis.ZiprydeApiClient;
+import com.altrockstech.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.altrockstech.ziprydeuserapp.assist.DataParser;
 import com.altrockstech.ziprydeuserapp.assist.Utils;
+import com.altrockstech.ziprydeuserapp.modelget.ListOfCarTypes;
+import com.altrockstech.ziprydeuserapp.modelget.ListOfFairEstimate;
+import com.altrockstech.ziprydeuserapp.modelget.SingleInstantResponse;
+import com.altrockstech.ziprydeuserapp.modelpost.SingleInstantParameters;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -51,6 +57,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class DirectionConfirmationActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -61,7 +71,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
     private AppCompatTextView searchPlace, searchPlaceDestination;
 
     TextView microText, microInfoText, miniText, miniInfoText, sedanText, sedanInfoText
-            , amountText1, amountText2, amountText3, amountText4;
+            , amountText1, amountText2, amountText3, amountText4, carTypeText;
     RelativeLayout microLay, miniLay, sedanLay;
     ImageView micro_circle, micro_car, mini_circle, mini_car, suv_circle, suv_car, centerMarker;
 
@@ -69,10 +79,17 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
 
     boolean fairDetailsVisible = false;
 
+    ZiprydeApiInterface apiService;
+
+    int selectedCarType = 2;
+    String selectedCarModel = "Mini";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_direction_confirmation);
+
+        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -130,6 +147,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         amountText3 = (TextView) findViewById(R.id.amountText3);
         amountText4 = (TextView) findViewById(R.id.amountText4);
 
+        carTypeText = (TextView) findViewById(R.id.carTypeText);
+
         microLay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,6 +159,9 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 micro_car.setImageResource(R.drawable.ic_micro_white_car);
                 mini_car.setImageResource(R.drawable.ic_mini_car);
                 suv_car.setImageResource(R.drawable.ic_suv_car);
+                selectedCarType = 1;
+                selectedCarModel = "Micro";
+                carTypeText.setText(selectedCarModel);
             }
         });
 
@@ -153,6 +175,9 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 micro_car.setImageResource(R.drawable.ic_micro_car);
                 mini_car.setImageResource(R.drawable.ic_mini_white_car);
                 suv_car.setImageResource(R.drawable.ic_suv_car);
+                selectedCarType = 2;
+                selectedCarModel = "Mini";
+                carTypeText.setText(selectedCarModel);
             }
         });
 
@@ -166,12 +191,22 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 micro_car.setImageResource(R.drawable.ic_micro_car);
                 mini_car.setImageResource(R.drawable.ic_mini_car);
                 suv_car.setImageResource(R.drawable.ic_suv_white_car);
+                selectedCarType = 3;
+                selectedCarModel = "Sedan";
+                carTypeText.setText(selectedCarModel);
             }
         });
 
         fairBooking.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SingleInstantParameters singleInstantParameters = new SingleInstantParameters();
+                singleInstantParameters.cabTypeId = selectedCarType;
+                String km = Utils.parsedDistance.split(" ")[0].trim();
+                String kmtomile = ""+(Double.parseDouble(km) * 0.6214);
+                Log.e("kmtomile",""+kmtomile);
+                singleInstantParameters.distanceInMiles = kmtomile;
+                getFairEstimateDetails(singleInstantParameters);
                 fairDetailsVisible = true;
                 carTypeLay.setVisibility(View.GONE);
                 fairDetailsLay.setVisibility(View.VISIBLE);
@@ -226,6 +261,119 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     }
                 }, 1000);
 
+            }
+        });
+
+        getAllCabTypes();
+    }
+
+    private void getAllCabTypes(){
+        final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<LinkedList<ListOfCarTypes>> call = apiService.getAllCabTypes();
+        call.enqueue(new Callback<LinkedList<ListOfCarTypes>>() {
+            @Override
+            public void onResponse(Call<LinkedList<ListOfCarTypes>> call, Response<LinkedList<ListOfCarTypes>> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                dialog.dismiss();
+                if(response.isSuccessful()){
+                    Utils.getAllCabTypesInstantResponse = response.body();
+                    Log.e("Size",""+ Utils.getAllCabTypesInstantResponse.size());
+                    selectedCarType = 2;
+                    selectedCarModel = "Mini";
+                    carTypeText.setText(selectedCarModel);
+                    //showInfoDlg("Success..", "Successfully registered.", "Ok", "success");
+                }else{
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LinkedList<ListOfCarTypes>> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+            }
+        });
+    }
+
+    private void getFairEstimateDetails(SingleInstantParameters singleInstantParameters){
+        final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<LinkedList<ListOfFairEstimate>> call = apiService.getAllNYOPByCabTypeAndDistance(singleInstantParameters);
+        call.enqueue(new Callback<LinkedList<ListOfFairEstimate>>() {
+            @Override
+            public void onResponse(Call<LinkedList<ListOfFairEstimate>> call, Response<LinkedList<ListOfFairEstimate>> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                dialog.dismiss();
+                if(response.isSuccessful()){
+                    Utils.getAllNYOPByCabTypeAndDistanceInstantResponse = response.body();
+                    Log.e("size",""+Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size());
+                    if(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 0){
+                        long price = Math.round(Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(0).getPrice()));
+                        amountText1.setText("$"+price);
+                    }
+
+                    if(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 1){
+                        long price = Math.round(Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(1).getPrice()));
+                        amountText2.setText("$"+price);
+                    }
+
+                    if(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 2){
+                        long price = Math.round(Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(2).getPrice()));
+                        amountText3.setText("$"+price);
+                    }
+
+                    if(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 3){
+                        long price = Math.round(Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(3).getPrice()));
+                        amountText4.setText("$"+price);
+                    }
+                    //showInfoDlg("Success..", "Successfully registered.", "Ok", "success");
+                }else{
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LinkedList<ListOfFairEstimate>> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
             }
         });
     }
@@ -365,6 +513,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
 
         // Getting URL to the Google Directions API
         String url = getUrl(origin, dest);
+        Log.d("url", ""+url);
         Log.d("onMapClick", url.toString());
         FetchUrl FetchUrl = new FetchUrl();
         // Start downloading json data from Google Directions API
@@ -423,6 +572,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         String output = "json";
         // Building the url to the web service
         String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
+        Log.e("url","url -- "+url);
         return url;
     }
 

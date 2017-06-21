@@ -84,6 +84,7 @@ public class OnGoingBookingActivity extends AppCompatActivity {
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
+        newnegativeBtn.setText("No");
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
         dialogtitleText.setText(""+title);

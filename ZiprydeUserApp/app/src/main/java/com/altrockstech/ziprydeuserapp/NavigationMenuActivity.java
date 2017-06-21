@@ -2,6 +2,7 @@ package com.altrockstech.ziprydeuserapp;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -217,6 +218,10 @@ public class NavigationMenuActivity extends AppCompatActivity
             public void onClick(View v) {
                 dialog.dismiss();
                 if(navType.equalsIgnoreCase("logout")){
+                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
                     Intent ide = new Intent(NavigationMenuActivity.this, LoginActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);

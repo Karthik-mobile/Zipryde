@@ -112,7 +112,7 @@
                     android:layout_gravity="end"
                     android:layout_marginRight="10dp"
                     android:singleLine="true"
-                    android:text="110 $"
+                    android:text="$ 110"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     android:textColor="#111111"
                     android:textSize="18dp" />

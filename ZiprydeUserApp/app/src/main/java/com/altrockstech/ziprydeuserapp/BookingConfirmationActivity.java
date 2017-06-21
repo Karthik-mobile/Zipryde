@@ -104,7 +104,7 @@ public class BookingConfirmationActivity extends AppCompatActivity implements On
                     @Override
                     public void run() {
                         dialog.dismiss();
-                        showInfoDlg("Booking Successful", "Your Zipryde has been confirmed. Driver will pick up you in 4 minutes.", "Done", "successBooking");
+                        showInfoDlg("Booking Successful", "Your Zipryde has been confirmed. Driver will pick you up in 4 minutes.", "Done", "successBooking");
                     }
                 }, 1000);
 

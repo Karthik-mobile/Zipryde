@@ -2,6 +2,7 @@ package com.altrockstech.ziprydeuserapp;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
@@ -24,6 +25,8 @@ import com.altrockstech.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.altrockstech.ziprydeuserapp.assist.Utils;
 import com.altrockstech.ziprydeuserapp.modelget.SingleInstantResponse;
 import com.altrockstech.ziprydeuserapp.modelpost.SingleInstantParameters;
+
+import org.json.JSONObject;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -61,8 +64,8 @@ public class LoginActivity extends AppCompatActivity {
         sign_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String phoneno = phonenoEdit.getText().toString().trim();
-                String password = passwordEdit.getText().toString().trim();
+                phoneno = phonenoEdit.getText().toString().trim();
+                password = passwordEdit.getText().toString().trim();
                 if(phoneno.isEmpty()){
                     showInfoDlg("Information", "Please enter the phone number", "Ok", "info");
                 }else if(password.isEmpty()){
@@ -77,6 +80,8 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
+
+    String phoneno, password;
 
     public void callMobileService(SingleInstantParameters loginCredentials){
         final Dialog dialog = new Dialog(LoginActivity.this, android.R.style.Theme_Dialog);
@@ -94,12 +99,24 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
                 int statusCode = response.code();
                 Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
                 dialog.dismiss();
-                if(statusCode == 200) {
+                if(response.isSuccessful()){
                     Utils.verifyLogInUserMobileInstantResponse = response.body();
+                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                    editor.putString("phoneNumber", phoneno);
+                    editor.putString("password", password);
+                    editor.commit();
                     showInfoDlg("Success..", "Successfully logged in.", "Ok", "success");
                 }else{
-                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
                 }
             }
 
@@ -123,7 +140,7 @@ public class LoginActivity extends AppCompatActivity {
         //dialog.setCanceledOnTouchOutside(true);
 
         ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
-        if(navType.equalsIgnoreCase("server")){
+        if(navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("error")){
             headerIcon.setImageResource(R.drawable.erroricon);
         }
 
@@ -131,7 +148,7 @@ public class LoginActivity extends AppCompatActivity {
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("info")){
+        if(navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("error")){
             newnegativeBtn.setVisibility(View.GONE);
         }
 

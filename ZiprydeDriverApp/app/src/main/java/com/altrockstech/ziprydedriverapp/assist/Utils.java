@@ -1,11 +1,7 @@
-package com.altrockstech.ziprydeuserapp.assist;
+package com.altrockstech.ziprydedriverapp.assist;
 
-import com.altrockstech.ziprydeuserapp.modelget.ListOfCarTypes;
-import com.altrockstech.ziprydeuserapp.modelget.ListOfFairEstimate;
-import com.altrockstech.ziprydeuserapp.modelget.SingleInstantResponse;
+import com.altrockstech.ziprydedriverapp.modelget.SingleInstantResponse;
 import com.google.android.gms.maps.model.LatLng;
-
-import java.util.LinkedList;
 
 /**
  * Created by Hari on 08-06-2017.
@@ -23,8 +19,6 @@ public class Utils {
     public static SingleInstantResponse verifyOTPByMobileInstantResponse;
     public static SingleInstantResponse saveUserMobileInstantResponse;
     public static SingleInstantResponse verifyLogInUserMobileInstantResponse;
-    public static LinkedList<ListOfFairEstimate> getAllNYOPByCabTypeAndDistanceInstantResponse;
-    public static LinkedList<ListOfCarTypes> getAllCabTypesInstantResponse;
 
     public static LatLng startingLatLan;
     public static String startingPlaceAddress = "";
@@ -33,5 +27,4 @@ public class Utils {
     public static LatLng backchkendingLatLan;
     public static String backchkendingPlaceAddress = "";
 
-    public static String parsedDistance = "";
 }

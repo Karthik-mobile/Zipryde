@@ -199,7 +199,15 @@ public class PlacesSearchActivity extends AppCompatActivity implements GoogleApi
 
             LatLng geoLatLng = place.getLatLng();
             Log.e(TAG, "Lat : " + geoLatLng.latitude + " Lng : " + geoLatLng.longitude);
-            String address = place.getName()+ "," + place.getAddress();
+            String tempAddress = ""+place.getAddress();
+            String address = "";
+            if(tempAddress.contains(place.getName())){
+                address = tempAddress;
+            }else{
+                address = place.getName()+ "," + place.getAddress();
+            }
+//            String address = ""+place.getAddress();
+
 
             // Display the third party attributions if set.
             final CharSequence thirdPartyAttribution = places.getAttributions();

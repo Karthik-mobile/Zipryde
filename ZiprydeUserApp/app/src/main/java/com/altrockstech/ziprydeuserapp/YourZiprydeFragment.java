@@ -80,8 +80,8 @@ public class YourZiprydeFragment extends Fragment {
         history_list = (ListView) view.findViewById(R.id.history_list);
 
         ziprydeHistoryDetailsList = new LinkedList<ZiprydeHistoryDetails>();
-        ziprydeHistoryDetailsList.add(new ZiprydeHistoryDetails("101", "Mini", "Sat, May 26, 18.26", "Mini CRN 70210525", "Airport, Blvd, Austin", "Hyde Park, Austin", "120 $", "Offer 110 $", ""));
-        ziprydeHistoryDetailsList.add(new ZiprydeHistoryDetails("102", "Mini", "Sun, May 27, 22.15", "Mini CRN 82154205", "Hyde Park, Austin", "Airport, Blvd, Austin", "190 $", "Offer 160 $", ""));
+        ziprydeHistoryDetailsList.add(new ZiprydeHistoryDetails("101", "Mini", "Sat, May 26, 18.26", "Mini CRN 70210525", "Airport, Blvd, Austin", "Hyde Park, Austin", "$ 120", "Offered $110", ""));
+        ziprydeHistoryDetailsList.add(new ZiprydeHistoryDetails("102", "Mini", "Sun, May 27, 22.15", "Mini CRN 82154205", "Hyde Park, Austin", "Airport, Blvd, Austin", "$ 190", "Offered $160", ""));
 
         ZiprydeHistoryAdapter ziprydeHistoryAdapter = new ZiprydeHistoryAdapter(ziprydeHistoryDetailsList, getActivity());
         history_list.setAdapter(ziprydeHistoryAdapter);
