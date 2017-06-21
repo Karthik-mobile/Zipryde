@@ -1,10 +1,14 @@
 package com.altrockstech.ziprydedriverapp.apis;
 
+import com.altrockstech.ziprydedriverapp.modelget.ListOfPercentage;
 import com.altrockstech.ziprydedriverapp.modelget.SingleInstantResponse;
 import com.altrockstech.ziprydedriverapp.modelpost.SingleInstantParameters;
 
+import java.util.LinkedList;
+
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 
 /**
@@ -24,4 +28,7 @@ public interface ZiprydeApiInterface {
 
     @POST("verifyLogInUser")
     Call<SingleInstantResponse> verifyLogInUser(@Body SingleInstantParameters parameters);
+
+    @GET("getAllNYOPList")
+    Call<LinkedList<ListOfPercentage>> getAllNYOPList();
 }

@@ -31,10 +31,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +44,7 @@ import com.altrockstech.ziprydedriverapp.apis.ZiprydeApiClient;
 import com.altrockstech.ziprydedriverapp.apis.ZiprydeApiInterface;
 import com.altrockstech.ziprydedriverapp.assist.ImageLoadingUtils;
 import com.altrockstech.ziprydedriverapp.assist.Utils;
+import com.altrockstech.ziprydedriverapp.modelget.ListOfPercentage;
 import com.altrockstech.ziprydedriverapp.modelget.SingleInstantResponse;
 import com.altrockstech.ziprydedriverapp.modelpost.SingleInstantParameters;
 
@@ -55,6 +58,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Locale;
 
 import retrofit2.Call;
@@ -67,6 +71,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
     ZiprydeApiInterface apiService;
     EditText licenseEdit, restriEdit, issuedDateEdit, expiryDateEdit;
     ImageView uploadImg;
+    Spinner percentageSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +106,9 @@ public class DocumentUploadActivity extends AppCompatActivity {
 
         uploadImg = (ImageView) findViewById(R.id.uploadImg);
 
+        percentageSpinner = (Spinner) findViewById(R.id.percentageSpinner);
+        getAllNYOPList();
+
         continueBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -108,7 +116,6 @@ public class DocumentUploadActivity extends AppCompatActivity {
                 String restri = restriEdit.getText().toString().trim();
                 String issuedDate = issuedDateEdit.getText().toString().trim();
                 String expiryDate = expiryDateEdit.getText().toString().trim();
-
                 if (license.isEmpty()) {
                     showInfoDlg("Information", "Please enter the License number", "Ok", "info");
                 } else if (restri.isEmpty()) {
@@ -124,6 +131,8 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     String emailadd = intent.getStringExtra("emailId");
                     String phoneno = intent.getStringExtra("mobileNumber");
                     String password = intent.getStringExtra("password");
+                    String vehicleno = intent.getStringExtra("vehicleno");
+
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.userType = "DRIVER";
                     loginCredentials.firstName = firstname;
@@ -132,10 +141,12 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     loginCredentials.mobileNumber = phoneno;
                     loginCredentials.password = password;
                     loginCredentials.licenseNo = license;
+                    loginCredentials.vehicleNumber = vehicleno;
                     loginCredentials.licenseValidUntil = expiryDate;
+                    loginCredentials.licenseIssuedOn = issuedDate;
                     loginCredentials.alternateNumber = "";
                     loginCredentials.status = "REQUESTED";
-                    loginCredentials.defaultPercentageAccepted = "5";
+                    loginCredentials.defaultPercentageAccepted = percentageSpinner.getSelectedItem().toString();
                     callMobileService(loginCredentials);
                 }
             }
@@ -153,6 +164,59 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     // start the image capture Intent
                     startActivityForResult(intent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
                 }
+            }
+        });
+    }
+
+    private void getAllNYOPList(){
+        final Dialog dialog = new Dialog(DocumentUploadActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<LinkedList<ListOfPercentage>> call = apiService.getAllNYOPList();
+        call.enqueue(new Callback<LinkedList<ListOfPercentage>>() {
+            @Override
+            public void onResponse(Call<LinkedList<ListOfPercentage>> call, Response<LinkedList<ListOfPercentage>> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                dialog.dismiss();
+                if(response.isSuccessful()){
+                    Utils.getAllNYOPListInstantResponse = response.body();
+                    Log.e("Size",""+ Utils.getAllNYOPListInstantResponse.size());
+                    LinkedList<String> percentageList = new LinkedList<String>();
+                    percentageList.add("0");
+                    for(int i = 0; i < Utils.getAllNYOPListInstantResponse.size(); i++){
+                        percentageList.add(""+Utils.getAllNYOPListInstantResponse.get(i).getPercentage());
+                    }
+                    ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(DocumentUploadActivity.this, android.R.layout.simple_spinner_item, percentageList);
+                    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    percentageSpinner.setAdapter(dataAdapter);
+                    percentageSpinner.setSelection(0);
+                    //showInfoDlg("Success..", "Successfully registered.", "Ok", "success");
+                }else{
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LinkedList<ListOfPercentage>> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
             }
         });
     }

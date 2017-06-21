@@ -107,6 +107,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     ide.putExtra("emailId", emailadd);
                     ide.putExtra("mobileNumber", phoneno);
                     ide.putExtra("password", password);
+                    ide.putExtra("vehicleno", vehicleno);
                     startActivity(ide);
                     finish();
                 }

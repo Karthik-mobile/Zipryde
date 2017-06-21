@@ -116,13 +116,31 @@
                 android:layout_marginTop="5dp"
                 android:hint="mm-dd-yyyy" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="PERCENTAGE"
+                android:textSize="14dp" />
+
+            <Spinner
+                android:id="@+id/percentageSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginTop="5dp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/black_overlay" />
+
             <Button
                 android:id="@+id/continueBtn"
                 android:layout_width="300dp"
                 android:layout_height="50dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="20dp"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="10dp"
                 android:background="@color/colorAccent"
                 android:text="Continue"
                 android:textColor="@color/secondaryText"

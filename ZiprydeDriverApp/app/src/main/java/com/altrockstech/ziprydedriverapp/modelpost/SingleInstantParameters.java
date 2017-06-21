@@ -17,4 +17,6 @@ public class SingleInstantParameters {
     public String licenseNo;
     public String licenseValidUntil;
     public String defaultPercentageAccepted;
+    public String vehicleNumber;
+    public String licenseIssuedOn;
 }
