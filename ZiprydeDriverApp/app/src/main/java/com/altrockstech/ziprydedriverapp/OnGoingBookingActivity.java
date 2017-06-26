@@ -146,6 +146,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             if(statusOfGPS){
                 getGPSLocation();
+                showConfirmationDlg();
             }else{
                 //askSwitchOnGPS();
                 showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
@@ -155,8 +156,6 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        showConfirmationDlg();
 
         starttripBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -388,15 +387,17 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
-                LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                for (Marker marker : markers) {
-                    builder.include(marker.getPosition());
+                if(markers.size() > 0){
+                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                    for (Marker marker : markers) {
+                        builder.include(marker.getPosition());
+                    }
+                    LatLngBounds bounds = builder.build();
+                    int padding = 200; // offset from edges of the map in pixels
+                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+                    mMap.moveCamera(cu);
+                    mMap.animateCamera(cu);
                 }
-                LatLngBounds bounds = builder.build();
-                int padding = 200; // offset from edges of the map in pixels
-                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-                mMap.moveCamera(cu);
-                mMap.animateCamera(cu);
             }
         });
 
@@ -538,20 +539,12 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                     boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
                     if(statusOfGPS){
                         getGPSLocation();
+                        showConfirmationDlg();
                     }else{
                         //askSwitchOnGPS();
                         showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
                     }
                     break;
-            }
-            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE );
-            boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            Log.e("statusOfGPS",""+statusOfGPS);
-            if(statusOfGPS){
-                getGPSLocation();
-            }else{
-                //askSwitchOnGPS();
-                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
             }
         }else{
             Toast.makeText(OnGoingBookingActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
@@ -631,6 +624,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             if(statusOfGPS){
                 getGPSLocation();
+                showConfirmationDlg();
             }else{
                 //askSwitchOnGPS();
                 showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");

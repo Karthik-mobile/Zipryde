@@ -70,8 +70,15 @@ public class DocumentUploadActivity extends AppCompatActivity {
     Button continueBtn;
     ZiprydeApiInterface apiService;
     EditText licenseEdit, restriEdit, issuedDateEdit, expiryDateEdit;
-    ImageView uploadImg;
+    ImageView uploadImgFront, uploadImgBack;
     Spinner percentageSpinner;
+
+    private Uri fileUri;
+    private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE_FRONT = 100;
+    private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE_BACK = 101;
+    File finalmediaFile;
+
+    File finalmediaFileFront, finalmediaFileBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +111,8 @@ public class DocumentUploadActivity extends AppCompatActivity {
         issuedDateEdit = (EditText) findViewById(R.id.issuedDateEdit);
         expiryDateEdit = (EditText) findViewById(R.id.expiryDateEdit);
 
-        uploadImg = (ImageView) findViewById(R.id.uploadImg);
+        uploadImgFront = (ImageView) findViewById(R.id.uploadImgFront);
+        uploadImgBack = (ImageView) findViewById(R.id.uploadImgBack);
 
         percentageSpinner = (Spinner) findViewById(R.id.percentageSpinner);
         getAllNYOPList();
@@ -154,15 +162,26 @@ public class DocumentUploadActivity extends AppCompatActivity {
 
         isStoragePermissionGranted();
 
-        uploadImg.setOnClickListener(new View.OnClickListener() {
+        uploadImgFront.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(isStoragePermissionGranted()){
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     fileUri = getOutputMediaFileUri();
                     intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-                    // start the image capture Intent
-                    startActivityForResult(intent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
+                    startActivityForResult(intent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE_FRONT);
+                }
+            }
+        });
+
+        uploadImgBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isStoragePermissionGranted()){
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    fileUri = getOutputMediaFileUri();
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+                    startActivityForResult(intent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE_BACK);
                 }
             }
         });
@@ -254,15 +273,10 @@ public class DocumentUploadActivity extends AppCompatActivity {
         }
     }
 
-    private Uri fileUri;
-    private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
-
     public Uri getOutputMediaFileUri() {
         Uri photoURI = FileProvider.getUriForFile(this, getApplicationContext().getPackageName() + ".provider", getOutputMediaFile());
         return photoURI;
     }
-
-    File finalmediaFile;
 
     /**
      * returning image / video
@@ -421,24 +435,24 @@ public class DocumentUploadActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // if the result is capturing Image
-        if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE) {
+        if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE_FRONT) {
             if (resultCode == RESULT_OK) {
-                new ImageCompressionAsyncTask("imageFile").execute(finalmediaFile.getAbsolutePath());
-//                try {
-//                    InputStream ims = new FileInputStream(finalmediaFile);
-//                    uploadImg.setImageBitmap(BitmapFactory.decodeStream(ims));
-//                } catch (FileNotFoundException e) {
-//                    e.printStackTrace();
-//                    return;
-//                }
-//
-//                // ScanFile so it will be appeared on Gallery
-//                MediaScannerConnection.scanFile(DocumentUploadActivity.this,
-//                        new String[]{fileUri.getPath()}, null,
-//                        new MediaScannerConnection.OnScanCompletedListener() {
-//                            public void onScanCompleted(String path, Uri uri) {
-//                            }
-//                        });
+                new ImageCompressionAsyncTask("frontimageFile").execute(finalmediaFile.getAbsolutePath());
+            } else if (resultCode == RESULT_CANCELED) {
+                // user cancelled Image capture
+                Toast.makeText(getApplicationContext(),
+                        "User cancelled image capture", Toast.LENGTH_SHORT)
+                        .show();
+            } else {
+                // failed to capture image
+                Toast.makeText(getApplicationContext(),
+                        "Sorry! Failed to capture image", Toast.LENGTH_SHORT)
+                        .show();
+            }
+
+        }else if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE_BACK) {
+            if (resultCode == RESULT_OK) {
+                new ImageCompressionAsyncTask("backimageFile").execute(finalmediaFile.getAbsolutePath());
             } else if (resultCode == RESULT_CANCELED) {
                 // user cancelled Image capture
                 Toast.makeText(getApplicationContext(),
@@ -620,8 +634,15 @@ public class DocumentUploadActivity extends AppCompatActivity {
             }else{
                 finalmediaFile = new File(result);
                 try {
+                    Log.e("fromGallery",""+fromGallery);
                     InputStream ims = new FileInputStream(finalmediaFile);
-                    uploadImg.setImageBitmap(BitmapFactory.decodeStream(ims));
+                    if(fromGallery.equalsIgnoreCase("frontimageFile")) {
+                        finalmediaFileFront = finalmediaFile;
+                        uploadImgFront.setImageBitmap(BitmapFactory.decodeStream(ims));
+                    }else {
+                        finalmediaFileBack = finalmediaFile;
+                        uploadImgBack.setImageBitmap(BitmapFactory.decodeStream(ims));
+                    }
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                     return;
