@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/appBackground"
-    tools:context="com.altrockstech.ziprydeuserapp.NotificationsFragment">
+    tools:context=".NotificationsFragment">
 
     <ListView
         android:id="@+id/notification_list"

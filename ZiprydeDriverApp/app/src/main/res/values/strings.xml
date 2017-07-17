@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Zipryde Driver App</string>
+    <string name="app_name">ZipRyde Driver App</string>
     <string name="title_activity_navigation_menu">NavigationMenuActivity</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -13,5 +13,7 @@
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
         AIzaSyDaySH-sKqQiAxY27CX-2uYgNUUDYFES3g
     </string>
+    <string name="title_activity_ride">RideActivity</string>
+    <string name="title_activity_history">HistoryActivity</string>
 
 </resources>

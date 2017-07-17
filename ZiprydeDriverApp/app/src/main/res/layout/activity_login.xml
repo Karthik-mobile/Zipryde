@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/appBackground"
-    tools:context="com.altrockstech.ziprydedriverapp.LoginActivity">
+    tools:context=".LoginActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -28,7 +28,7 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <com.altrockstech.ziprydedriverapp.assist.CircleImageView
+        <com.trivectadigital.ziprydedriverapp.assist.CircleImageView
             android:id="@+id/user_view"
             android:layout_width="100dp"
             android:layout_height="100dp"

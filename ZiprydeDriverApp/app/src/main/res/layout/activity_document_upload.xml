@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/appBackground"
     android:orientation="vertical"
-    tools:context="com.altrockstech.ziprydedriverapp.DocumentUploadActivity">
+    tools:context=".DocumentUploadActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -30,8 +30,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:gravity="center"
             android:layout_marginTop="10dp"
+            android:gravity="center"
             android:orientation="horizontal">
 
             <ImageView
@@ -115,6 +115,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
                 android:layout_marginTop="5dp"
+                android:editable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:hint="mm-dd-yyyy"
                 android:inputType="date" />
 
@@ -130,6 +133,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
                 android:layout_marginTop="5dp"
+                android:editable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
                 android:hint="mm-dd-yyyy"
                 android:inputType="date" />
 

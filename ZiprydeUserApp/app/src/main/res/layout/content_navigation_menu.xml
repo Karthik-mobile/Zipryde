@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/appBackground"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.altrockstech.ziprydeuserapp.NavigationMenuActivity"
+    tools:context=".NavigationMenuActivity"
     tools:showIn="@layout/app_bar_navigation_menu">
 
     <FrameLayout
@@ -14,4 +14,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</LinearLayout>
+    <ImageView
+        android:id="@+id/menuImgBlack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/ic_action_menu_black" />
+
+</RelativeLayout>

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/appBackground"
-    tools:context="com.altrockstech.ziprydeuserapp.BookingConfirmationActivity">
+    tools:context=".BookingConfirmationActivity">
 
     <fragment
         android:id="@+id/map"
@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        tools:context="com.altrockstech.ziprydeuserapp.BookingConfirmationActivity" />
+        tools:context=".BookingConfirmationActivity" />
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/headerLay"
@@ -239,7 +239,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="5dp"
                             android:layout_marginRight="5dp"
-                            android:text="Fair Estimate"
+                            android:text="Fare Estimate"
                             android:textColor="@color/primaryText"
                             android:textSize="15dp" />
                     </LinearLayout>

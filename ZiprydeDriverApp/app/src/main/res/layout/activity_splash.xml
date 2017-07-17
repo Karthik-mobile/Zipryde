@@ -8,7 +8,7 @@
     android:gravity="center"
     android:id="@+id/fullscreen_content"
     android:background="@color/colorPrimary"
-    tools:context="com.altrockstech.ziprydedriverapp.SplashActivity">
+    tools:context=".SplashActivity">
 
     <TextView
         android:layout_width="wrap_content"

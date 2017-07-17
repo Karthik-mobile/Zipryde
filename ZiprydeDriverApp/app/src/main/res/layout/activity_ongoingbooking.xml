@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.altrockstech.ziprydedriverapp.OnGoingBookingActivity">
+    tools:context=".OnGoingBookingActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -31,7 +31,7 @@
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:context="com.altrockstech.ziprydedriverapp.OnGoingBookingActivity" />
+            tools:context=".OnGoingBookingActivity" />
 
         <RelativeLayout
             android:layout_width="match_parent"

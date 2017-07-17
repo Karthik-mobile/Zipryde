@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/appBackground"
-    tools:context="com.altrockstech.ziprydedriverapp.YourZiprydeFragment">
+    tools:context=".YourZiprydeFragment">
 
     <ListView
         android:id="@+id/history_list"

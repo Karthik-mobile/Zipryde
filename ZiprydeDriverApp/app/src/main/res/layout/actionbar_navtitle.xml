@@ -36,11 +36,13 @@
             android:orientation="vertical">
 
             <Switch
+                android:id="@+id/switchStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true" />
 
             <TextView
+                android:id="@+id/statusText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"

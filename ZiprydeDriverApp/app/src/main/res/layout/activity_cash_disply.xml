@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/appBackground"
     android:orientation="vertical"
-    tools:context="com.altrockstech.ziprydedriverapp.CashDisplyActivity">
+    tools:context=".CashDisplyActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"

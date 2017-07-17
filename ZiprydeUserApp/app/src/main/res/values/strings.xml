@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Zipryde User App</string>
+    <string name="app_name">ZipRyde User App</string>
     <string name="signup">Sign Up</string>
     <string name="loginup">Login</string>
     <string name="title_activity_navigation_menu">ZIPRYDE</string>
@@ -17,5 +17,22 @@
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
         AIzaSyDaySH-sKqQiAxY27CX-2uYgNUUDYFES3g
     </string>
+
+    <string-array name="sedan_micro_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+    <string-array name="suv_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+    </string-array>
 
 </resources>

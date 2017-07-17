@@ -4,10 +4,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/appBackground"
-    tools:context="com.altrockstech.ziprydedriverapp.NotificationsFragment">
+    tools:context=".NotificationsFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:visibility="gone"
         android:layout_height="50dp">
 
         <RelativeLayout
