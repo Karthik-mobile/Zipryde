@@ -1,5 +1,6 @@
 package com.trivectadigital.ziprydeuserapp.apis;
 
+import com.trivectadigital.ziprydeuserapp.modelget.ListOfBooking;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCarTypes;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCurrentCabs;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfFairEstimate;
@@ -40,5 +41,15 @@ public interface ZiprydeApiInterface {
     @POST("getNearByActiveDrivers")
     Call<LinkedList<ListOfCurrentCabs>> getNearByActiveDrivers(@Body SingleInstantParameters parameters);
 
+    @POST("requestBooking")
+    Call<SingleInstantResponse> requestBooking(@Body SingleInstantParameters parameters);
 
+    @POST("getBookingByBookingId")
+    Call<SingleInstantResponse> getBookingByBookingId(@Body SingleInstantParameters parameters);
+
+    @POST("getBookingByuserId")
+    Call<LinkedList<ListOfBooking>> getBookingByUserId(@Body SingleInstantParameters parameters);
+
+    @POST("getGeoLocationByDriverId")
+    Call<SingleInstantResponse> getGeoLocationByDriverId(@Body SingleInstantParameters parameters);
 }

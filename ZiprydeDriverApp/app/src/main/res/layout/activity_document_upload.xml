@@ -24,28 +24,42 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="175dp">
+        android:layout_height="wrap_content">
 
         <LinearLayout
+            android:id="@+id/imgLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="150dp"
             android:layout_gravity="center"
             android:layout_marginTop="10dp"
             android:gravity="center"
             android:orientation="horizontal">
 
+            <com.trivectadigital.ziprydedriverapp.assist.CircleImageView
+                android:id="@+id/uploadProfilePic"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_weight="1"
+                android:src="@drawable/person"
+                app:civ_border_color="@color/dark"
+                app:civ_border_width="2dp" />
+
             <ImageView
                 android:id="@+id/uploadImgFront"
-                android:layout_width="150dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="5dp"
+                android:layout_weight="2"
                 android:src="@drawable/liciconfront" />
 
             <ImageView
                 android:id="@+id/uploadImgBack"
-                android:layout_width="150dp"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="2"
                 android:src="@drawable/liciconback" />
 
         </LinearLayout>
@@ -53,7 +67,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/imgLayout"
             android:layout_gravity="bottom"
             android:layout_marginTop="10dp"
             android:gravity="center"

@@ -24,7 +24,7 @@ import com.trivectadigital.ziprydedriverapp.assist.Utils;
 
 public class SignupActivity extends AppCompatActivity implements View.OnClickListener {
 
-    EditText firstnameEdit, lastnameEdit, phonenoEdit, emailaddEdit, vehiclenoEdit, passwordEdit;
+    EditText firstnameEdit, lastnameEdit, phonenoEdit, emailaddEdit, vehiclenoEdit, passwordEdit, confirmpasswordEdit;
     ZiprydeApiInterface apiService;
 
     @Override
@@ -54,6 +54,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         phonenoEdit = (EditText) findViewById(R.id.phonenoEdit);
         emailaddEdit = (EditText) findViewById(R.id.emailaddEdit);
         passwordEdit = (EditText) findViewById(R.id.passwordEdit);
+        confirmpasswordEdit = (EditText) findViewById(R.id.confirmpasswordEdit);
         vehiclenoEdit = (EditText) findViewById(R.id.vehiclenoEdit);
         phonenoEdit.setText("" + Utils.getOTPByMobileInstantResponse.getMobileNumber());
     }
@@ -75,6 +76,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 String emailadd = emailaddEdit.getText().toString();
                 String password = passwordEdit.getText().toString();
                 String vehicleno = vehiclenoEdit.getText().toString();
+                String confirmpassword = confirmpasswordEdit.getText().toString();
 
                 if (firstname.isEmpty()) {
                     showInfoDlg("Information", "Please enter the first name", "Ok", "info");
@@ -84,6 +86,10 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     showInfoDlg("Information", "Please enter the email name", "Ok", "info");
                 } else if (password.isEmpty()) {
                     showInfoDlg("Information", "Please enter the password", "Ok", "info");
+                }else if (confirmpassword.isEmpty()) {
+                    showInfoDlg("Information", "Please enter the confirm password", "Ok", "info");
+                }else if (!password.equals(confirmpassword)) {
+                    showInfoDlg("Information", "Password and Confirm Password are not Matched", "Ok", "info");
                 } else if (phoneno.isEmpty()) {
                     showInfoDlg("Information", "Please enter the mobile number", "Ok", "info");
                 } else if (phoneno.length() != 10) {

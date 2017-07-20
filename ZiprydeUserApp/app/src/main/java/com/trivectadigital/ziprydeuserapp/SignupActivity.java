@@ -35,7 +35,7 @@ import retrofit2.Response;
 
 public class SignupActivity extends AppCompatActivity implements View.OnClickListener {
 
-    EditText firstnameEdit, lastnameEdit, phonenoEdit, emailaddEdit, passwordEdit;
+    EditText firstnameEdit, lastnameEdit, phonenoEdit, emailaddEdit, passwordEdit, confirmpasswordEdit;
 
     ZiprydeApiInterface apiService;
 
@@ -66,6 +66,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         phonenoEdit = (EditText) findViewById(R.id.phonenoEdit);
         emailaddEdit = (EditText) findViewById(R.id.emailaddEdit);
         passwordEdit = (EditText) findViewById(R.id.passwordEdit);
+        confirmpasswordEdit = (EditText) findViewById(R.id.confirmpasswordEdit);
         phonenoEdit.setText(""+ Utils.getOTPByMobileInstantResponse.getMobileNumber());
         apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
 
@@ -89,6 +90,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 phoneno = phonenoEdit.getText().toString();
                 String emailadd = emailaddEdit.getText().toString();
                 password = passwordEdit.getText().toString();
+                String confirmpassword = confirmpasswordEdit.getText().toString();
 
                 if(firstname.isEmpty()){
                     showInfoDlg("Information", "Please enter the first name", "Ok", "info");
@@ -98,6 +100,10 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     showInfoDlg("Information", "Please enter the email name", "Ok", "info");
                 }else if(password.isEmpty()){
                     showInfoDlg("Information", "Please enter the password", "Ok", "info");
+                }else if(confirmpassword.isEmpty()){
+                    showInfoDlg("Information", "Please enter the confirm password", "Ok", "info");
+                }else if (!password.equals(confirmpassword)) {
+                    showInfoDlg("Information", "Password and Confirm Password are not Matched", "Ok", "info");
                 }else if(phoneno.isEmpty()){
                     showInfoDlg("Information", "Please enter the mobile number", "Ok", "info");
                 }else if(phoneno.length() != 10){

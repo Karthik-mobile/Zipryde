@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.trivectadigital.ziprydedriverapp.R;
+import com.trivectadigital.ziprydedriverapp.modelget.ListOfBooking;
 
 import java.util.LinkedList;
 
@@ -18,10 +19,10 @@ import java.util.LinkedList;
 
 public class ZiprydeHistoryAdapter extends BaseAdapter {
 
-    LinkedList<ZiprydeHistoryDetails> ziprydeHistoryDetailsList;
+    LinkedList<ListOfBooking> ziprydeHistoryDetailsList;
     public Context context;
 
-    public ZiprydeHistoryAdapter(LinkedList<ZiprydeHistoryDetails> ziprydeHistoryDetailsList, Context context) {
+    public ZiprydeHistoryAdapter(LinkedList<ListOfBooking> ziprydeHistoryDetailsList, Context context) {
         this.ziprydeHistoryDetailsList = ziprydeHistoryDetailsList;
         this.context = context;
     }
@@ -70,16 +71,16 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
             holder = (ViewHolder) view.getTag();
         }
 
-        ZiprydeHistoryDetails ziprydeHistoryDetails = ziprydeHistoryDetailsList.get(position);
+        ListOfBooking ziprydeHistoryDetails = ziprydeHistoryDetailsList.get(position);
 
-        String ziprydeBookingCarType = ziprydeHistoryDetails.getZiprydeBookingCarType();
-        String ziprydeBookingDateTime = ziprydeHistoryDetails.getZiprydeBookingDateTime();
-        String ziprydeBookingCRN = ziprydeHistoryDetails.getZiprydeBookingCRN();
-        String ziprydeBookingStarting = ziprydeHistoryDetails.getZiprydeBookingStarting();
-        String ziprydeBookingEnding = ziprydeHistoryDetails.getZiprydeBookingEnding();
-        String ziprydeBookingPrice = ziprydeHistoryDetails.getZiprydeBookingPrice();
-        String ziprydeBookingOfferPrice = ziprydeHistoryDetails.getZiprydeBookingOfferPrice();
-        String ziprydeBookingProfileImg = ziprydeHistoryDetails.getZiprydeBookingProfileImg();
+//        String ziprydeBookingCarType = ziprydeHistoryDetails.getZiprydeBookingCarType();
+        String ziprydeBookingDateTime = ziprydeHistoryDetails.getBookingDateTime();
+        String ziprydeBookingCRN = ziprydeHistoryDetails.getCrnNumber();
+        String ziprydeBookingStarting = ziprydeHistoryDetails.getFrom();
+        String ziprydeBookingEnding = ziprydeHistoryDetails.getTo();
+        String ziprydeBookingPrice = ziprydeHistoryDetails.getSuggestedPrice();
+        String ziprydeBookingOfferPrice = ziprydeHistoryDetails.getOfferedPrice();
+//        String ziprydeBookingProfileImg = ziprydeHistoryDetails.getZiprydeBookingProfileImg();
 
         holder.bookingDatetime.setText(""+ziprydeBookingDateTime);
         holder.bookingCRN.setText(""+ziprydeBookingCRN);

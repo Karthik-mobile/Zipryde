@@ -2,7 +2,9 @@ package com.trivectadigital.ziprydedriverapp.assist;
 
 import android.location.Location;
 
+import com.trivectadigital.ziprydedriverapp.modelget.ListOfBooking;
 import com.trivectadigital.ziprydedriverapp.modelget.ListOfPercentage;
+import com.trivectadigital.ziprydedriverapp.modelget.ListOfRequestedBooking;
 import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -35,8 +37,11 @@ public class Utils {
     public static SingleInstantResponse getOTPByMobileInstantResponse;
     public static SingleInstantResponse verifyOTPByMobileInstantResponse;
     public static SingleInstantResponse saveUserMobileInstantResponse;
+    public static SingleInstantResponse updateBookingDriverStatusInstantResponse;
     public static SingleInstantResponse verifyLogInUserMobileInstantResponse;
+    public static LinkedList<ListOfBooking> getBookingByDriverIdInstantResponse;
     public static LinkedList<ListOfPercentage> getAllNYOPListInstantResponse;
+    public static LinkedList<ListOfRequestedBooking> getBookingRequestedByDriverIdResponse;
 
     public static LatLng startingLatLan;
     public static String startingPlaceAddress = "";
@@ -46,4 +51,5 @@ public class Utils {
     public static String backchkendingPlaceAddress = "";
 
     public static String parsedDistance = "";
+    public static String parsedDuration = "";
 }

@@ -1,5 +1,6 @@
 package com.trivectadigital.ziprydeuserapp.assist;
 
+import com.trivectadigital.ziprydeuserapp.modelget.ListOfBooking;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCarTypes;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCurrentCabs;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfFairEstimate;
@@ -33,6 +34,9 @@ public class Utils {
     public static SingleInstantResponse verifyOTPByMobileInstantResponse;
     public static SingleInstantResponse saveUserMobileInstantResponse;
     public static SingleInstantResponse verifyLogInUserMobileInstantResponse;
+    public static SingleInstantResponse requestBookingResponse;
+    public static SingleInstantResponse getGeoLocationByDriverIdResponse;
+    public static LinkedList<ListOfBooking> getBookingByUserIdResponse;
     public static LinkedList<ListOfFairEstimate> getAllNYOPByCabTypeAndDistanceInstantResponse;
     public static LinkedList<ListOfCarTypes> getAllCabTypesInstantResponse;
     public static LinkedList<ListOfCurrentCabs> getNearByActiveDriversInstantResponse;
@@ -45,4 +49,5 @@ public class Utils {
     public static String backchkendingPlaceAddress = "";
 
     public static String parsedDistance = "";
+    public static String parsedDuration = "";
 }

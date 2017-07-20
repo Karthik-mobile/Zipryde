@@ -292,6 +292,7 @@ public class FromToPlaceActivity extends AppCompatActivity implements GoogleApiC
             clearsearchImageViewdest.setVisibility(View.VISIBLE);
             Intent intent = new Intent(FromToPlaceActivity.this, DirectionConfirmationActivity.class);
             startActivity(intent);
+            finish();
         }
     };
 

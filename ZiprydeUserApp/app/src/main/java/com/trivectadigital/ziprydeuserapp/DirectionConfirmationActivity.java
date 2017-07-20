@@ -3,6 +3,7 @@ package com.trivectadigital.ziprydeuserapp;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
@@ -26,12 +27,15 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.DataParser;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCarTypes;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfFairEstimate;
+import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
+import com.trivectadigital.ziprydeuserapp.modelpost.GeoLocationRequest;
 import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -326,22 +330,43 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         requestPickupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.loadingimage_layout);
-                dialog.setCanceledOnTouchOutside(false);
-                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                dialog.show();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.dismiss();
-                        showInfoDlg("Booking Successful", "Your Zipryde has been confirmed. Driver will pick up you in 4 minutes.", "Done", "successBooking");
-                    }
-                }, 1000);
+                selectedCarType = Integer.parseInt(getFareDetailsBtn.getTag().toString().trim());
+                SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                Log.e("selectedCarType",""+selectedCarType);
+                loginCredentials.cabTypeId = selectedCarType;
+                Log.e("customerId",""+Utils.verifyLogInUserMobileInstantResponse.getUserId());
+                loginCredentials.customerId = Utils.verifyLogInUserMobileInstantResponse.getUserId();
+                Log.e("from",""+Utils.startingPlaceAddress);
+                loginCredentials.from = Utils.startingPlaceAddress;
+                Log.e("to",""+Utils.endingPlaceAddress);
+                loginCredentials.to = Utils.endingPlaceAddress;
+                Log.e("suggestedPrice",""+basePrice.getTag().toString().trim());
+                loginCredentials.suggestedPrice = basePrice.getTag().toString().trim();
+                Log.e("offeredPrice",""+requestPickupBtn.getTag().toString().trim());
+                loginCredentials.offeredPrice = requestPickupBtn.getTag().toString().trim();
+                Log.e("noOfPassengers",""+noofSeatsSpinner.getSelectedItem().toString().trim());
+                loginCredentials.noOfPassengers = Integer.parseInt(noofSeatsSpinner.getSelectedItem().toString().trim());
 
+                String km = Utils.parsedDistance.split(" ")[0].trim();
+                String kmtomile = ""+(Double.parseDouble(km) * 0.6214);
+                GeoLocationRequest bookingObjects = new GeoLocationRequest();
+                Log.e("fromLatitude",""+Utils.startingLatLan.latitude);
+                bookingObjects.fromLatitude = ""+new DecimalFormat("##.######").format(Utils.startingLatLan.latitude);
+                Log.e("fromLongitude",""+Utils.startingLatLan.longitude);
+                bookingObjects.fromLongitude = ""+new DecimalFormat("##.######").format(Utils.startingLatLan.longitude);
+                Log.e("toLatitude",""+Utils.endingLatLan.latitude);
+                bookingObjects.toLatitude = ""+new DecimalFormat("##.######").format(Utils.endingLatLan.latitude);
+                Log.e("toLongitude",""+Utils.endingLatLan.longitude);
+                bookingObjects.toLongitude = ""+new DecimalFormat("##.######").format(Utils.endingLatLan.longitude);
+                Log.e("kmtomile",""+kmtomile);
+                bookingObjects.distanceInMiles = ""+kmtomile;
+
+                loginCredentials.geoLocationRequest = bookingObjects;
+
+                Gson gson = new Gson();
+                String json = gson.toJson(loginCredentials);
+                Log.e("json",""+json);
+                callRequestBooking(loginCredentials);
             }
         });
 
@@ -438,6 +463,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         textAmount1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                requestPickupBtn.setTag(textAmount1.getTag().toString().trim());
                 textAmount1.setBackgroundResource(R.drawable.rounded_button);
                 textAmount1.setTextColor(getResources().getColor(R.color.primaryText));
                 textAmount2.setBackgroundResource(0);
@@ -452,6 +478,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         textAmount2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                requestPickupBtn.setTag(textAmount2.getTag().toString().trim());
                 textAmount2.setBackgroundResource(R.drawable.rounded_button);
                 textAmount2.setTextColor(getResources().getColor(R.color.primaryText));
                 textAmount1.setBackgroundResource(0);
@@ -466,6 +493,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         textAmount3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                requestPickupBtn.setTag(textAmount3.getTag().toString().trim());
                 textAmount3.setBackgroundResource(R.drawable.rounded_button);
                 textAmount3.setTextColor(getResources().getColor(R.color.primaryText));
                 textAmount1.setBackgroundResource(0);
@@ -480,6 +508,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         textAmount4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                requestPickupBtn.setTag(textAmount4.getTag().toString().trim());
                 textAmount4.setBackgroundResource(R.drawable.rounded_button);
                 textAmount4.setTextColor(getResources().getColor(R.color.primaryText));
                 textAmount1.setBackgroundResource(0);
@@ -492,6 +521,127 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         });
 
         getAllCabTypes();
+    }
+
+    public void callRequestBooking(SingleInstantParameters loginCredentials){
+        final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.requetsloadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<SingleInstantResponse> call = apiService.requestBooking(loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
+            @Override
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                if(response.isSuccessful()){
+                    Utils.requestBookingResponse = response.body();
+                    Log.e("bookingId",""+Utils.requestBookingResponse.getBookingId());
+                    Log.e("bookingStatus",""+Utils.requestBookingResponse.getBookingStatus());
+                    if(Utils.requestBookingResponse.getBookingStatus().equals("SCHEDULED")){
+                        dialog.dismiss();
+                        showInfoDlg("Booking Successful", "Your Booking request has been submitted successfully. Please wait till driver accepts...", "Done", "successBooking");
+                    }else{
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                dialog.dismiss();
+                                SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                                loginCredentials.bookingId = ""+ Utils.requestBookingResponse.getBookingId();
+                                getBookingByBookingId(loginCredentials, 1);
+                            }
+                        }, 15000);
+                    }
+                }else{
+                    dialog.dismiss();
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+            }
+        });
+    }
+
+    public void getBookingByBookingId(SingleInstantParameters loginCredentials, final int count){
+        final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.requetsloadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<SingleInstantResponse> call = apiService.getBookingByBookingId(loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
+            @Override
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                if(response.isSuccessful()){
+                    Utils.requestBookingResponse = response.body();
+                    Log.e("bookingId",""+Utils.requestBookingResponse.getBookingId());
+                    Log.e("bookingStatus",""+Utils.requestBookingResponse.getBookingStatus());
+                    if(count != 3){
+                        if(Utils.requestBookingResponse.getBookingStatus().equals("SCHEDULED")){
+                            dialog.dismiss();
+                            showInfoDlg("Booking Successful", "Your Booking request has been accepted by driver...", "Done", "successBooking");
+                        }else{
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    dialog.dismiss();
+                                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                                    loginCredentials.bookingId = ""+ Utils.requestBookingResponse.getBookingId();
+                                    getBookingByBookingId(loginCredentials, 3);
+                                }
+                            }, 15000);
+                        }
+                    }else{
+                        dialog.dismiss();
+                        showInfoDlg("Booking Successful", "Your Booking request has been submitted successfully. Please wait till driver accepts...", "Done", "requestRequest");
+                    }
+                }else{
+                    dialog.dismiss();
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+            }
+        });
     }
 
     public void sendPassengerInformation(int count){
@@ -605,7 +755,10 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(0).getPrice());
                         Log.e("price 11",""+price);
                         textAmount1.setText("$"+new DecimalFormat("##.#").format(price));
+                        textAmount1.setTag(""+price);
+                        requestPickupBtn.setTag(textAmount1.getTag().toString().trim());
                         basePrice.setText("$"+new DecimalFormat("##.#").format(price));
+                        basePrice.setTag(""+price);
                     }
 
                     if(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 1){
@@ -613,6 +766,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(1).getPrice());
                         Log.e("price 22",""+price);
                         textAmount2.setText("$"+new DecimalFormat("##.#").format(price));
+                        textAmount2.setTag(""+price);
                     }
 
                     if(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 2){
@@ -620,6 +774,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(2).getPrice());
                         Log.e("price 33",""+price);
                         textAmount3.setText("$"+new DecimalFormat("##.#").format(price));
+                        textAmount3.setTag(""+price);
                     }
 
                     if(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 3){
@@ -627,6 +782,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(3).getPrice());
                         Log.e("price 44",""+price);
                         textAmount4.setText("$"+new DecimalFormat("##.#").format(price));
+                        textAmount4.setTag(""+price);
                     }
                     //showInfoDlg("Success..", "Successfully registered.", "Ok", "success");
                 }else{
@@ -677,7 +833,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         }
 
         ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
-        if(navType.equalsIgnoreCase("successBooking")){
+        if(navType.equalsIgnoreCase("successBooking") || navType.equalsIgnoreCase("requestRequest")){
             headerIcon.setImageResource(R.drawable.successicon);
             newnegativeBtn.setVisibility(View.GONE);
         }
@@ -695,6 +851,11 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_CHECK_SETTINGS);
                 }else if(navType.equalsIgnoreCase("successBooking")){
                     Intent ide = new Intent(DirectionConfirmationActivity.this, DriverInfoBookingActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
+                }else if(navType.equalsIgnoreCase("requestRequest")){
+                    Intent ide = new Intent(DirectionConfirmationActivity.this, NavigationMenuActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
                     finish();

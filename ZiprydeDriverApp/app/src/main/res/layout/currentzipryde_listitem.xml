@@ -50,7 +50,7 @@
                 android:text="Sat May 27 18:25"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                 android:textColor="@color/primaryText"
-                android:textSize="16dp"  />
+                android:textSize="16dp" />
 
         </LinearLayout>
 
@@ -64,13 +64,20 @@
             android:orientation="horizontal">
 
             <RelativeLayout
-                android:layout_width="70dp"
+                android:layout_width="wrap_content"
                 android:layout_height="80dp"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:orientation="vertical">
 
                 <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:src="@drawable/fromtopoint" />
+
+                <!--<ImageView
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:layout_alignParentTop="true"
@@ -88,7 +95,7 @@
                     android:layout_height="25dp"
                     android:layout_alignParentBottom="true"
                     android:layout_centerHorizontal="true"
-                    android:src="@drawable/ic_action_location_new" />
+                    android:src="@drawable/ic_action_location_new" />-->
 
             </RelativeLayout>
 
@@ -134,6 +141,33 @@
             </LinearLayout>
 
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginRight="25dp"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/newnegativeBtn"
+                android:layout_width="100dp"
+                android:layout_height="45dp"
+                android:background="@null"
+                android:focusable="false"
+                android:text="DECLINE"
+                android:textColor="@color/black_overlay" />
+
+            <Button
+                android:id="@+id/positiveBtn"
+                android:layout_width="100dp"
+                android:layout_height="45dp"
+                android:background="@null"
+                android:focusable="false"
+                android:text="ACCEPT" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>

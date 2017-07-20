@@ -23,4 +23,9 @@ public class SingleInstantParameters {
     public String fromLatitude;
     public String fromLongitude;
     public int isOnline;
+    public String driverId;
+    public String bookingId;
+    public String driverStatus;
+    public String amountPaid;
+    public String paymentType;
 }

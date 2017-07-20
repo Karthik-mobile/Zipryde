@@ -1,13 +1,26 @@
 package com.trivectadigital.ziprydeuserapp;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -21,8 +34,15 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.gson.Gson;
+import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
+import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
+import com.trivectadigital.ziprydeuserapp.assist.CircleImageView;
 import com.trivectadigital.ziprydeuserapp.assist.DataParser;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
+import com.trivectadigital.ziprydeuserapp.modelget.ListOfBooking;
+import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
+import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
 
 import org.json.JSONObject;
 
@@ -37,20 +57,192 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class DriverInfoBookingActivity extends AppCompatActivity implements OnMapReadyCallback  {
 
     private GoogleMap mMap;
+
+    int position = -1;
+
+    TextView driverNameText, cabTypeText, fromAddressText, toAddressText;
+    ListOfBooking listOfBooking;
+    ZiprydeApiInterface apiService;
+
+    CircleImageView user_view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_info_booking);
 
+        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+
+        Intent intent = getIntent();
+        if(intent.hasExtra("position")){
+            position = intent.getIntExtra("position", -1);
+        }
+
+        driverNameText = (TextView) findViewById(R.id.driverNameText);
+        cabTypeText = (TextView) findViewById(R.id.cabTypeText);
+        fromAddressText = (TextView) findViewById(R.id.fromAddressText);
+        toAddressText = (TextView) findViewById(R.id.toAddressText);
+        user_view = (CircleImageView) findViewById(R.id.user_view);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        if(position != -1){
+            listOfBooking = Utils.getBookingByUserIdResponse.get(position);
+            driverNameText.setText(listOfBooking.getDriverName());
+            cabTypeText.setText(listOfBooking.getCabType());
+            fromAddressText.setText(listOfBooking.getFrom());
+            toAddressText.setText(listOfBooking.getTo());
+
+            Log.e("DriverId", listOfBooking.getDriverId());
+            Log.e("driverImage", "driverImage : "+listOfBooking.getDriverImage());
+            String driverImage = ""+listOfBooking.getDriverImage();
+            if(driverImage != null){
+                if(!driverImage.equalsIgnoreCase("null")){
+                    byte[] decodedString = Base64.decode(driverImage, Base64.DEFAULT);
+                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                    user_view.setImageBitmap(decodedByte);
+                }
+            }
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.userId = ""+ listOfBooking.getDriverId();
+            getGeoLocationByDriverId(loginCredentials);
+        }else {
+            driverNameText.setText(Utils.requestBookingResponse.getDriverName());
+            cabTypeText.setText(Utils.requestBookingResponse.getCabType());
+            fromAddressText.setText(Utils.requestBookingResponse.getFrom());
+            toAddressText.setText(Utils.requestBookingResponse.getTo());
+
+            Log.e("DriverId", Utils.requestBookingResponse.getDriverId());
+            Log.e("driverImage", "driverImage : "+Utils.requestBookingResponse.getDriverImage());
+            String driverImage = ""+Utils.requestBookingResponse.getDriverImage();
+            if(driverImage != null){
+                if(!driverImage.equalsIgnoreCase("null")){
+                    byte[] decodedString = Base64.decode(driverImage, Base64.DEFAULT);
+                    Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                    user_view.setImageBitmap(decodedByte);
+                }
+            }
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.userId = ""+ Utils.requestBookingResponse.getDriverId();
+            getGeoLocationByDriverId(loginCredentials);
+        }
     }
+
+    public void getGeoLocationByDriverId(SingleInstantParameters loginCredentials){
+        final Dialog dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<SingleInstantResponse> call = apiService.getGeoLocationByDriverId(loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
+            @Override
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                dialog.dismiss();
+                if(response.isSuccessful()){
+                    Utils.getGeoLocationByDriverIdResponse = response.body();
+                    Log.e("Latitude",""+Utils.getGeoLocationByDriverIdResponse.getLatitude());
+                    Log.e("Longitude",""+Utils.getGeoLocationByDriverIdResponse.getLongitude());
+                    LatLng driverLatLng = new LatLng(Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLatitude()), Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLongitude()));
+                    mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(driverLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
+//                    endingMarker.setTag("ending");
+                }else{
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+            }
+        });
+    }
+
+    Dialog dialog;
+    private void showInfoDlg(String title, String content, String btnText, final String navType) {
+        dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.infodialog_layout);
+        //dialog.setCanceledOnTouchOutside(true);
+
+        ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
+        if(navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("error")){
+            headerIcon.setImageResource(R.drawable.erroricon);
+        }
+
+        Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
+        positiveBtn.setText(""+btnText);
+
+        Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
+        if(navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("error")){
+            newnegativeBtn.setVisibility(View.GONE);
+        }
+
+        if(navType.equalsIgnoreCase("success")){
+            headerIcon.setImageResource(R.drawable.successicon);
+            positiveBtn.setVisibility(View.GONE);
+            newnegativeBtn.setVisibility(View.GONE);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    dialog.dismiss();
+                }
+            }, 1000);
+        }
+
+        TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
+        dialogtitleText.setText(""+title);
+        TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
+        dialogcontentText.setText(""+content);
+
+        positiveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        newnegativeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+    }
+
 
     /**
      * Manipulates the map once available.
@@ -68,10 +260,30 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
         LatLng origin = Utils.startingLatLan;
         LatLng dest = Utils.endingLatLan;
-        startingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(origin).title(""+Utils.startingPlaceAddress).icon(BitmapDescriptorFactory.fromResource(R.drawable.startpoint)));
+        if(position != -1) {
+            ListOfBooking listOfBooking = Utils.getBookingByUserIdResponse.get(position);
+            String fromLat = listOfBooking.getGeoLocationResponse().getFromLatitude();
+            String fromLong = listOfBooking.getGeoLocationResponse().getFromLongitude();
+            String toLat = listOfBooking.getGeoLocationResponse().getToLatitude();
+            String toLong = listOfBooking.getGeoLocationResponse().getToLongitude();
+
+            origin = new LatLng(Double.parseDouble(fromLat), Double.parseDouble(fromLong));
+            dest = new LatLng(Double.parseDouble(toLat), Double.parseDouble(toLong));
+        }else{
+            // Booked
+            String fromLat = Utils.requestBookingResponse.getGeoLocationResponse().getFromLatitude();
+            String fromLong = Utils.requestBookingResponse.getGeoLocationResponse().getFromLongitude();
+            String toLat = Utils.requestBookingResponse.getGeoLocationResponse().getToLatitude();
+            String toLong = Utils.requestBookingResponse.getGeoLocationResponse().getToLongitude();
+
+            origin = new LatLng(Double.parseDouble(fromLat), Double.parseDouble(fromLong));
+            dest = new LatLng(Double.parseDouble(toLat), Double.parseDouble(toLong));
+        }
+
+        startingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(origin).icon(BitmapDescriptorFactory.fromResource(R.drawable.startpoint)));
         startingMarker.setTag("starting");
         startingMarker.showInfoWindow();
-        endingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(dest).title(""+Utils.endingPlaceAddress).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
+        endingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(dest).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
         endingMarker.setTag("ending");
 
         // Getting URL to the Google Directions API

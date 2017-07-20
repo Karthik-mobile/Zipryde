@@ -4,12 +4,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -29,6 +31,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
+import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydedriverapp.assist.DataParser;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
 import com.google.android.gms.common.ConnectionResult;
@@ -53,6 +58,10 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.trivectadigital.ziprydedriverapp.modelget.ListOfBooking;
+import com.trivectadigital.ziprydedriverapp.modelget.ListOfRequestedBooking;
+import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
+import com.trivectadigital.ziprydedriverapp.modelpost.SingleInstantParameters;
 
 import org.json.JSONObject;
 
@@ -67,6 +76,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class OnGoingBookingActivity extends AppCompatActivity implements OnMapReadyCallback,
                                                                             GoogleApiClient.ConnectionCallbacks,
                                                                             GoogleApiClient.OnConnectionFailedListener,
@@ -74,7 +87,6 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                                                                             LocationListener {
 
     private GoogleMap mMap;
-
     static final Integer LOCATION = 0x1;
 
     protected GoogleApiClient mGoogleApiClient;
@@ -86,44 +98,75 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
 
     Location mLastLocation;
 
-    Button starttripBtn, endtripBtn;
-
-    TextView distanceText, pickdropText, pickdroplocationText;
-
+    Button starttripBtn, endtripBtn, acceptBtn;
+    TextView distanceText, pickdropText, pickdroplocationText,
+            fromPlaceText, toPlaceText, suggestedPrice, offerPriceText, timeText;
     ImageView navigationImg;
+    LinearLayout confirmBtn;
+
+    Intent intent;
+    ListOfRequestedBooking listOfRequestedBooking;
+    ListOfBooking listOfBooking;
+
+    ZiprydeApiInterface apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ongoingbooking);
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
 
-        LayoutInflater mInflater = LayoutInflater.from(this);
-        View mCustomView = mInflater.inflate(R.layout.actionbar_titleback, null);
-        toolbar.setContentInsetsAbsolute(0, 0);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        toolbar.addView(mCustomView, layoutParams);
-        TextView titleText = (TextView) mCustomView.findViewById(R.id.titleText);
-        titleText.setText("");
-        ImageView backImg = (ImageView) mCustomView.findViewById(R.id.backImg);
-        backImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        confirmBtn = (LinearLayout) findViewById(R.id.confirmBtn);
 
-        starttripBtn = (Button) findViewById(R.id.starttripBtn);
-        endtripBtn = (Button) findViewById(R.id.endtripBtn);
+        starttripBtn = (Button) findViewById(R.id.startBtn);
+        endtripBtn = (Button) findViewById(R.id.endBtn);
+        acceptBtn = (Button) findViewById(R.id.acceptBtn);
 
         distanceText = (TextView) findViewById(R.id.distanceText);
+
+        fromPlaceText = (TextView) findViewById(R.id.fromPlaceText);
+        toPlaceText = (TextView) findViewById(R.id.toPlaceText);
+        suggestedPrice = (TextView) findViewById(R.id.suggestedPrice);
+        offerPriceText = (TextView) findViewById(R.id.offerPriceText);
+        timeText = (TextView) findViewById(R.id.timeText);
 
         pickdropText = (TextView) findViewById(R.id.pickdropText);
         pickdroplocationText = (TextView) findViewById(R.id.pickdroplocationText);
         navigationImg = (ImageView) findViewById(R.id.navigationImg);
+
+        intent = getIntent();
+        if(intent.hasExtra("type")) {
+            int position = intent.getIntExtra("position", 0);
+            listOfBooking = Utils.getBookingByDriverIdInstantResponse.get(position);
+            fromPlaceText.setText(listOfBooking.getFrom());
+            toPlaceText.setText(listOfBooking.getTo());
+            suggestedPrice.setText("$" + listOfBooking.getSuggestedPrice());
+            offerPriceText.setText("$" + listOfBooking.getOfferedPrice());
+
+            String driverStatus = listOfBooking.getDriverStatus();
+            Log.e("driverStatus",""+driverStatus);
+            if(driverStatus.equals("ACCEPTED")){
+                endtripBtn.setVisibility(View.GONE);
+                starttripBtn.setVisibility(View.VISIBLE);
+                confirmBtn.setVisibility(View.GONE);
+            }else if(driverStatus.equals("ON_TRIP")){
+                confirmBtn.setVisibility(View.GONE);
+                endtripBtn.setVisibility(View.VISIBLE);
+                starttripBtn.setVisibility(View.GONE);
+            }else {
+                endtripBtn.setVisibility(View.GONE);
+                starttripBtn.setVisibility(View.GONE);
+                confirmBtn.setVisibility(View.GONE);
+            }
+        }else{
+            int position = intent.getIntExtra("position", 0);
+            listOfRequestedBooking = Utils.getBookingRequestedByDriverIdResponse.get(position);
+            fromPlaceText.setText(listOfRequestedBooking.getFrom());
+            toPlaceText.setText(listOfRequestedBooking.getTo());
+            suggestedPrice.setText("$" + listOfRequestedBooking.getSuggestedPrice());
+            offerPriceText.setText("$" + listOfRequestedBooking.getOfferedPrice());
+        }
 
         mGoogleApiClient = new GoogleApiClient.Builder(OnGoingBookingActivity.this)
                 .addConnectionCallbacks(this)
@@ -146,7 +189,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             if(statusOfGPS){
                 getGPSLocation();
-                showConfirmationDlg();
+                //showConfirmationDlg();
             }else{
                 //askSwitchOnGPS();
                 showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
@@ -157,29 +200,116 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        acceptBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(intent.hasExtra("type")) {
+                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                    loginCredentials.driverId = ""+Utils.verifyLogInUserMobileInstantResponse.getUserId();
+                    loginCredentials.bookingId = listOfBooking.getBookingId();
+                    loginCredentials.driverStatus = "ACCEPTED";
+                    updateBookingDriverStatus(loginCredentials);
+                }else{
+                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                    loginCredentials.driverId = ""+Utils.verifyLogInUserMobileInstantResponse.getUserId();
+                    loginCredentials.bookingId = listOfRequestedBooking.getBookingId();
+                    loginCredentials.driverStatus = "ACCEPTED";
+                    updateBookingDriverStatus(loginCredentials);
+                }
+            }
+        });
+
         starttripBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                pickdropText.setText("DROP LOCATION");
-                pickdroplocationText.setText("Hyde Park, Austin");
-                navigationImg.setVisibility(View.GONE);
-                endtripBtn.setVisibility(View.VISIBLE);
-                starttripBtn.setVisibility(View.GONE);
-                distanceText.setVisibility(View.VISIBLE);
-                String url = getUrl(crtLocation, tempLocation);
-                Log.d("url", ""+url);
-                FetchUrl FetchUrl = new FetchUrl();
-                FetchUrl.execute(url);
+                if(intent.hasExtra("type")) {
+                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                    loginCredentials.driverId = ""+Utils.verifyLogInUserMobileInstantResponse.getUserId();
+                    loginCredentials.bookingId = listOfBooking.getBookingId();
+                    loginCredentials.driverStatus = "ON_TRIP";
+                    updateBookingDriverStatus(loginCredentials);
+                }else {
+                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                    loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
+                    loginCredentials.bookingId = listOfRequestedBooking.getBookingId();
+                    loginCredentials.driverStatus = "ON_TRIP";
+                    updateBookingDriverStatus(loginCredentials);
+                }
             }
         });
 
         endtripBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent ide = new Intent(OnGoingBookingActivity.this, CashDisplyActivity.class);
-                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(ide);
-                finish();
+                if(intent.hasExtra("type")) {
+                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                    loginCredentials.driverId = ""+Utils.verifyLogInUserMobileInstantResponse.getUserId();
+                    loginCredentials.bookingId = listOfBooking.getBookingId();
+                    loginCredentials.driverStatus = "COMPLETED";
+                    updateBookingDriverStatus(loginCredentials);
+                }else {
+                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                    loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
+                    loginCredentials.bookingId = listOfRequestedBooking.getBookingId();
+                    loginCredentials.driverStatus = "COMPLETED";
+                    updateBookingDriverStatus(loginCredentials);
+                }
+            }
+        });
+    }
+
+    public void updateBookingDriverStatus(final SingleInstantParameters loginCredentials){
+        final Dialog dialog = new Dialog(OnGoingBookingActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<SingleInstantResponse> call = apiService.updateBookingDriverStatus(loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
+            @Override
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                dialog.dismiss();
+                if(response.isSuccessful()){
+                    Utils.updateBookingDriverStatusInstantResponse = response.body();
+                    Log.e("CustomerName",""+Utils.updateBookingDriverStatusInstantResponse.getCustomerName());
+                    Log.e("DistanceInMiles",""+Utils.updateBookingDriverStatusInstantResponse.getGeoLocationResponse().getDistanceInMiles());
+                    if(loginCredentials.driverStatus.equals("ACCEPTED")){
+                        endtripBtn.setVisibility(View.GONE);
+                        starttripBtn.setVisibility(View.VISIBLE);
+                        confirmBtn.setVisibility(View.GONE);
+                        showInfoDlg("Success..", "Request Accepted Successfully.", "Ok", "success");
+                    }else if(loginCredentials.driverStatus.equals("ON_TRIP")){
+                        endtripBtn.setVisibility(View.VISIBLE);
+                        starttripBtn.setVisibility(View.GONE);
+                        showInfoDlg("Success..", "Trip Started Successfully.", "Ok", "success");
+                    }else if(loginCredentials.driverStatus.equals("COMPLETED")){
+                        showInfoDlg("Success..", "Trip Ended Successfully.", "Ok", "trip success");
+                    }
+                }else{
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
             }
         });
     }
@@ -330,9 +460,9 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
 
                 // Adding all the points in the route to LineOptions
                 lineOptions.addAll(points);
-                lineOptions.width(15);
+                lineOptions.width(10);
                 lineOptions.color(Color.parseColor("#df722c"));
-
+                timeText.setText(Utils.parsedDuration);
                 Log.d("onPostExecute","onPostExecute lineoptions decoded");
 
             }
@@ -421,6 +551,42 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 Log.e("onCameraIdle","onCameraIdle");
             }
         });
+
+        if(intent.hasExtra("type")) {
+            String fromLat = listOfBooking.getGeoLocationResponse().getFromLatitude();
+            String fromLong = listOfBooking.getGeoLocationResponse().getFromLongitude();
+            String toLat = listOfBooking.getGeoLocationResponse().getToLatitude();
+            String toLong = listOfBooking.getGeoLocationResponse().getToLongitude();
+
+            LatLng fromLatLng = new LatLng(Double.parseDouble(fromLat), Double.parseDouble(fromLong));
+            LatLng toLatLng = new LatLng(Double.parseDouble(toLat), Double.parseDouble(toLong));
+            String url = getUrl(fromLatLng, toLatLng);
+            Log.d("url", ""+url);
+            FetchUrl FetchUrl = new FetchUrl();
+            FetchUrl.execute(url);
+
+            Marker marker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(fromLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.startpoint)));
+            markers.add(marker);
+            marker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(toLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
+            markers.add(marker);
+        }else{
+            String fromLat = listOfRequestedBooking.getGeoLocationResponse().getFromLatitude();
+            String fromLong = listOfRequestedBooking.getGeoLocationResponse().getFromLongitude();
+            String toLat = listOfRequestedBooking.getGeoLocationResponse().getToLatitude();
+            String toLong = listOfRequestedBooking.getGeoLocationResponse().getToLongitude();
+
+            LatLng fromLatLng = new LatLng(Double.parseDouble(fromLat), Double.parseDouble(fromLong));
+            LatLng toLatLng = new LatLng(Double.parseDouble(toLat), Double.parseDouble(toLong));
+            String url = getUrl(fromLatLng, toLatLng);
+            Log.d("url", ""+url);
+            FetchUrl FetchUrl = new FetchUrl();
+            FetchUrl.execute(url);
+
+            Marker marker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(fromLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.startpoint)));
+            markers.add(marker);
+            marker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(toLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
+            markers.add(marker);
+        }
     }
 
     public void getGPSLocation() {
@@ -433,20 +599,27 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
 
                 if(mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.micro_car_48)));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
-                    mMap.animateCamera(CameraUpdateFactory.zoomIn());
-                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
+                    markers.add(marker);
+//                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.micro_car_48)));
+//                    mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
+//                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
+//                    mMap.animateCamera(CameraUpdateFactory.zoomIn());
+//                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
                     //marker.showInfoWindow();
-                    markers.add(marker);
-                    double meters = 500;
-                    double coef = meters * 0.0000089;
-                    double new_lat = mLastLocation.getLatitude() + coef;
-                    double new_long = mLastLocation.getLongitude() + coef / Math.cos(mLastLocation.getLatitude() * 0.018);
-                    tempLocation = new LatLng(new_lat, new_long);
-                    marker = mMap.addMarker(new MarkerOptions().position(tempLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.pickup_icon_48)));
-                    markers.add(marker);
+//                    markers.add(marker);
+//                    double meters = 500;
+//                    double coef = meters * 0.0000089;
+//                    double new_lat = mLastLocation.getLatitude() + coef;
+//                    double new_long = mLastLocation.getLongitude() + coef / Math.cos(mLastLocation.getLatitude() * 0.018);
+//                    tempLocation = new LatLng(new_lat, new_long);
+//                    marker = mMap.addMarker(new MarkerOptions().position(tempLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.pickup_icon_48)));
+//                    markers.add(marker);
+//
+//                    String url = getUrl(crtLocation, tempLocation);
+//                    Log.d("url", ""+url);
+//                    FetchUrl FetchUrl = new FetchUrl();
+//                    FetchUrl.execute(url);
                 }
             }
             startLocationUpdates();
@@ -490,6 +663,11 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         dialog.setContentView(R.layout.infodialog_layout);
         //dialog.setCanceledOnTouchOutside(true);
 
+        ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
+        if (navType.equalsIgnoreCase("server")) {
+            headerIcon.setImageResource(R.drawable.erroricon);
+        }
+
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
         positiveBtn.setText(""+btnText);
 
@@ -498,6 +676,59 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             newnegativeBtn.setVisibility(View.GONE);
         }else{
             newnegativeBtn.setVisibility(View.VISIBLE);
+        }
+
+        if (navType.equalsIgnoreCase("success")) {
+            headerIcon.setImageResource(R.drawable.successicon);
+            positiveBtn.setVisibility(View.GONE);
+            newnegativeBtn.setVisibility(View.GONE);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    dialog.dismiss();
+                }
+            }, 1000);
+        }else if(navType.equalsIgnoreCase("trip success")){
+            headerIcon.setImageResource(R.drawable.successicon);
+            positiveBtn.setVisibility(View.GONE);
+            newnegativeBtn.setVisibility(View.GONE);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    dialog.dismiss();
+                    String bookingId = "";
+                    String suggestedPrice = "";
+                    String offeredPrice = "";
+                    String distanceInMiles = "";
+                    String fromaddress = "";
+                    String toaddress = "";
+                    if(intent.hasExtra("type")) {
+                        bookingId = listOfBooking.getBookingId();
+                        suggestedPrice = listOfBooking.getSuggestedPrice();
+                        offeredPrice = listOfBooking.getOfferedPrice();
+                        distanceInMiles = listOfBooking.getGeoLocationResponse().getDistanceInMiles();
+                        fromaddress = listOfBooking.getFrom();
+                        toaddress = listOfBooking.getTo();
+                    }else {
+                        bookingId = listOfRequestedBooking.getBookingId();
+                        suggestedPrice = listOfRequestedBooking.getSuggestedPrice();
+                        offeredPrice = listOfRequestedBooking.getOfferedPrice();
+                        distanceInMiles = listOfRequestedBooking.getGeoLocationResponse().getDistanceInMiles();
+                        fromaddress = listOfRequestedBooking.getFrom();
+                        toaddress = listOfRequestedBooking.getTo();
+                    }
+                    Intent ide = new Intent(OnGoingBookingActivity.this, CashDisplyActivity.class);
+                    ide.putExtra("bookingId",""+bookingId);
+                    ide.putExtra("suggestedPrice",""+suggestedPrice);
+                    ide.putExtra("offeredPrice",""+offeredPrice);
+                    ide.putExtra("distanceInMiles",""+distanceInMiles);
+                    ide.putExtra("fromaddress",""+fromaddress);
+                    ide.putExtra("toaddress",""+toaddress);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
+                }
+            }, 1000);
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
@@ -539,7 +770,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                     boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
                     if(statusOfGPS){
                         getGPSLocation();
-                        showConfirmationDlg();
+                        //showConfirmationDlg();
                     }else{
                         //askSwitchOnGPS();
                         showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
@@ -564,20 +795,27 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
 
                 if(mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.micro_car_48)));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
-                    mMap.animateCamera(CameraUpdateFactory.zoomIn());
-                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
-                    //marker.showInfoWindow();
+                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
                     markers.add(marker);
-                    double meters = 500;
-                    double coef = meters * 0.0000089;
-                    double new_lat = mLastLocation.getLatitude() + coef;
-                    double new_long = mLastLocation.getLongitude() + coef / Math.cos(mLastLocation.getLatitude() * 0.018);
-                    tempLocation = new LatLng(new_lat, new_long);
-                    marker = mMap.addMarker(new MarkerOptions().position(tempLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.pickup_icon_48)));
-                    markers.add(marker);
+//                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.micro_car_48)));
+//                    mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
+//                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
+//                    mMap.animateCamera(CameraUpdateFactory.zoomIn());
+//                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+//                    //marker.showInfoWindow();
+//                    markers.add(marker);
+//                    double meters = 500;
+//                    double coef = meters * 0.0000089;
+//                    double new_lat = mLastLocation.getLatitude() + coef;
+//                    double new_long = mLastLocation.getLongitude() + coef / Math.cos(mLastLocation.getLatitude() * 0.018);
+//                    tempLocation = new LatLng(new_lat, new_long);
+//                    marker = mMap.addMarker(new MarkerOptions().position(tempLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.pickup_icon_48)));
+//                    markers.add(marker);
+//
+//                    String url = getUrl(crtLocation, tempLocation);
+//                    Log.d("url", ""+url);
+//                    FetchUrl FetchUrl = new FetchUrl();
+//                    FetchUrl.execute(url);
                 }
             }
         }
@@ -624,7 +862,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             if(statusOfGPS){
                 getGPSLocation();
-                showConfirmationDlg();
+                //showConfirmationDlg();
             }else{
                 //askSwitchOnGPS();
                 showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
@@ -688,6 +926,11 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                     tempLocation = new LatLng(new_lat, new_long);
                     marker = mMap.addMarker(new MarkerOptions().position(tempLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.pickup_icon_48)));
                     markers.add(marker);
+
+                    String url = getUrl(crtLocation, tempLocation);
+                    Log.d("url", ""+url);
+                    FetchUrl FetchUrl = new FetchUrl();
+                    FetchUrl.execute(url);
                 }
             }
         }

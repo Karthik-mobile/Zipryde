@@ -35,6 +35,9 @@ public class DataParser {
                 JSONObject distanceObj = stepsObj.getJSONObject("distance");
                 Utils.parsedDistance = distanceObj.getString("text");
                 Log.e("Utils.parsedDistance",""+Utils.parsedDistance);
+                distanceObj = stepsObj.getJSONObject("duration");
+                Utils.parsedDuration = distanceObj.getString("text");
+                Log.e("Utils.parsedDuration",""+Utils.parsedDuration);
                 //0.6214
                 /** Traversing all legs */
                 for(int j=0;j<jLegs.length();j++){

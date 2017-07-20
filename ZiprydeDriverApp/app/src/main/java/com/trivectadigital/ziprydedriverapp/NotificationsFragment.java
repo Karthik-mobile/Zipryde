@@ -1,23 +1,46 @@
 package com.trivectadigital.ziprydedriverapp;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
+import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydedriverapp.assist.CurrentRideAdapter;
 import com.trivectadigital.ziprydedriverapp.assist.CurrentRideDetails;
 import com.trivectadigital.ziprydedriverapp.assist.CommissionAdapter;
 import com.trivectadigital.ziprydedriverapp.assist.CommissionDetails;
+import com.trivectadigital.ziprydedriverapp.assist.Utils;
+import com.trivectadigital.ziprydedriverapp.modelget.ListOfRequestedBooking;
+import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
+import com.trivectadigital.ziprydedriverapp.modelpost.SingleInstantParameters;
+
+import org.json.JSONObject;
 
 import java.util.LinkedList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 
 /**
@@ -71,11 +94,11 @@ public class NotificationsFragment extends Fragment {
         }
     }
 
-    LinkedList<CurrentRideDetails> currentRideDetailsList;
-    //LinkedList<CommissionDetails> commissionDetailsList;
     ListView currentride_list;
     RelativeLayout requestLay;
     View requestHighView;
+
+    ZiprydeApiInterface apiService;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -83,9 +106,7 @@ public class NotificationsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_notifications, container, false);
 
-        currentRideDetailsList = new LinkedList<CurrentRideDetails>();
-        currentRideDetailsList.add(new CurrentRideDetails("101", "CRN 70210525", "Sat, May 27 22:03", "Airport, Blvd, Austin", "Hyde Park, Austin"));
-        currentRideDetailsList.add(new CurrentRideDetails("102", "CRN 70210525", "Sat, May 28 20:28", "Hyde Park, Austin", "Airport, Blvd, Austin"));
+        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
 
         currentride_list = (ListView) view.findViewById(R.id.requestList);
 
@@ -93,19 +114,111 @@ public class NotificationsFragment extends Fragment {
 
         requestHighView = (View) view.findViewById(R.id.requestHighView);
 
-        CurrentRideAdapter currentRideAdapter = new CurrentRideAdapter(currentRideDetailsList, getActivity());
-        currentride_list.setAdapter(currentRideAdapter);
-
         currentride_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent ide = new Intent(getActivity(), OnGoingBookingActivity.class);
+                ide.putExtra("position",position);
                 ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(ide);
             }
         });
 
+        Log.e("UserId","UserId "+ Utils.verifyLogInUserMobileInstantResponse.getUserId());
+        SingleInstantParameters loginCredentials = new SingleInstantParameters();
+        loginCredentials.driverId = ""+Utils.verifyLogInUserMobileInstantResponse.getUserId();
+        getBookingRequestedByDriverId(loginCredentials);
+
         return view;
+    }
+
+    public void getBookingRequestedByDriverId(SingleInstantParameters loginCredentials){
+        final Dialog dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<LinkedList<ListOfRequestedBooking>> call = apiService.getBookingRequestedByDriverId(loginCredentials);
+        call.enqueue(new Callback<LinkedList<ListOfRequestedBooking>>() {
+            @Override
+            public void onResponse(Call<LinkedList<ListOfRequestedBooking>> call, Response<LinkedList<ListOfRequestedBooking>> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                dialog.dismiss();
+                if(response.isSuccessful()){
+                    Utils.getBookingRequestedByDriverIdResponse = response.body();
+                    Log.e("size",""+Utils.getBookingRequestedByDriverIdResponse.size());
+                    for(int i = 0; i < Utils.getBookingRequestedByDriverIdResponse.size(); i++){
+                        Log.e("BookingId",""+Utils.getBookingRequestedByDriverIdResponse.get(i).getBookingId());
+                        Log.e("CrnNumber",""+Utils.getBookingRequestedByDriverIdResponse.get(i).getCrnNumber());
+                        Log.e("BookingStatus",""+Utils.getBookingRequestedByDriverIdResponse.get(i).getBookingStatus());
+                        Log.e("distanceInMiles",""+Utils.getBookingRequestedByDriverIdResponse.get(i).getGeoLocationResponse().getDistanceInMiles());
+                    }
+                    CurrentRideAdapter currentRideAdapter = new CurrentRideAdapter(Utils.getBookingRequestedByDriverIdResponse, getActivity());
+                    currentride_list.setAdapter(currentRideAdapter);
+                }else{
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LinkedList<ListOfRequestedBooking>> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+            }
+        });
+    }
+
+    Dialog dialog;
+    private void showInfoDlg(String title, String content, String btnText, final String navType) {
+        dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.infodialog_layout);
+        //dialog.setCanceledOnTouchOutside(true);
+
+        Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
+        positiveBtn.setText(""+btnText);
+
+        Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
+
+        TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
+        dialogtitleText.setText(""+title);
+        TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
+        dialogcontentText.setText(""+content);
+
+        positiveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        newnegativeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
     }
 
     // TODO: Rename method, update argument and hook method into UI event

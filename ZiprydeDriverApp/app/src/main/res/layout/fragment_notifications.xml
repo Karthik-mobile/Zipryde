@@ -64,6 +64,7 @@
     <ListView
         android:id="@+id/requestList"
         android:layout_width="match_parent"
+        android:focusable="true"
         android:layout_height="match_parent" />
 
     <ListView

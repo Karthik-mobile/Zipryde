@@ -38,27 +38,5 @@ public class RideActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
-
-        //showNotificationFragment();
     }
-
-    public void showNotificationFragment() {
-        // Creating a fragment object
-        NotificationsFragment sFragment = new NotificationsFragment();
-        // Creating a Bundle object
-        Bundle data = new Bundle();
-        // Setting the index of the currently selected item of mDrawerList
-//            data.putInt("position", position);
-        // Setting the position to the fragment
-        sFragment.setArguments(data);
-        // Getting reference to the FragmentManager
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        // Creating a fragment transaction
-        FragmentTransaction ft = fragmentManager.beginTransaction();
-        // Adding a fragment to the fragment transaction
-        ft.replace(R.id.fragment, sFragment);
-        // Committing the transaction
-        ft.commit();
-    }
-
 }

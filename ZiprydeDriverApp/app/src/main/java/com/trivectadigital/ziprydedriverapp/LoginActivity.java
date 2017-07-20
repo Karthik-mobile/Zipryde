@@ -38,6 +38,7 @@ public class LoginActivity extends AppCompatActivity {
     Button sign_btn;
     EditText phonenoEdit, passwordEdit;
     ZiprydeApiInterface apiService;
+    TextView gotoRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +60,7 @@ public class LoginActivity extends AppCompatActivity {
         titleText.setText("Login");
 
         sign_btn = (Button) findViewById(R.id.sign_btn);
+        gotoRegister = (TextView) findViewById(R.id.gotoRegister);
 
         phonenoEdit = (EditText) findViewById(R.id.phonenoEdit);
         passwordEdit = (EditText) findViewById(R.id.passwordEdit);
@@ -79,6 +81,16 @@ public class LoginActivity extends AppCompatActivity {
                     loginCredentials.password = password;
                     callMobileService(loginCredentials);
                 }
+            }
+        });
+
+        gotoRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent ide = new Intent(LoginActivity.this, MobileNumberActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
+                finish();
             }
         });
     }
@@ -174,7 +186,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     Dialog dialog;
-
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
         dialog = new Dialog(LoginActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -203,7 +214,7 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     dialog.dismiss();
-                    Intent ide = new Intent(LoginActivity.this, NavigationMenuActivity.class);
+                    Intent ide = new Intent(LoginActivity.this, NewDashBoardActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
                     finish();

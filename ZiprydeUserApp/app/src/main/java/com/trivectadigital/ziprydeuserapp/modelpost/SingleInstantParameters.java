@@ -18,4 +18,14 @@ public class SingleInstantParameters {
     public String fromLongitude;
     public String fromLatitude;
     public int noOfPassengers;
+    public String customerId;
+    public String from;
+    public String to;
+    public String suggestedPrice;
+    public String offeredPrice;
+    public GeoLocationRequest geoLocationRequest;
+    public String userId;
+    public String bookingId;
 }
+
+

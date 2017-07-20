@@ -61,7 +61,7 @@
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:layout_marginTop="35dp"
-            android:text="ENTER PIN"
+            android:text="ENTER CODE"
             android:textColor="#696969"
             android:textSize="15dp" />
 

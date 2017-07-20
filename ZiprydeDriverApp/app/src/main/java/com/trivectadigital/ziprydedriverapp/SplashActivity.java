@@ -152,7 +152,7 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
                     startActivity(ide);
                     finish();
                 }else{
-                    Intent ide = new Intent(SplashActivity.this, MobileNumberActivity.class);
+                    Intent ide = new Intent(SplashActivity.this, LoginActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
                     finish();

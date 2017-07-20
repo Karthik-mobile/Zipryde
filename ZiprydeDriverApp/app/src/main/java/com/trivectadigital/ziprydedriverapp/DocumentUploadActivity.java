@@ -46,6 +46,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
+import com.trivectadigital.ziprydedriverapp.assist.CircleImageView;
 import com.trivectadigital.ziprydedriverapp.assist.ImageLoadingUtils;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
 import com.trivectadigital.ziprydedriverapp.modelget.ListOfPercentage;
@@ -66,6 +67,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -79,13 +83,15 @@ public class DocumentUploadActivity extends AppCompatActivity {
     public static String textField = "issued";
     ImageView uploadImgFront, uploadImgBack;
     Spinner percentageSpinner;
+    CircleImageView uploadProfilePic;
 
     private Uri fileUri;
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE_FRONT = 100;
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE_BACK = 101;
+    private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE_PROFILE = 102;
     File finalmediaFile;
 
-    File finalmediaFileFront, finalmediaFileBack;
+    File finalmediaFileFront, finalmediaFileBack, finalmediaFileProfile;
 
     String phoneno, password;
 
@@ -114,6 +120,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
         });
 
         continueBtn = (Button) findViewById(R.id.continueBtn);
+        uploadProfilePic = (CircleImageView) findViewById(R.id.uploadProfilePic);
 
         licenseEdit = (EditText) findViewById(R.id.licenseEdit);
         restriEdit = (EditText) findViewById(R.id.restriEdit);
@@ -144,6 +151,12 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     showInfoDlg("Information", "Please enter the Expiry date", "Ok", "info");
                 }else if (percentage == 0) {
                     showInfoDlg("Information", "Please select the Percentage", "Ok", "info");
+                }else if (finalmediaFileProfile == null || !finalmediaFileProfile.isFile()) {
+                    showInfoDlg("Information", "Please upload profile Image", "Ok", "info");
+                }else if (finalmediaFileFront == null || !finalmediaFileFront.isFile()) {
+                    showInfoDlg("Information", "Please upload License Front Image", "Ok", "info");
+                }else if (finalmediaFileBack == null || !finalmediaFileBack.isFile()) {
+                    showInfoDlg("Information", "Please upload License Back Image", "Ok", "info");
                 }else {
                     Intent intent = getIntent();
                     String firstname = intent.getStringExtra("firstName");
@@ -167,6 +180,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     loginCredentials.alternateNumber = "";
                     loginCredentials.status = "REQUESTED";
                     loginCredentials.defaultPercentageAccepted = percentageSpinner.getSelectedItem().toString();
+
                     callMobileService(loginCredentials);
                 }
             }
@@ -194,6 +208,18 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     fileUri = getOutputMediaFileUri();
                     intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
                     startActivityForResult(intent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE_BACK);
+                }
+            }
+        });
+
+        uploadProfilePic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isStoragePermissionGranted()){
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    fileUri = getOutputMediaFileUri();
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+                    startActivityForResult(intent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE_PROFILE);
                 }
             }
         });
@@ -421,33 +447,43 @@ public class DocumentUploadActivity extends AppCompatActivity {
         });
     }
 
-    private final Handler handler = new Handler();
-    int countInc = 0;
-    TextView percentageText;
-
     public void callMobileService(SingleInstantParameters loginCredentials) {
         final Dialog dialog = new Dialog(DocumentUploadActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
-        percentageText = (TextView) dialog.findViewById(R.id.percentageText);
-        countInc = 0;
-//        handler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                countInc++;
-//                percentageText.setText(countInc+"%");
-//                if(countInc != 100) {
-//                    handler.postDelayed(this, 1000);
-//                }
-//            }
-//        });
         dialog.setCanceledOnTouchOutside(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
 
-        Call<SingleInstantResponse> call = apiService.saveUser(loginCredentials);
+        RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileFront);
+        MultipartBody.Part frontBody = MultipartBody.Part.createFormData("licenseFrontImage", finalmediaFileFront.getName(), reqFile);
+
+        RequestBody userType = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.userType);
+        RequestBody firstName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.firstName);
+        RequestBody lastName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.lastName);
+        RequestBody emailId = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.emailId);
+        RequestBody mobileNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.mobileNumber);
+        RequestBody password = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.password);
+        RequestBody licenseNo = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseNo);
+        RequestBody vehicleNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.vehicleNumber);
+        RequestBody licenseValidUntil = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseValidUntil);
+        RequestBody licenseIssuedOn = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseIssuedOn);
+        RequestBody alternateNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.alternateNumber);
+        RequestBody status = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.status);
+        RequestBody defaultPercentageAccepted = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.defaultPercentageAccepted);
+
+        reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileBack);
+        MultipartBody.Part backBody = MultipartBody.Part.createFormData("licenseBackImage", finalmediaFileBack.getName(), reqFile);
+
+        reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileProfile);
+        MultipartBody.Part  profileBody = MultipartBody.Part.createFormData("userImage", finalmediaFileProfile.getName(), reqFile);
+
+        Call<SingleInstantResponse> call = apiService.saveUser(profileBody, frontBody, backBody, userType, firstName, lastName,
+                emailId, mobileNumber, password, licenseNo, vehicleNumber,
+                licenseValidUntil, licenseIssuedOn, alternateNumber, status, defaultPercentageAccepted);
+
         call.enqueue(new Callback<SingleInstantResponse>() {
             @Override
             public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -459,6 +495,8 @@ public class DocumentUploadActivity extends AppCompatActivity {
                 dialog.dismiss();
                 if (response.isSuccessful()) {
                     Utils.saveUserMobileInstantResponse = response.body();
+                    Log.e("licenseFrontImage", "" + Utils.saveUserMobileInstantResponse.getLicenseFrontImage());
+                    Log.e("licenseBackImage", "" + Utils.saveUserMobileInstantResponse.getLicenseBackImage());
 //                    Gson gson = new Gson();
 //                    String json = gson.toJson(Utils.saveUserMobileInstantResponse);
 //                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
@@ -602,6 +640,20 @@ public class DocumentUploadActivity extends AppCompatActivity {
                         .show();
             }
 
+        }else if(requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE_PROFILE) {
+            if (resultCode == RESULT_OK) {
+                new ImageCompressionAsyncTask("profileimageFile").execute(finalmediaFile.getAbsolutePath());
+            } else if (resultCode == RESULT_CANCELED) {
+                // user cancelled Image capture
+                Toast.makeText(getApplicationContext(),
+                        "User cancelled image capture", Toast.LENGTH_SHORT)
+                        .show();
+            } else {
+                // failed to capture image
+                Toast.makeText(getApplicationContext(),
+                        "Sorry! Failed to capture image", Toast.LENGTH_SHORT)
+                        .show();
+            }
         }
     }
 
@@ -776,7 +828,10 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     if(fromGallery.equalsIgnoreCase("frontimageFile")) {
                         finalmediaFileFront = finalmediaFile;
                         uploadImgFront.setImageBitmap(BitmapFactory.decodeStream(ims));
-                    }else {
+                    } else if(fromGallery.equalsIgnoreCase("profileimageFile")){
+                        finalmediaFileProfile = finalmediaFile;
+                        uploadProfilePic.setImageBitmap(BitmapFactory.decodeStream(ims));
+                    } else {
                         finalmediaFileBack = finalmediaFile;
                         uploadImgBack.setImageBitmap(BitmapFactory.decodeStream(ims));
                     }

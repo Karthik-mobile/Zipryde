@@ -149,13 +149,14 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginRight="5dp"
+                android:background="@drawable/rounded_button"
                 android:gravity="center"
                 android:paddingBottom="5dp"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
                 android:paddingTop="5dp"
                 android:text="$ 102"
-                android:textColor="@color/whiteColor"
+                android:textColor="@color/primaryText"
                 android:textSize="18dp" />
 
             <TextView
@@ -164,14 +165,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginRight="5dp"
-                android:background="@drawable/rounded_button"
                 android:gravity="center"
                 android:paddingBottom="5dp"
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
                 android:paddingTop="5dp"
                 android:text="$ 108"
-                android:textColor="@color/primaryText"
+                android:textColor="@color/whiteColor"
                 android:textSize="18dp" />
 
             <TextView
