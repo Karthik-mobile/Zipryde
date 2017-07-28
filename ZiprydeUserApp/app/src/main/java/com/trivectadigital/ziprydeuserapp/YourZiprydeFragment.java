@@ -106,18 +106,17 @@ public class YourZiprydeFragment extends Fragment {
                 ListOfBooking listOfBooking = Utils.getBookingByUserIdResponse.get(position);
                 String driverStatus = listOfBooking.getDriverStatus();
                 if(driverStatus != null){
-                    if(driverStatus.equals("ACCEPTED")) {
+                    if(driverStatus.equals("REQUESTED")) {
+                        showInfoDlg("Information", "Please wait till the driver accepts your request", "Ok", "info");
+                    }else{
                         Intent ide = new Intent(getActivity(), DriverInfoBookingActivity.class);
                         ide.putExtra("position", position);
                         ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(ide);
-                    }else{
-                        showInfoDlg("Information", "Please wait till the driver accepts your request", "Ok", "info");
                     }
                 }else{
                     showInfoDlg("Information", "Please wait till the driver accepts your request", "Ok", "info");
                 }
-
             }
         });
 

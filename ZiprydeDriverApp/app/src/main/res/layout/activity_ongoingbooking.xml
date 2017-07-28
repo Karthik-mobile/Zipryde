@@ -68,12 +68,32 @@
         android:orientation="vertical"
         android:padding="10dp">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:text="Pickup request"
-            android:textSize="25dp" />
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:text="Pickup request"
+                android:textSize="25dp" />
+
+            <TextView
+                android:id="@+id/bookingStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:gravity="center_vertical"
+                android:text="Booking"
+                android:textColor="@color/primaryText"
+                android:textSize="12dp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -181,8 +201,8 @@
                     android:id="@+id/suggestedPrice"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="$32.00"
                     android:singleLine="true"
+                    android:text="$32.00"
                     android:textColor="@color/primaryText"
                     android:textSize="18dp" />
             </LinearLayout>
@@ -191,8 +211,8 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:visibility="invisible"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="invisible">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -224,8 +244,8 @@
                     android:id="@+id/offerPriceText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="$27.00"
                     android:singleLine="true"
+                    android:text="$27.00"
                     android:textColor="@color/primaryText"
                     android:textSize="18dp"
                     android:textStyle="bold" />
@@ -242,6 +262,7 @@
             android:layout_marginTop="10dp">
 
             <Button
+                android:id="@+id/declineBtn"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"
@@ -273,10 +294,10 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/rounded_laybackground"
             android:text="START TRIP"
-            android:visibility="gone"
             android:textColor="@color/whiteColor"
             android:textSize="18dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/endBtn"
@@ -287,10 +308,10 @@
             android:layout_marginTop="10dp"
             android:background="@drawable/rounded_laybackground"
             android:text="END TRIP"
-            android:visibility="gone"
             android:textColor="@color/whiteColor"
             android:textSize="18dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:visibility="gone" />
 
     </LinearLayout>
 

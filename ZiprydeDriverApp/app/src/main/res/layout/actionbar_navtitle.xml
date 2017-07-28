@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:textColor="@color/whiteColor"
-            android:textSize="20dp" />
+            android:textSize="18dp" />
 
         <LinearLayout
             android:id="@+id/switchLay"

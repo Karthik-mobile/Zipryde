@@ -36,6 +36,7 @@ public class Utils {
     public static SingleInstantResponse verifyLogInUserMobileInstantResponse;
     public static SingleInstantResponse requestBookingResponse;
     public static SingleInstantResponse getGeoLocationByDriverIdResponse;
+    public static SingleInstantResponse updateBookingStatusInstantResponse;
     public static LinkedList<ListOfBooking> getBookingByUserIdResponse;
     public static LinkedList<ListOfFairEstimate> getAllNYOPByCabTypeAndDistanceInstantResponse;
     public static LinkedList<ListOfCarTypes> getAllCabTypesInstantResponse;

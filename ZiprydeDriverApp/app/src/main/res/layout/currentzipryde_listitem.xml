@@ -39,6 +39,18 @@
                     android:textSize="16dp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/bookingStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginTop="5dp"
+                    android:gravity="center_vertical"
+                    android:text="Booking"
+                    android:textColor="@color/primaryText"
+                    android:textSize="12dp"
+                    android:textStyle="bold" />
+
             </LinearLayout>
 
             <TextView

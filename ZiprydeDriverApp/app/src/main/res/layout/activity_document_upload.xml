@@ -92,10 +92,11 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/dlnText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="LICENSE NUMBER"
+                android:text="DRIVER LICENSE NUMBER"
                 android:textSize="14dp" />
 
             <EditText
@@ -105,6 +106,7 @@
                 android:layout_marginTop="5dp" />
 
             <TextView
+                android:id="@+id/resText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -118,6 +120,7 @@
                 android:layout_marginTop="5dp" />
 
             <TextView
+                android:id="@+id/iseText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -136,6 +139,7 @@
                 android:inputType="date" />
 
             <TextView
+                android:id="@+id/exyText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -158,17 +162,20 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:text="PERCENTAGE"
+                android:visibility="gone"
                 android:textSize="14dp" />
 
             <Spinner
                 android:id="@+id/percentageSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
+                android:visibility="gone"
                 android:layout_marginTop="5dp" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
+                android:visibility="gone"
                 android:background="@color/black_overlay" />
 
             <Button

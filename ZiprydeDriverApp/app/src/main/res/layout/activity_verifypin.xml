@@ -41,7 +41,7 @@
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:layout_marginTop="15dp"
-            android:text="Please enter PIN sent to"
+            android:text="Please enter the Code sent to"
             android:textColor="#696969"
             android:textSize="15dp" />
 

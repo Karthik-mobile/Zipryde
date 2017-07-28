@@ -26,6 +26,7 @@ public class SingleInstantParameters {
     public GeoLocationRequest geoLocationRequest;
     public String userId;
     public String bookingId;
+    public String bookingStatus;
 }
 
 

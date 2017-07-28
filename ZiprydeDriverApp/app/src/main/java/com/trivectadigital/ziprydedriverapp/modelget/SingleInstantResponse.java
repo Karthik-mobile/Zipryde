@@ -62,6 +62,28 @@ public class SingleInstantResponse {
     @SerializedName("geoLocationResponse")
     private GeoLocationRequest geoLocationResponse;
 
+    @SerializedName("revenueAmount")
+    private String revenueAmount;
+
+    @SerializedName("count")
+    private String count;
+
+    public String getCount() {
+        return count;
+    }
+
+    public void setCount(String count) {
+        this.count = count;
+    }
+
+    public String getRevenueAmount() {
+        return revenueAmount;
+    }
+
+    public void setRevenueAmount(String revenueAmount) {
+        this.revenueAmount = revenueAmount;
+    }
+
     public String getBookingId() {
         return bookingId;
     }

@@ -64,7 +64,7 @@
             android:layout_height="50dp"
             android:layout_marginTop="15dp"
             android:background="@color/colorAccent"
-            android:text="ENTER PIN"
+            android:text="SUBMIT"
             android:textColor="@color/secondaryText"
             android:textSize="18dp"  />
 

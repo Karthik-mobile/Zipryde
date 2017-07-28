@@ -28,7 +28,7 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
     }
 
     private class ViewHolder {
-        TextView bookingDatetime, bookingCRN, bookingStarting, bookingEnding, bookingPrice, bookingOfferPrice;
+        TextView bookingDatetime, bookingCRN, bookingStarting, bookingEnding, bookingPrice, bookingOfferPrice, bookingStatus;
         ImageView bookingCarType, bookingProfileImg;
     }
 
@@ -62,6 +62,7 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
             holder.bookingEnding = (TextView) view.findViewById(R.id.bookingEnding);
             holder.bookingPrice = (TextView) view.findViewById(R.id.bookingPrice);
             holder.bookingOfferPrice = (TextView) view.findViewById(R.id.bookingOfferPrice);
+            holder.bookingStatus = (TextView) view.findViewById(R.id.bookingStatus);
 
             holder.bookingCarType = (ImageView) view.findViewById(R.id.bookingCarType);
             holder.bookingProfileImg = (ImageView) view.findViewById(R.id.bookingProfileImg);
@@ -80,14 +81,16 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
         String ziprydeBookingEnding = ziprydeHistoryDetails.getTo();
         String ziprydeBookingPrice = ziprydeHistoryDetails.getSuggestedPrice();
         String ziprydeBookingOfferPrice = ziprydeHistoryDetails.getOfferedPrice();
+        String ziprydeBookingStatus = ziprydeHistoryDetails.getBookingStatus();
 //        String ziprydeBookingProfileImg = ziprydeHistoryDetails.getZiprydeBookingProfileImg();
 
         holder.bookingDatetime.setText(""+ziprydeBookingDateTime);
         holder.bookingCRN.setText(""+ziprydeBookingCRN);
         holder.bookingStarting.setText(""+ziprydeBookingStarting);
         holder.bookingEnding.setText(""+ziprydeBookingEnding);
-        holder.bookingPrice.setText(""+ziprydeBookingPrice);
-        holder.bookingOfferPrice.setText(""+ziprydeBookingOfferPrice);
+        holder.bookingPrice.setText("$ "+ziprydeBookingPrice);
+        holder.bookingOfferPrice.setText("Offer $ "+ziprydeBookingOfferPrice);
+        holder.bookingStatus.setText(""+ziprydeBookingStatus);
 
         return view;
     }

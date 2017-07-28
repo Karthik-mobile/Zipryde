@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,8 +59,8 @@ public class CurrentRideAdapter extends BaseAdapter {
     }
 
     private class ViewHolder {
-        TextView bookingCRN, bookingDate, bookingStarting, bookingEnding;
-        Button positiveBtn;
+        TextView bookingCRN, bookingDate, bookingStarting, bookingEnding, bookingStatus;
+        Button positiveBtn, newnegativeBtn;
     }
 
     @Override
@@ -90,7 +91,9 @@ public class CurrentRideAdapter extends BaseAdapter {
             holder.bookingDate = (TextView) view.findViewById(R.id.bookingDate);
             holder.bookingStarting = (TextView) view.findViewById(R.id.bookingStarting);
             holder.bookingEnding = (TextView) view.findViewById(R.id.bookingEnding);
+            holder.bookingStatus = (TextView) view.findViewById(R.id.bookingStatus);
             holder.positiveBtn = (Button) view.findViewById(R.id.positiveBtn);
+            holder.newnegativeBtn = (Button) view.findViewById(R.id.newnegativeBtn);
 
             view.setTag(holder);
         } else {
@@ -103,6 +106,7 @@ public class CurrentRideAdapter extends BaseAdapter {
         String dateTime = currentRideDetails.getBookingDateTime();
         String pickupLocation = currentRideDetails.getFrom();
         String dropLocation = currentRideDetails.getTo();
+        String bookingStatus = currentRideDetails.getBookingStatus();
 
         SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
         try {
@@ -117,6 +121,7 @@ public class CurrentRideAdapter extends BaseAdapter {
         holder.bookingDate.setText("" + dateTime);
         holder.bookingStarting.setText("" + pickupLocation);
         holder.bookingEnding.setText("" + dropLocation);
+        holder.bookingStatus.setText(""+bookingStatus);
 
         holder.positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,6 +131,12 @@ public class CurrentRideAdapter extends BaseAdapter {
                 loginCredentials.bookingId = currentRideDetails.getBookingId();
                 loginCredentials.driverStatus = "ACCEPTED";
                 updateBookingDriverStatus(loginCredentials);
+            }
+        });
+        holder.newnegativeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((AppCompatActivity)context).finish();
             }
         });
 
@@ -206,6 +217,7 @@ public class CurrentRideAdapter extends BaseAdapter {
                     Intent ide = new Intent(context, RideActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     context.startActivity(ide);
+                    ((AppCompatActivity)context).finish();
                 }
             }, 1000);
         }

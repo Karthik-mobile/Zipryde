@@ -98,9 +98,9 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
 
     Location mLastLocation;
 
-    Button starttripBtn, endtripBtn, acceptBtn;
+    Button starttripBtn, endtripBtn, acceptBtn, declineBtn;
     TextView distanceText, pickdropText, pickdroplocationText,
-            fromPlaceText, toPlaceText, suggestedPrice, offerPriceText, timeText;
+            fromPlaceText, toPlaceText, suggestedPrice, offerPriceText, timeText, bookingStatus;
     ImageView navigationImg;
     LinearLayout confirmBtn;
 
@@ -122,6 +122,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         starttripBtn = (Button) findViewById(R.id.startBtn);
         endtripBtn = (Button) findViewById(R.id.endBtn);
         acceptBtn = (Button) findViewById(R.id.acceptBtn);
+        declineBtn = (Button) findViewById(R.id.declineBtn);
 
         distanceText = (TextView) findViewById(R.id.distanceText);
 
@@ -130,6 +131,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         suggestedPrice = (TextView) findViewById(R.id.suggestedPrice);
         offerPriceText = (TextView) findViewById(R.id.offerPriceText);
         timeText = (TextView) findViewById(R.id.timeText);
+        bookingStatus = (TextView) findViewById(R.id.bookingStatus);
 
         pickdropText = (TextView) findViewById(R.id.pickdropText);
         pickdroplocationText = (TextView) findViewById(R.id.pickdroplocationText);
@@ -143,6 +145,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             toPlaceText.setText(listOfBooking.getTo());
             suggestedPrice.setText("$" + listOfBooking.getSuggestedPrice());
             offerPriceText.setText("$" + listOfBooking.getOfferedPrice());
+            bookingStatus.setText(""+listOfBooking.getBookingStatus());
 
             String driverStatus = listOfBooking.getDriverStatus();
             Log.e("driverStatus",""+driverStatus);
@@ -166,6 +169,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             toPlaceText.setText(listOfRequestedBooking.getTo());
             suggestedPrice.setText("$" + listOfRequestedBooking.getSuggestedPrice());
             offerPriceText.setText("$" + listOfRequestedBooking.getOfferedPrice());
+            bookingStatus.setText(""+listOfRequestedBooking.getBookingStatus());
         }
 
         mGoogleApiClient = new GoogleApiClient.Builder(OnGoingBookingActivity.this)
@@ -192,7 +196,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 //showConfirmationDlg();
             }else{
                 //askSwitchOnGPS();
-                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
         }
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -216,6 +220,13 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                     loginCredentials.driverStatus = "ACCEPTED";
                     updateBookingDriverStatus(loginCredentials);
                 }
+            }
+        });
+
+        declineBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
 
@@ -773,7 +784,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                         //showConfirmationDlg();
                     }else{
                         //askSwitchOnGPS();
-                        showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                        showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
                     }
                     break;
             }
@@ -865,7 +876,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 //showConfirmationDlg();
             }else{
                 //askSwitchOnGPS();
-                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
         }
     }

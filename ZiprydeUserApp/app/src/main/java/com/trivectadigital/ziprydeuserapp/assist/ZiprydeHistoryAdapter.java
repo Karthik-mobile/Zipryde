@@ -1,17 +1,38 @@
 package com.trivectadigital.ziprydeuserapp.assist;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.trivectadigital.ziprydeuserapp.NavigationMenuActivity;
 import com.trivectadigital.ziprydeuserapp.R;
+import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
+import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfBooking;
+import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
+import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
+
+import org.json.JSONObject;
 
 import java.util.LinkedList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by Hari on 09-06-2017.
@@ -21,15 +42,17 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
 
     LinkedList<ListOfBooking> ziprydeHistoryDetailsList;
     public Context context;
+    ZiprydeApiInterface apiService;
 
     public ZiprydeHistoryAdapter(LinkedList<ListOfBooking> ziprydeHistoryDetailsList, Context context) {
+        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
         this.ziprydeHistoryDetailsList = ziprydeHistoryDetailsList;
         this.context = context;
     }
 
     private class ViewHolder {
-        TextView bookingDatetime, bookingCRN, bookingStarting, bookingEnding, bookingPrice, bookingOfferPrice;
-        ImageView bookingCarType, bookingProfileImg;
+        TextView bookingDatetime, bookingCRN, bookingStarting, bookingEnding, bookingPrice, bookingOfferPrice, bookingStatus;
+        ImageView bookingCarType, bookingProfileImg, cancelBookingImg;
     }
 
     @Override
@@ -65,13 +88,15 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
 
             holder.bookingCarType = (ImageView) view.findViewById(R.id.bookingCarType);
             holder.bookingProfileImg = (ImageView) view.findViewById(R.id.bookingProfileImg);
+            holder.cancelBookingImg = (ImageView) view.findViewById(R.id.cancelBookingImg);
+            holder.bookingStatus = (TextView) view.findViewById(R.id.bookingStatus);
 
             view.setTag(holder);
         } else {
             holder = (ViewHolder) view.getTag();
         }
 
-        ListOfBooking ziprydeHistoryDetails = ziprydeHistoryDetailsList.get(position);
+        final ListOfBooking ziprydeHistoryDetails = ziprydeHistoryDetailsList.get(position);
 
 //        String ziprydeBookingCarType = ziprydeHistoryDetails.getZiprydeBookingCarType();
         String ziprydeBookingDateTime = ziprydeHistoryDetails.getBookingDateTime();
@@ -86,9 +111,132 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
         holder.bookingCRN.setText(""+ziprydeBookingCRN);
         holder.bookingStarting.setText(""+ziprydeBookingStarting);
         holder.bookingEnding.setText(""+ziprydeBookingEnding);
-        holder.bookingPrice.setText(""+ziprydeBookingPrice);
-        holder.bookingOfferPrice.setText(""+ziprydeBookingOfferPrice);
+        holder.bookingPrice.setText("$ "+ziprydeBookingPrice);
+        holder.bookingOfferPrice.setText("Offer $ "+ziprydeBookingOfferPrice);
+
+        holder.cancelBookingImg.setVisibility(View.GONE);
+
+        String bookingStatus = ziprydeHistoryDetails.getBookingStatus();
+        holder.bookingStatus.setText(""+bookingStatus);
+        Log.e("bookingStatus",""+bookingStatus);
+        if(bookingStatus != null) {
+            if (bookingStatus.equals("SCHEDULED")) {
+                holder.cancelBookingImg.setVisibility(View.VISIBLE);
+            }
+        }
+
+        holder.cancelBookingImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                loginCredentials.bookingId = ziprydeHistoryDetails.getBookingId();
+                loginCredentials.bookingStatus = "CANCELLED";
+                updateBookingStatus(loginCredentials);
+            }
+        });
 
         return view;
+    }
+
+    private void updateBookingStatus(SingleInstantParameters loginCredentials){
+        final Dialog dialog = new Dialog(context, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<SingleInstantResponse> call = apiService.updateBookingStatus(loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
+            @Override
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                dialog.dismiss();
+                if(response.isSuccessful()){
+                    Utils.updateBookingStatusInstantResponse = response.body();
+                    Log.e("BookingStatus",""+Utils.updateBookingStatusInstantResponse.getBookingStatus());
+                    showInfoDlg("Success..", "Request Cancelled Successfully.", "Ok", "success");
+                }else{
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+            }
+        });
+    }
+
+    Dialog dialog;
+    private void showInfoDlg(String title, String content, String btnText, final String navType) {
+        dialog = new Dialog(context, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.infodialog_layout);
+        //dialog.setCanceledOnTouchOutside(true);
+
+        ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
+        if (navType.equalsIgnoreCase("server")) {
+            headerIcon.setImageResource(R.drawable.erroricon);
+        }
+
+        Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
+        positiveBtn.setText(""+btnText);
+
+        Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
+
+        if (navType.equalsIgnoreCase("success")) {
+            headerIcon.setImageResource(R.drawable.successicon);
+            positiveBtn.setVisibility(View.GONE);
+            newnegativeBtn.setVisibility(View.GONE);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    dialog.dismiss();
+                    Intent ide = new Intent(context, NavigationMenuActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    context.startActivity(ide);
+                }
+            }, 1000);
+        }
+
+        TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
+        dialogtitleText.setText(""+title);
+        TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
+        dialogcontentText.setText(""+content);
+
+        positiveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        newnegativeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
     }
 }

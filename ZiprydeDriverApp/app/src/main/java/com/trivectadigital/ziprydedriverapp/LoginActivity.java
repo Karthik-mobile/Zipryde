@@ -45,8 +45,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
-
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -75,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
                 } else if (password.isEmpty()) {
                     showInfoDlg("Information", "Please enter the password", "Ok", "info");
                 } else {
+                    apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.userType = "DRIVER";
                     loginCredentials.mobileNumber = phoneno;
@@ -91,6 +90,16 @@ public class LoginActivity extends AppCompatActivity {
                 ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(ide);
                 finish();
+            }
+        });
+
+        ImageView settingsPage = (ImageView) findViewById(R.id.settingsPage);
+        settingsPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent ide = new Intent(LoginActivity.this, SettingsActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
             }
         });
     }
@@ -194,7 +203,7 @@ public class LoginActivity extends AppCompatActivity {
         //dialog.setCanceledOnTouchOutside(true);
 
         ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
-        if (navType.equalsIgnoreCase("server")) {
+        if (navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("error")) {
             headerIcon.setImageResource(R.drawable.erroricon);
         }
 
@@ -202,7 +211,7 @@ public class LoginActivity extends AppCompatActivity {
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("info")) {
+        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("error")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 

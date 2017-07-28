@@ -67,7 +67,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     int position = -1;
 
-    TextView driverNameText, cabTypeText, fromAddressText, toAddressText;
+    TextView driverNameText, cabTypeText, fromAddressText, toAddressText, bookingStatus;
     ListOfBooking listOfBooking;
     ZiprydeApiInterface apiService;
 
@@ -89,6 +89,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         cabTypeText = (TextView) findViewById(R.id.cabTypeText);
         fromAddressText = (TextView) findViewById(R.id.fromAddressText);
         toAddressText = (TextView) findViewById(R.id.toAddressText);
+        bookingStatus = (TextView) findViewById(R.id.bookingStatus);
         user_view = (CircleImageView) findViewById(R.id.user_view);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -102,7 +103,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             cabTypeText.setText(listOfBooking.getCabType());
             fromAddressText.setText(listOfBooking.getFrom());
             toAddressText.setText(listOfBooking.getTo());
-
+            bookingStatus.setText(listOfBooking.getBookingStatus());
             Log.e("DriverId", listOfBooking.getDriverId());
             Log.e("driverImage", "driverImage : "+listOfBooking.getDriverImage());
             String driverImage = ""+listOfBooking.getDriverImage();
@@ -121,7 +122,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             cabTypeText.setText(Utils.requestBookingResponse.getCabType());
             fromAddressText.setText(Utils.requestBookingResponse.getFrom());
             toAddressText.setText(Utils.requestBookingResponse.getTo());
-
+            bookingStatus.setText(Utils.requestBookingResponse.getBookingStatus());
             Log.e("DriverId", Utils.requestBookingResponse.getDriverId());
             Log.e("driverImage", "driverImage : "+Utils.requestBookingResponse.getDriverImage());
             String driverImage = ""+Utils.requestBookingResponse.getDriverImage();
@@ -138,7 +139,20 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         }
     }
 
-    public void getGeoLocationByDriverId(SingleInstantParameters loginCredentials){
+    Marker driverMarker;
+    Handler handler = new Handler();
+    Runnable finalizer;
+
+    @Override
+    public void onBackPressed() {
+        if(handler != null && finalizer != null){
+            handler.removeCallbacks(finalizer);
+        }
+
+        finish();
+    }
+
+    public void getGeoLocationByDriverId(final SingleInstantParameters loginCredentials){
         final Dialog dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -163,8 +177,19 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     Log.e("Latitude",""+Utils.getGeoLocationByDriverIdResponse.getLatitude());
                     Log.e("Longitude",""+Utils.getGeoLocationByDriverIdResponse.getLongitude());
                     LatLng driverLatLng = new LatLng(Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLatitude()), Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLongitude()));
-                    mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(driverLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
-//                    endingMarker.setTag("ending");
+
+                    if(driverMarker != null)
+                        driverMarker.remove();
+
+                    driverMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(driverLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
+
+                    finalizer = new Runnable() {
+                        public void run() {
+                            getGeoLocationByDriverId(loginCredentials);
+                        }
+                    };
+                    handler.postDelayed(finalizer, 10000);
+
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());

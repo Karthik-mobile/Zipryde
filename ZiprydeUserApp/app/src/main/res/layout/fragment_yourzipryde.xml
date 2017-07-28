@@ -2,13 +2,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/appBackground"
+    android:orientation="vertical"
     tools:context=".YourZiprydeFragment">
 
     <ListView
         android:id="@+id/history_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:focusable="true" />
 
 </LinearLayout>

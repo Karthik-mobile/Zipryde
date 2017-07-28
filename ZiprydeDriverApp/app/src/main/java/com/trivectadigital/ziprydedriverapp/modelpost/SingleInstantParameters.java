@@ -28,4 +28,5 @@ public class SingleInstantParameters {
     public String driverStatus;
     public String amountPaid;
     public String paymentType;
+    public String paidDateTime;
 }

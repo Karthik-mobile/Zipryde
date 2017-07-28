@@ -44,6 +44,7 @@
                 android:paddingTop="5dp"
                 android:imeOptions="actionNext"
                 android:paddingBottom="5dp"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
                 android:singleLine="true" />
 
             <EditText
@@ -56,6 +57,7 @@
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
                 android:paddingTop="5dp"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ."
                 android:paddingBottom="5dp"
                 android:imeOptions="actionNext"
                 android:singleLine="true" />
@@ -102,6 +104,7 @@
                 android:paddingLeft="10dp"
                 android:paddingRight="10dp"
                 android:paddingTop="5dp"
+                android:visibility="gone"
                 android:paddingBottom="5dp"
                 android:imeOptions="actionNext"
                 android:singleLine="true" />

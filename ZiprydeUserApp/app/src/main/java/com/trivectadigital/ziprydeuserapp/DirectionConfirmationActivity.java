@@ -33,6 +33,7 @@ import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.DataParser;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCarTypes;
+import com.trivectadigital.ziprydeuserapp.modelget.ListOfCurrentCabs;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfFairEstimate;
 import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydeuserapp.modelpost.GeoLocationRequest;
@@ -78,7 +79,6 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
 
     TextView microText, microInfoText, miniText, miniInfoText, sedanText, sedanInfoText
             , amountText1, amountText2, amountText3, amountText4, carTypeText;
-    RelativeLayout microLay, miniLay, sedanLay;
 
     ImageView micro_circle_small, micro_circle_big;
     ImageView mini_circle_small, mini_circle_big;
@@ -96,12 +96,13 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
     int selectedCarType = 2;
     String selectedCarModel = "Mini";
 
-    LinearLayout microLaySmall, microLayBig, suvLayBig, suvLaySmall, sedanLaySmall, sedanLayBig, vehicleTypeLay, requestTypeLay;
+    LinearLayout microLaySmall, microLayBig, suvLayBig, suvLaySmall, sedanLaySmall, sedanLayBig, vehicleTypeLay, requestTypeLay, noCabsLay;
     TextView microTextSmall, microTextBig, sedanTextSmall, sedanTextBig, suvTextSmall, suvTextBig, textSeatCapacity;
     ImageView imgNext;
     Button getFareDetailsBtn, requestPickupBtn;
     Spinner noofSeatsSpinner;
-    TextView textAmount1, textAmount2, textAmount3, textAmount4, basePrice;
+    TextView textAmount1, textAmount2, textAmount3, textAmount4, basePrice, priceUpdateText, noCabsText;
+    TextView microTimeTextSmall, microTimeTextBig, sedanTimeTextSmall, sedanTimeTextBig, suvTimeTextSmall, suvTimeTextBig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +148,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         sedanLayBig = (LinearLayout) findViewById(R.id.sedanLayBig);
         vehicleTypeLay = (LinearLayout) findViewById(R.id.vehicleTypeLay);
         requestTypeLay = (LinearLayout) findViewById(R.id.requestTypeLay);
+        noCabsLay= (LinearLayout) findViewById(R.id.noCabsLay);
 
         microTextSmall = (TextView) findViewById(R.id.microTextSmall);
         microTextBig = (TextView) findViewById(R.id.microTextBig);
@@ -155,21 +157,26 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         suvTextSmall = (TextView) findViewById(R.id.suvTextSmall);
         suvTextBig = (TextView) findViewById(R.id.suvTextBig);
         textSeatCapacity = (TextView) findViewById(R.id.textSeatCapacity);
+        noCabsText = (TextView) findViewById(R.id.noCabsText);
 
         textAmount1 = (TextView) findViewById(R.id.textAmount1);
         textAmount2 = (TextView) findViewById(R.id.textAmount2);
         textAmount3 = (TextView) findViewById(R.id.textAmount3);
         textAmount4 = (TextView) findViewById(R.id.textAmount4);
         basePrice = (TextView) findViewById(R.id.basePrice);
+        priceUpdateText = (TextView) findViewById(R.id.priceUpdateText);
+
+        microTimeTextSmall = (TextView) findViewById(R.id.microTimeTextSmall);
+        microTimeTextBig = (TextView) findViewById(R.id.microTimeTextBig);
+        sedanTimeTextSmall = (TextView) findViewById(R.id.sedanTimeTextSmall);
+        sedanTimeTextBig = (TextView) findViewById(R.id.sedanTimeTextBig);
+        suvTimeTextSmall = (TextView) findViewById(R.id.suvTimeTextSmall);
+        suvTimeTextBig = (TextView) findViewById(R.id.suvTimeTextBig);
 
         imgNext = (ImageView) findViewById(R.id.imgNext);
         getFareDetailsBtn = (Button) findViewById(R.id.getFareDetailsBtn);
         requestPickupBtn = (Button) findViewById(R.id.requestPickupBtn);
         noofSeatsSpinner = (Spinner) findViewById(R.id.noofSeatsSpinner);
-
-        microLay = (RelativeLayout) findViewById(R.id.microLay);
-        miniLay = (RelativeLayout) findViewById(R.id.miniLay);
-        sedanLay = (RelativeLayout) findViewById(R.id.sedanLay);
 
         fairBooking = (LinearLayout) findViewById(R.id.fairBooking);
         carTypeLay = (LinearLayout) findViewById(R.id.carTypeLay);
@@ -206,45 +213,6 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         amountText4 = (TextView) findViewById(R.id.amountText4);
 
         carTypeText = (TextView) findViewById(R.id.carTypeText);
-
-        microLay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeTextColorToBlack(miniText, sedanText, miniInfoText, sedanInfoText);
-                changeTextColorToOrange(microText, microInfoText);
-                changeCircleBigtoSmall(mini_circle_small, suv_circle_small, mini_car_small, suv_car_small, micro_circle_big, micro_car_big);
-                changeCircleSmalltoBig(mini_circle_big, suv_circle_big, mini_car_big, suv_car_big, micro_circle_small, micro_car_small);
-                selectedCarType = 1;
-                selectedCarModel = "Micro";
-                carTypeText.setText(selectedCarModel);
-            }
-        });
-
-        miniLay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeTextColorToBlack(microText, sedanText, microInfoText, sedanInfoText);
-                changeTextColorToOrange(miniText, miniInfoText);
-                changeCircleBigtoSmall(micro_circle_small, suv_circle_small, micro_car_small, suv_car_small, mini_circle_big, mini_car_big);
-                changeCircleSmalltoBig(micro_circle_big, micro_car_big, suv_circle_big, suv_car_big, mini_circle_small, mini_car_small);
-                selectedCarType = 2;
-                selectedCarModel = "Mini";
-                carTypeText.setText(selectedCarModel);
-            }
-        });
-
-        sedanLay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeTextColorToBlack(microText, miniText, microInfoText, miniInfoText);
-                changeTextColorToOrange(sedanText, sedanInfoText);
-                changeCircleBigtoSmall(micro_circle_small, micro_car_small, mini_circle_small, mini_car_small, suv_circle_big, suv_car_big);
-                changeCircleSmalltoBig(micro_circle_big, micro_car_big, mini_circle_big, mini_car_big, suv_circle_small, suv_car_small);
-                selectedCarType = 3;
-                selectedCarModel = "Sedan";
-                carTypeText.setText(selectedCarModel);
-            }
-        });
 
         fairBooking.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -373,57 +341,66 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         microLaySmall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(0).getCabTypeId());
-                microLayBig.setVisibility(View.VISIBLE);
-                suvLaySmall.setVisibility(View.VISIBLE);
-                sedanLaySmall.setVisibility(View.VISIBLE);
-                microLaySmall.setVisibility(View.GONE);
-                suvLayBig.setVisibility(View.GONE);
-                sedanLayBig.setVisibility(View.GONE);
-                ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
-                        R.array.sedan_micro_array, android.R.layout.simple_spinner_item);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                noofSeatsSpinner.setAdapter(adapter);
-                noofSeatsSpinner.setSelection(0, true);
-                textSeatCapacity.setText("Seats 1-4");
+                String timeText = microTimeTextSmall.getText().toString().trim();
+                if(!timeText.equals("Not Available")){
+                    getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(0).getCabTypeId());
+                    microLayBig.setVisibility(View.VISIBLE);
+                    suvLaySmall.setVisibility(View.VISIBLE);
+                    sedanLaySmall.setVisibility(View.VISIBLE);
+                    microLaySmall.setVisibility(View.GONE);
+                    suvLayBig.setVisibility(View.GONE);
+                    sedanLayBig.setVisibility(View.GONE);
+                    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
+                            R.array.sedan_micro_array, android.R.layout.simple_spinner_item);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    noofSeatsSpinner.setAdapter(adapter);
+                    noofSeatsSpinner.setSelection(0, true);
+                    textSeatCapacity.setText("Seats 1-4");
+                }
             }
         });
 
         suvLaySmall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(2).getCabTypeId());
-                microLaySmall.setVisibility(View.VISIBLE);
-                suvLayBig.setVisibility(View.VISIBLE);
-                sedanLaySmall.setVisibility(View.VISIBLE);
-                microLayBig.setVisibility(View.GONE);
-                suvLaySmall.setVisibility(View.GONE);
-                sedanLayBig.setVisibility(View.GONE);
-                ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
-                        R.array.suv_array, android.R.layout.simple_spinner_item);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                noofSeatsSpinner.setAdapter(adapter);
-                noofSeatsSpinner.setSelection(0, true);
-                textSeatCapacity.setText("Seats 1-7");
+                String timeText = suvTimeTextSmall.getText().toString().trim();
+                if(!timeText.equals("Not Available")) {
+                    getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(2).getCabTypeId());
+                    microLaySmall.setVisibility(View.VISIBLE);
+                    suvLayBig.setVisibility(View.VISIBLE);
+                    sedanLaySmall.setVisibility(View.VISIBLE);
+                    microLayBig.setVisibility(View.GONE);
+                    suvLaySmall.setVisibility(View.GONE);
+                    sedanLayBig.setVisibility(View.GONE);
+                    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
+                            R.array.suv_array, android.R.layout.simple_spinner_item);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    noofSeatsSpinner.setAdapter(adapter);
+                    noofSeatsSpinner.setSelection(0, true);
+                    textSeatCapacity.setText("Seats 1-7");
+                }
             }
         });
 
         sedanLaySmall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(1).getCabTypeId());
-                microLaySmall.setVisibility(View.VISIBLE);
-                suvLayBig.setVisibility(View.GONE);
-                sedanLaySmall.setVisibility(View.GONE);
-                microLayBig.setVisibility(View.GONE);
-                suvLaySmall.setVisibility(View.VISIBLE);
-                sedanLayBig.setVisibility(View.VISIBLE);
-                ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
-                        R.array.sedan_micro_array, android.R.layout.simple_spinner_item);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                noofSeatsSpinner.setAdapter(adapter);
-                noofSeatsSpinner.setSelection(0, true);
-                textSeatCapacity.setText("Seats 1-4");
+                String timeText = sedanTimeTextSmall.getText().toString().trim();
+                if(!timeText.equals("Not Available")) {
+                    getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(1).getCabTypeId());
+                    microLaySmall.setVisibility(View.VISIBLE);
+                    suvLayBig.setVisibility(View.GONE);
+                    sedanLaySmall.setVisibility(View.GONE);
+                    microLayBig.setVisibility(View.GONE);
+                    suvLaySmall.setVisibility(View.VISIBLE);
+                    sedanLayBig.setVisibility(View.VISIBLE);
+                    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
+                            R.array.sedan_micro_array, android.R.layout.simple_spinner_item);
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    noofSeatsSpinner.setAdapter(adapter);
+                    noofSeatsSpinner.setSelection(0, true);
+                    textSeatCapacity.setText("Seats 1-4");
+                }
             }
         });
 
@@ -464,6 +441,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             @Override
             public void onClick(View v) {
                 requestPickupBtn.setTag(textAmount1.getTag().toString().trim());
+                priceUpdateText.setText(textAmount1.getText().toString().trim());
                 textAmount1.setBackgroundResource(R.drawable.rounded_button);
                 textAmount1.setTextColor(getResources().getColor(R.color.primaryText));
                 textAmount2.setBackgroundResource(0);
@@ -479,6 +457,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             @Override
             public void onClick(View v) {
                 requestPickupBtn.setTag(textAmount2.getTag().toString().trim());
+                priceUpdateText.setText(textAmount2.getText().toString().trim());
                 textAmount2.setBackgroundResource(R.drawable.rounded_button);
                 textAmount2.setTextColor(getResources().getColor(R.color.primaryText));
                 textAmount1.setBackgroundResource(0);
@@ -494,6 +473,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             @Override
             public void onClick(View v) {
                 requestPickupBtn.setTag(textAmount3.getTag().toString().trim());
+                priceUpdateText.setText(textAmount3.getText().toString().trim());
                 textAmount3.setBackgroundResource(R.drawable.rounded_button);
                 textAmount3.setTextColor(getResources().getColor(R.color.primaryText));
                 textAmount1.setBackgroundResource(0);
@@ -509,6 +489,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             @Override
             public void onClick(View v) {
                 requestPickupBtn.setTag(textAmount4.getTag().toString().trim());
+                priceUpdateText.setText(textAmount4.getText().toString().trim());
                 textAmount4.setBackgroundResource(R.drawable.rounded_button);
                 textAmount4.setTextColor(getResources().getColor(R.color.primaryText));
                 textAmount1.setBackgroundResource(0);
@@ -690,15 +671,21 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         Log.e("CARTYPE",""+ Utils.getAllCabTypesInstantResponse.get(i).getType());
                         if(i == 0){
                             microTextSmall.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
-                            getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+                            //getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
                             microTextBig.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
+                            microTimeTextSmall.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+                            microTimeTextBig.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
                         }else if(i == 1){
                             sedanTextSmall.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
                             sedanTextBig.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
+                            sedanTimeTextSmall.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+                            sedanTimeTextBig.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
                         }else {
                             suvTextSmall.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
                             getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
                             suvTextBig.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
+                            suvTimeTextSmall.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+                            suvTimeTextBig.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
                         }
                     }
                     ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
@@ -759,6 +746,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         requestPickupBtn.setTag(textAmount1.getTag().toString().trim());
                         basePrice.setText("$"+new DecimalFormat("##.#").format(price));
                         basePrice.setTag(""+price);
+                        priceUpdateText.setText("$"+new DecimalFormat("##.#").format(price));
                     }
 
                     if(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 1){
@@ -929,6 +917,9 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
      * installed Google Play services and returned to the app.
      */
     Marker startingMarker, endingMarker;
+
+    List<Marker> markers = new LinkedList<Marker>();
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -940,6 +931,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         startingMarker.showInfoWindow();
         endingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(dest).title(""+Utils.endingPlaceAddress).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
         endingMarker.setTag("ending");
+        markers.add(startingMarker);
+        markers.add(endingMarker);
 
         // Getting URL to the Google Directions API
         String url = getUrl(origin, dest);
@@ -951,9 +944,6 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
-                List<Marker> markers = new LinkedList<Marker>();
-                markers.add(startingMarker);
-                markers.add(endingMarker);
                 LatLngBounds.Builder builder = new LatLngBounds.Builder();
                 for (Marker marker : markers) {
                     builder.include(marker.getPosition());
@@ -1113,36 +1103,48 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             PolylineOptions lineOptions = null;
 
             // Traversing through all the routes
-            for (int i = 0; i < result.size(); i++) {
-                points = new ArrayList<>();
-                lineOptions = new PolylineOptions();
 
-                // Fetching i-th route
-                List<HashMap<String, String>> path = result.get(i);
+            Log.e("result.size()",""+result.size());
 
-                // Fetching all the points in i-th route
-                for (int j = 0; j < path.size(); j++) {
-                    HashMap<String, String> point = path.get(j);
+            if(result.size() > 0){
+                vehicleTypeLay.setVisibility(View.VISIBLE);
+                for (int i = 0; i < result.size(); i++) {
+                    points = new ArrayList<>();
+                    lineOptions = new PolylineOptions();
 
-                    double lat = Double.parseDouble(point.get("lat"));
-                    double lng = Double.parseDouble(point.get("lng"));
-                    LatLng position = new LatLng(lat, lng);
+                    // Fetching i-th route
+                    List<HashMap<String, String>> path = result.get(i);
 
-                    points.add(position);
+                    Log.e("path.size()",""+path.size());
+                    // Fetching all the points in i-th route
+                    for (int j = 0; j < path.size(); j++) {
+                        HashMap<String, String> point = path.get(j);
+
+                        double lat = Double.parseDouble(point.get("lat"));
+                        double lng = Double.parseDouble(point.get("lng"));
+                        LatLng position = new LatLng(lat, lng);
+
+                        points.add(position);
+                    }
+
+                    // Adding all the points in the route to LineOptions
+                    lineOptions.addAll(points);
+                    lineOptions.width(10);
+                    lineOptions.color(Color.parseColor("#df722c"));
+
+                    Log.d("onPostExecute","onPostExecute lineoptions decoded");
+
                 }
-
-                // Adding all the points in the route to LineOptions
-                lineOptions.addAll(points);
-                lineOptions.width(10);
-                lineOptions.color(Color.parseColor("#df722c"));
-
-                Log.d("onPostExecute","onPostExecute lineoptions decoded");
-
+            }else{
+                noCabsLay.setVisibility(View.VISIBLE);
+                vehicleTypeLay.setVisibility(View.GONE);
+                noCabsText.setText("Unfortunately, There is NO route between Pickup and Drop Location");
             }
 
             // Drawing polyline in the Google Map for the i-th route
             if(lineOptions != null) {
                 mMap.addPolyline(lineOptions);
+                getNearByActiveDrivers(""+Utils.startingLatLan.latitude, ""+Utils.startingLatLan.longitude);
             }
             else {
                 Log.d("onPostExecute","without Polylines drawn");
@@ -1150,4 +1152,122 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         }
     }
 
+    public void getNearByActiveDrivers(String latitude, String longitude){
+        Log.e("fromLatitude",""+latitude);
+        Log.e("fromLongitude",""+longitude);
+        SingleInstantParameters loginCredentials = new SingleInstantParameters();
+        loginCredentials.fromLatitude = latitude;
+        loginCredentials.fromLongitude = longitude;
+
+        final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<LinkedList<ListOfCurrentCabs>> call = apiService.getNearByActiveDrivers(loginCredentials);
+        call.enqueue(new Callback<LinkedList<ListOfCurrentCabs>>() {
+            @Override
+            public void onResponse(Call<LinkedList<ListOfCurrentCabs>> call, Response<LinkedList<ListOfCurrentCabs>> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                dialog.dismiss();
+                if(response.isSuccessful()){
+                    Utils.getNearByActiveDriversInstantResponse = response.body();
+                    Log.e("size",""+Utils.getNearByActiveDriversInstantResponse.size());
+
+                    if(Utils.getNearByActiveDriversInstantResponse.size() <= 0){
+                        noCabsLay.setVisibility(View.VISIBLE);
+                        vehicleTypeLay.setVisibility(View.GONE);
+                    }else{
+                        vehicleTypeLay.setVisibility(View.VISIBLE);
+                        for(int i = 0; i < Utils.getNearByActiveDriversInstantResponse.size(); i++){
+                            String cabtypeId = Utils.getNearByActiveDriversInstantResponse.get(i).getCabTypeId();
+                            Log.e("cabtypeId",""+cabtypeId);
+                            if(cabtypeId != null){
+                                if(cabtypeId.equalsIgnoreCase(microTimeTextSmall.getTag().toString().trim())){
+                                    microTimeTextSmall.setText("2 min");
+                                    microTimeTextBig.setText("2 min");
+                                    getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(0).getCabTypeId());
+                                    microLayBig.setVisibility(View.VISIBLE);
+                                    suvLaySmall.setVisibility(View.VISIBLE);
+                                    sedanLaySmall.setVisibility(View.VISIBLE);
+                                    microLaySmall.setVisibility(View.GONE);
+                                    suvLayBig.setVisibility(View.GONE);
+                                    sedanLayBig.setVisibility(View.GONE);
+                                    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
+                                            R.array.sedan_micro_array, android.R.layout.simple_spinner_item);
+                                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                    noofSeatsSpinner.setAdapter(adapter);
+                                    noofSeatsSpinner.setSelection(0, true);
+                                    textSeatCapacity.setText("Seats 1-4");
+                                }else if(cabtypeId.equalsIgnoreCase(sedanTimeTextSmall.getTag().toString().trim())){
+                                    sedanTimeTextSmall.setText("2 min");
+                                    sedanTimeTextBig.setText("2 min");
+                                    getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(1).getCabTypeId());
+                                    microLaySmall.setVisibility(View.VISIBLE);
+                                    suvLayBig.setVisibility(View.GONE);
+                                    sedanLaySmall.setVisibility(View.GONE);
+                                    microLayBig.setVisibility(View.GONE);
+                                    suvLaySmall.setVisibility(View.VISIBLE);
+                                    sedanLayBig.setVisibility(View.VISIBLE);
+                                    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
+                                            R.array.sedan_micro_array, android.R.layout.simple_spinner_item);
+                                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                    noofSeatsSpinner.setAdapter(adapter);
+                                    noofSeatsSpinner.setSelection(0, true);
+                                    textSeatCapacity.setText("Seats 1-4");
+                                }else if(cabtypeId.equalsIgnoreCase(suvTimeTextSmall.getTag().toString().trim())){
+                                    suvTimeTextSmall.setText("2 min");
+                                    suvTimeTextBig.setText("2 min");
+                                    getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(2).getCabTypeId());
+                                    microLaySmall.setVisibility(View.VISIBLE);
+                                    suvLayBig.setVisibility(View.VISIBLE);
+                                    sedanLaySmall.setVisibility(View.VISIBLE);
+                                    microLayBig.setVisibility(View.GONE);
+                                    suvLaySmall.setVisibility(View.GONE);
+                                    sedanLayBig.setVisibility(View.GONE);
+                                    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
+                                            R.array.suv_array, android.R.layout.simple_spinner_item);
+                                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                    noofSeatsSpinner.setAdapter(adapter);
+                                    noofSeatsSpinner.setSelection(0, true);
+                                    textSeatCapacity.setText("Seats 1-7");
+                                }
+                            }
+                            String latitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLatitude();
+                            String longitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLongitude();
+                            Log.e("latitude longitude","latitude : "+latitude+" longitude : "+longitude);
+                            LatLng tempLatLong = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                            Marker marker = mMap.addMarker(new MarkerOptions().position(tempLatLong).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
+                            markers.add(marker);
+                        }
+                    }
+
+
+                }else{
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LinkedList<ListOfCurrentCabs>> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+            }
+        });
+    }
 }

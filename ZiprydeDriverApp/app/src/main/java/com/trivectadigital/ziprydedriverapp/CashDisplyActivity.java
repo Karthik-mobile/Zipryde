@@ -131,7 +131,7 @@ public class CashDisplyActivity extends AppCompatActivity {
                         showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
                     }
                 }else {
-                    Intent ide = new Intent(CashDisplyActivity.this, HistoryActivity.class);
+                    Intent ide = new Intent(CashDisplyActivity.this, NewDashBoardActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
                     finish();

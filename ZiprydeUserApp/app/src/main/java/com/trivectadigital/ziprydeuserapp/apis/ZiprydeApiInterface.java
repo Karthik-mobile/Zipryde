@@ -9,10 +9,13 @@ import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
 
 import java.util.LinkedList;
 
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 
 /**
  * Created by Hari on 14-06-2017.
@@ -26,8 +29,15 @@ public interface ZiprydeApiInterface {
     @POST("verifyOTPByMobile")
     Call<SingleInstantResponse> verifyOTPByMobile(@Body SingleInstantParameters parameters);
 
+    @Multipart
     @POST("saveUser")
-    Call<SingleInstantResponse> saveUser(@Body SingleInstantParameters parameters);
+    Call<SingleInstantResponse> saveUser(@Part("userType") RequestBody userType, @Part("firstName") RequestBody firstName,
+                                         @Part("lastName") RequestBody lastName, @Part("emailId") RequestBody emailId, @Part("mobileNumber") RequestBody mobileNumber, @Part("password") RequestBody password, @Part("alternateNumber") RequestBody alternateNumber);
+
+    @Multipart
+    @POST("saveUser")
+    Call<SingleInstantResponse> saveUpdateUser(@Part("userType") RequestBody userType, @Part("firstName") RequestBody firstName,
+                                         @Part("lastName") RequestBody lastName, @Part("emailId") RequestBody emailId, @Part("mobileNumber") RequestBody mobileNumber, @Part("userId") RequestBody userId, @Part("alternateNumber") RequestBody alternateNumber);
 
     @POST("verifyLogInUser")
     Call<SingleInstantResponse> verifyLogInUser(@Body SingleInstantParameters parameters);
@@ -52,4 +62,7 @@ public interface ZiprydeApiInterface {
 
     @POST("getGeoLocationByDriverId")
     Call<SingleInstantResponse> getGeoLocationByDriverId(@Body SingleInstantParameters parameters);
+
+    @POST("updateBookingStatus")
+    Call<SingleInstantResponse> updateBookingStatus(@Body SingleInstantParameters parameters);
 }

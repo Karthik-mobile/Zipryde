@@ -16,12 +16,17 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
+import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydedriverapp.modelpost.SingleInstantParameters;
 
 import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,7 +34,7 @@ import retrofit2.Response;
 
 public class NewDashBoardActivity extends AppCompatActivity {
 
-    LinearLayout rideLayout, historyLayout, notificationLayout;
+    LinearLayout rideLayout, historyLayout, notificationLayout, logoutLayout;
 
     RelativeLayout onofflineLay;
 
@@ -37,7 +42,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
 
     View viewOffline, viewOnline;
 
-    TextView driverInfoText;
+    TextView driverInfoText, revenueText, rideCountText, dateText;
 
     ZiprydeApiInterface apiService;
 
@@ -53,6 +58,9 @@ public class NewDashBoardActivity extends AppCompatActivity {
         viewOnline = findViewById(R.id.viewOnline);
 
         driverInfoText = (TextView) findViewById(R.id.driverInfoText);
+        revenueText = (TextView) findViewById(R.id.revenueText);
+        rideCountText = (TextView) findViewById(R.id.rideCountText);
+        dateText = (TextView) findViewById(R.id.dateText);
 
         rideLayout = (LinearLayout) findViewById(R.id.rideLayout);
         rideLayout.setOnClickListener(new View.OnClickListener() {
@@ -84,6 +92,14 @@ public class NewDashBoardActivity extends AppCompatActivity {
             }
         });
 
+        logoutLayout = (LinearLayout) findViewById(R.id.logoutLayout);
+        logoutLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showInfoDlg("Information", "Are you sure do you want to Logout??", "YES", "logout");
+            }
+        });
+
         updateDriverStatus(1);
         isOnline = true;
         onofflineLay.setOnClickListener(new View.OnClickListener() {
@@ -94,6 +110,112 @@ public class NewDashBoardActivity extends AppCompatActivity {
                 }else{
                     updateDriverStatus(0);
                 }
+            }
+        });
+
+        TextView nameProfile = (TextView) findViewById(R.id.driverText);
+        nameProfile.setText(Utils.verifyLogInUserMobileInstantResponse.getFirstName()+" "+Utils.verifyLogInUserMobileInstantResponse.getLastName());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getRevenueByDateAndDriverId();
+    }
+
+    public void getRevenueByDateAndDriverId(){
+        final Dialog dialog = new Dialog(NewDashBoardActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+        Calendar c = Calendar.getInstance();
+        System.out.println("Current time => "+c.getTime());
+        SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy");
+        String formattedDate = df.format(c.getTime());
+        final SingleInstantParameters loginCredentials = new SingleInstantParameters();
+        loginCredentials.driverId = ""+Utils.verifyLogInUserMobileInstantResponse.getUserId();
+        loginCredentials.paidDateTime = formattedDate;
+        dateText.setText(formattedDate);
+
+        Call<SingleInstantResponse> call = apiService.getRevenueByDateAndDriverId(loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
+            @Override
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                dialog.dismiss();
+                if(response.isSuccessful()){
+                    Utils.getRevenueByDateInstantResponse = response.body();
+                    String revenueAmount = Utils.getRevenueByDateInstantResponse.getRevenueAmount();
+                    revenueText.setText("$ "+revenueAmount);
+                    getBookingCountByDateAndDriverId(loginCredentials);
+                }else{
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+            }
+        });
+    }
+
+    public void getBookingCountByDateAndDriverId(SingleInstantParameters singleInstantParameters){
+        final Dialog dialog = new Dialog(NewDashBoardActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<SingleInstantResponse> call = apiService.getBookingCountByDateAndDriverId(singleInstantParameters);
+        call.enqueue(new Callback<SingleInstantResponse>() {
+            @Override
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                dialog.dismiss();
+                if(response.isSuccessful()){
+                    Utils.getBookingCountByDateInstantResponse = response.body();
+                    String count = Utils.getBookingCountByDateInstantResponse.getCount();
+                    rideCountText.setText(count);
+                }else{
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
             }
         });
     }
@@ -177,6 +299,16 @@ public class NewDashBoardActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+                if(navType.equalsIgnoreCase("logout")){
+                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
+                    Intent ide = new Intent(NewDashBoardActivity.this, LoginActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
+                }
             }
         });
 

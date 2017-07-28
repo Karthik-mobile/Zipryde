@@ -25,7 +25,7 @@
         android:orientation="vertical"
         android:paddingBottom="10dp"
         android:visibility="gone"
-        android:paddingTop="10dp">
+        android:paddingTop="10dp" >
 
         <Button
             android:id="@+id/requestPickupBtn"
@@ -34,7 +34,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="25dp"
             android:background="@drawable/rounded_button"
-            android:text="REQUEST PICKUP"
+            android:text="ZIP ME NOW"
             android:textColor="@color/whiteColor"
             android:textSize="18dp"
             android:textStyle="bold" />
@@ -125,6 +125,7 @@
                 android:textColor="@color/appBackground" />
 
             <TextView
+                android:id="@+id/priceUpdateText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Fair Price"
@@ -205,6 +206,32 @@
                 android:textSize="18dp" />
 
         </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/noCabsLay"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_gravity="center"
+        android:background="@color/colorAccent"
+        android:gravity="center"
+        android:visibility="gone"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/noCabsText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:gravity="center"
+            android:text="Unfortunately, Zipryde is currently unavailable in your area."
+            android:textAlignment="center"
+            android:textColor="@color/whiteColor"
+            android:textSize="18dp"
+            android:textStyle="bold" />
+
     </LinearLayout>
 
     <LinearLayout
@@ -293,6 +320,7 @@
                     android:textSize="16dp" />
 
                 <TextView
+                    android:id="@+id/microTimeTextSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -329,6 +357,7 @@
                     android:textSize="18dp" />
 
                 <TextView
+                    android:id="@+id/microTimeTextBig"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -365,6 +394,7 @@
                     android:textSize="18dp" />
 
                 <TextView
+                    android:id="@+id/sedanTimeTextBig"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -397,6 +427,7 @@
                     android:textSize="16dp" />
 
                 <TextView
+                    android:id="@+id/sedanTimeTextSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -432,6 +463,7 @@
                     android:textSize="18dp" />
 
                 <TextView
+                    android:id="@+id/suvTimeTextBig"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -465,6 +497,7 @@
                     android:textSize="16dp" />
 
                 <TextView
+                    android:id="@+id/suvTimeTextSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -499,8 +532,8 @@
                     android:id="@+id/textSeatCapacity"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Seats 1-7"
                     android:layout_marginLeft="5dp"
+                    android:text="Seats 1-7"
                     android:textColor="@color/whiteColor"
                     android:textSize="18dp" />
 

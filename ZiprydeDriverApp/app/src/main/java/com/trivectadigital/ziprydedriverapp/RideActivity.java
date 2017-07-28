@@ -30,7 +30,7 @@ public class RideActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT);
         toolbar.addView(mCustomView, layoutParams);
         TextView titleText = (TextView) mCustomView.findViewById(R.id.titleText);
-        titleText.setText("Your Ziprydes");
+        titleText.setText("Your ZipRydes Requests");
         ImageView backImg = (ImageView) mCustomView.findViewById(R.id.backImg);
         backImg.setOnClickListener(new View.OnClickListener() {
             @Override

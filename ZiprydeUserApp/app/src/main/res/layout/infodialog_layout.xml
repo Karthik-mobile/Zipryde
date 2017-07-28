@@ -69,7 +69,7 @@
             android:layout_marginRight="15dp"
             android:layout_marginTop="10dp"
             android:background="@color/colorAccent"
-            android:text="Cancel"
+            android:text="CANCEL"
             android:textColor="@color/secondaryText"
             android:textSize="18dp" />
 

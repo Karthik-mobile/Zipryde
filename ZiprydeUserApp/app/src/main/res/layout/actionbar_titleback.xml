@@ -25,7 +25,7 @@
             android:layout_centerInParent="true"
             android:text="@string/signup"
             android:textColor="@color/whiteColor"
-            android:textSize="20dp"  />
+            android:textSize="18dp"  />
 
     </RelativeLayout>
 

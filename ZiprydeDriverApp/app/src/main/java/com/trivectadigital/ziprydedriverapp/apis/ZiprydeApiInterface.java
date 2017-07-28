@@ -33,7 +33,19 @@ public interface ZiprydeApiInterface {
     @POST("zipryde/saveUser")
     Call<SingleInstantResponse> saveUser(@Part MultipartBody.Part userImage, @Part MultipartBody.Part frontImage, @Part MultipartBody.Part backImage, @Part("userType") RequestBody userType, @Part("firstName") RequestBody firstName,
             @Part("lastName") RequestBody lastName, @Part("emailId") RequestBody emailId, @Part("mobileNumber") RequestBody mobileNumber, @Part("password") RequestBody password, @Part("licenseNo") RequestBody licenseNo
-            , @Part("vehicleNumber") RequestBody vehicleNumber, @Part("licenseValidUntil") RequestBody licenseValidUntil, @Part("licenseIssuedOn") RequestBody licenseIssuedOn, @Part("alternateNumber") RequestBody alternateNumber, @Part("status") RequestBody status, @Part("defaultPercentageAccepted") RequestBody defaultPercentageAccepted);
+            , @Part("licenseValidUntil") RequestBody licenseValidUntil, @Part("licenseIssuedOn") RequestBody licenseIssuedOn, @Part("alternateNumber") RequestBody alternateNumber, @Part("status") RequestBody status);
+
+    @Multipart
+    @POST("zipryde/saveUser")
+    Call<SingleInstantResponse> saveUser(@Part MultipartBody.Part userImage, @Part("userType") RequestBody userType, @Part("firstName") RequestBody firstName,
+                                         @Part("lastName") RequestBody lastName, @Part("emailId") RequestBody emailId, @Part("mobileNumber") RequestBody mobileNumber, @Part("password") RequestBody password, @Part("licenseNo") RequestBody licenseNo
+            , @Part("licenseValidUntil") RequestBody licenseValidUntil, @Part("licenseIssuedOn") RequestBody licenseIssuedOn, @Part("alternateNumber") RequestBody alternateNumber, @Part("status") RequestBody status);
+
+    @Multipart
+    @POST("zipryde/saveUser")
+    Call<SingleInstantResponse> saveUser(@Part MultipartBody.Part userImage, @Part MultipartBody.Part backImage, @Part("userType") RequestBody userType, @Part("firstName") RequestBody firstName,
+                                         @Part("lastName") RequestBody lastName, @Part("emailId") RequestBody emailId, @Part("mobileNumber") RequestBody mobileNumber, @Part("password") RequestBody password, @Part("licenseNo") RequestBody licenseNo
+            , @Part("licenseValidUntil") RequestBody licenseValidUntil, @Part("licenseIssuedOn") RequestBody licenseIssuedOn, @Part("alternateNumber") RequestBody alternateNumber, @Part("status") RequestBody status);
 
     @POST("zipryde/verifyLogInUser")
     Call<SingleInstantResponse> verifyLogInUser(@Body SingleInstantParameters parameters);
@@ -55,6 +67,12 @@ public interface ZiprydeApiInterface {
 
     @POST("zipryde/updateBookingDriverStatus")
     Call<SingleInstantResponse> updateBookingDriverStatus(@Body SingleInstantParameters parameters);
+
+    @POST("zipryde/getRevenueByDateAndDriverId")
+    Call<SingleInstantResponse> getRevenueByDateAndDriverId(@Body SingleInstantParameters parameters);
+
+    @POST("zipryde/getBookingCountByDateAndDriverId")
+    Call<SingleInstantResponse> getBookingCountByDateAndDriverId(@Body SingleInstantParameters parameters);
 
     @POST("zipryde/getBookingByDriverId")
     Call<LinkedList<ListOfBooking>> getBookingByDriverId(@Body SingleInstantParameters parameters);

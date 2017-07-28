@@ -178,7 +178,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                 getGPSLocation();
             }else{
                 //askSwitchOnGPS();
-                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
         }
 
@@ -390,7 +390,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                         getGPSLocation();
                     }else{
                         //askSwitchOnGPS();
-                        showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                        showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
                     }
                     break;
             }
@@ -401,7 +401,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                 getGPSLocation();
             }else{
                 //askSwitchOnGPS();
-                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
         }else{
             Toast.makeText(getActivity(), "Permission denied", Toast.LENGTH_SHORT).show();
@@ -476,7 +476,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                 getGPSLocation();
             }else{
                 //askSwitchOnGPS();
-                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
         }else if(requestCode == Utils.REQUEST_GET_PLACES_DETAILS){
 //            if (resultCode == RESULT_OK) {

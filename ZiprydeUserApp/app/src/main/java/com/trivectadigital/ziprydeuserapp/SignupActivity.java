@@ -29,6 +29,8 @@ import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
 
 import org.json.JSONObject;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -93,21 +95,21 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 String confirmpassword = confirmpasswordEdit.getText().toString();
 
                 if(firstname.isEmpty()){
-                    showInfoDlg("Information", "Please enter the first name", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the First Name", "OK", "info");
                 }else if(lastname.isEmpty()){
-                    showInfoDlg("Information", "Please enter the last name", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Last Name", "OK", "info");
                 }else if(emailadd.isEmpty()){
-                    showInfoDlg("Information", "Please enter the email name", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Email Id", "OK", "info");
                 }else if(password.isEmpty()){
-                    showInfoDlg("Information", "Please enter the password", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Password", "OK", "info");
                 }else if(confirmpassword.isEmpty()){
-                    showInfoDlg("Information", "Please enter the confirm password", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Confirm Password", "OK", "info");
                 }else if (!password.equals(confirmpassword)) {
-                    showInfoDlg("Information", "Password and Confirm Password are not Matched", "Ok", "info");
+                    showInfoDlg("Information", "Password and Confirm Password are not matching", "OK", "info");
                 }else if(phoneno.isEmpty()){
-                    showInfoDlg("Information", "Please enter the mobile number", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Mobile Number", "OK", "info");
                 }else if(phoneno.length() != 10){
-                    showInfoDlg("Information", "Please enter valid mobile number", "Ok", "info");
+                    showInfoDlg("Information", "Please enter valid Mobile Number", "OK", "info");
                 }else{
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.userType = "RIDER";
@@ -117,6 +119,9 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     loginCredentials.mobileNumber = phoneno;
                     loginCredentials.password = password;
                     loginCredentials.alternateNumber = "";
+                    Gson gson = new Gson();
+                    String json = gson.toJson(loginCredentials);
+                    Log.e("json",""+json);
                     callMobileService(loginCredentials);
                 }
                 break;
@@ -134,7 +139,15 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
 
-        Call<SingleInstantResponse> call = apiService.saveUser(loginCredentials);
+        RequestBody userType = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.userType);
+        RequestBody firstName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.firstName);
+        RequestBody lastName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.lastName);
+        RequestBody emailId = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.emailId);
+        RequestBody mobileNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.mobileNumber);
+        RequestBody passw = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.password);
+        RequestBody alternateNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.alternateNumber);
+
+        Call<SingleInstantResponse> call = apiService.saveUser(userType, firstName, lastName, emailId, mobileNumber, passw, alternateNumber);
         call.enqueue(new Callback<SingleInstantResponse>() {
             @Override
             public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -154,13 +167,13 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     editor.putString("LoginCredentials", json);
                     editor.commit();
                     Utils.verifyLogInUserMobileInstantResponse = Utils.saveUserMobileInstantResponse;
-                    showInfoDlg("Success..", "Successfully registered.", "Ok", "success");
+                    showInfoDlg("Success..", "Successfully registered.", "OK", "success");
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -170,7 +183,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }

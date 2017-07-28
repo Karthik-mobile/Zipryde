@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -75,28 +76,32 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 String phoneno = phonenoEdit.getText().toString();
                 String emailadd = emailaddEdit.getText().toString();
                 String password = passwordEdit.getText().toString();
-                String vehicleno = vehiclenoEdit.getText().toString();
+                //String vehicleno = vehiclenoEdit.getText().toString();
                 String confirmpassword = confirmpasswordEdit.getText().toString();
 
                 if (firstname.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the first name", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the first Name", "OK", "info");
                 } else if (lastname.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the last name", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Last Name", "OK", "info");
                 } else if (emailadd.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the email name", "Ok", "info");
-                } else if (password.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the password", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Email Id", "OK", "info");
+                } else if (!Patterns.EMAIL_ADDRESS.matcher(emailadd).matches()) {
+                    showInfoDlg("Information", "Please enter the Proper Email Id", "OK", "info");
+                }else if (password.isEmpty()) {
+                    showInfoDlg("Information", "Please enter the Password", "OK", "info");
                 }else if (confirmpassword.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the confirm password", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Confirm Password", "OK", "info");
                 }else if (!password.equals(confirmpassword)) {
-                    showInfoDlg("Information", "Password and Confirm Password are not Matched", "Ok", "info");
+                    showInfoDlg("Information", "Password and Confirm Password are not Matched", "OK", "info");
                 } else if (phoneno.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the mobile number", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Mobile Number", "OK", "info");
                 } else if (phoneno.length() != 10) {
-                    showInfoDlg("Information", "Please enter valid mobile number", "Ok", "info");
-                } else if (vehicleno.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the vehicle number", "Ok", "info");
-                } else {
+                    showInfoDlg("Information", "Please enter valid Mobile Number", "OK", "info");
+                }
+//                else if (vehicleno.isEmpty()) {
+//                    showInfoDlg("Information", "Please enter the vehicle number", "Ok", "info");
+//                }
+                else {
                     ide = new Intent(SignupActivity.this, DocumentUploadActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     ide.putExtra("firstName", firstname);
@@ -104,7 +109,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     ide.putExtra("emailId", emailadd);
                     ide.putExtra("mobileNumber", phoneno);
                     ide.putExtra("password", password);
-                    ide.putExtra("vehicleno", vehicleno);
+//                    ide.putExtra("vehicleno", vehicleno);
                     startActivity(ide);
                     finish();
                 }

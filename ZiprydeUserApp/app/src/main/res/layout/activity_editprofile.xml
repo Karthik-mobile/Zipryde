@@ -192,6 +192,17 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <Button
+                android:id="@+id/edit_btn"
+                android:layout_width="300dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="15dp"
+                android:background="@color/colorAccent"
+                android:text="UPDATE"
+                android:layout_gravity="center"
+                android:textColor="@color/secondaryText"
+                android:textSize="18dp" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -199,20 +210,23 @@
                 android:layout_marginTop="25dp"
                 android:text="PLACES"
                 android:textColor="@color/primaryText"
-                android:textSize="12dp" />
+                android:textSize="12dp"
+                android:visibility="gone" />
 
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginTop="10dp"
-                android:background="@color/colorPrimary" />
+                android:background="@color/colorPrimary"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal"
-                android:padding="10dp">
+                android:padding="10dp"
+                android:visibility="gone">
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -261,14 +275,16 @@
                 android:layout_marginLeft="55dp"
                 android:layout_marginRight="15dp"
                 android:layout_marginTop="5dp"
-                android:background="@color/black_overlay" />
+                android:background="@color/black_overlay"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:orientation="horizontal"
-                android:padding="10dp">
+                android:padding="10dp"
+                android:visibility="gone">
 
                 <ImageView
                     android:layout_width="wrap_content"

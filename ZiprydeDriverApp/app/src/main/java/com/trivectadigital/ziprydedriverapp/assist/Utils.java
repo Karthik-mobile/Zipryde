@@ -39,6 +39,8 @@ public class Utils {
     public static SingleInstantResponse saveUserMobileInstantResponse;
     public static SingleInstantResponse updateBookingDriverStatusInstantResponse;
     public static SingleInstantResponse verifyLogInUserMobileInstantResponse;
+    public static SingleInstantResponse getRevenueByDateInstantResponse;
+    public static SingleInstantResponse getBookingCountByDateInstantResponse;
     public static LinkedList<ListOfBooking> getBookingByDriverIdInstantResponse;
     public static LinkedList<ListOfPercentage> getAllNYOPListInstantResponse;
     public static LinkedList<ListOfRequestedBooking> getBookingRequestedByDriverIdResponse;

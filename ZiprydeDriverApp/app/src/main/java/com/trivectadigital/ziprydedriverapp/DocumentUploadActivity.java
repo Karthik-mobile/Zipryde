@@ -28,6 +28,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -82,7 +85,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
     public static EditText issuedDateEdit, expiryDateEdit;
     public static String textField = "issued";
     ImageView uploadImgFront, uploadImgBack;
-    Spinner percentageSpinner;
+//    Spinner percentageSpinner;
     CircleImageView uploadProfilePic;
 
     private Uri fileUri;
@@ -110,7 +113,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT);
         toolbar.addView(mCustomView, layoutParams);
         TextView titleText = (TextView) mCustomView.findViewById(R.id.titleText);
-        titleText.setText("Upload Driver License");
+        titleText.setText("Upload Driver License Details");
         ImageView backImg = (ImageView) mCustomView.findViewById(R.id.backImg);
         backImg.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,7 +133,16 @@ public class DocumentUploadActivity extends AppCompatActivity {
         uploadImgFront = (ImageView) findViewById(R.id.uploadImgFront);
         uploadImgBack = (ImageView) findViewById(R.id.uploadImgBack);
 
-        percentageSpinner = (Spinner) findViewById(R.id.percentageSpinner);
+        TextView dlnText = (TextView) findViewById(R.id.dlnText);
+        dlnText.setText(getRedManditoty(dlnText.getText().toString().trim()));
+        TextView resText = (TextView) findViewById(R.id.resText);
+        resText.setText(getRedManditoty(resText.getText().toString().trim()));
+        TextView iseText = (TextView) findViewById(R.id.iseText);
+        iseText.setText(getRedManditoty(iseText.getText().toString().trim()));
+        TextView exyText = (TextView) findViewById(R.id.exyText);
+        exyText.setText(getRedManditoty(exyText.getText().toString().trim()));
+
+//        percentageSpinner = (Spinner) findViewById(R.id.percentageSpinner);
         getAllNYOPList();
 
         continueBtn.setOnClickListener(new View.OnClickListener() {
@@ -140,31 +152,35 @@ public class DocumentUploadActivity extends AppCompatActivity {
                 String restri = restriEdit.getText().toString().trim();
                 String issuedDate = issuedDateEdit.getText().toString().trim();
                 String expiryDate = expiryDateEdit.getText().toString().trim();
-                int percentage = percentageSpinner.getSelectedItemPosition();
+//                int percentage = percentageSpinner.getSelectedItemPosition();
                 if (license.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the License number", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the License number", "OK", "info");
                 } else if (restri.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the Restrictions", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Restrictions", "OK", "info");
                 }else if (issuedDate.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the Issue date", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Issue date", "OK", "info");
                 }else if (expiryDate.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the Expiry date", "Ok", "info");
-                }else if (percentage == 0) {
-                    showInfoDlg("Information", "Please select the Percentage", "Ok", "info");
-                }else if (finalmediaFileProfile == null || !finalmediaFileProfile.isFile()) {
-                    showInfoDlg("Information", "Please upload profile Image", "Ok", "info");
-                }else if (finalmediaFileFront == null || !finalmediaFileFront.isFile()) {
-                    showInfoDlg("Information", "Please upload License Front Image", "Ok", "info");
-                }else if (finalmediaFileBack == null || !finalmediaFileBack.isFile()) {
-                    showInfoDlg("Information", "Please upload License Back Image", "Ok", "info");
-                }else {
+                    showInfoDlg("Information", "Please enter the Expiry date", "OK", "info");
+                }
+//                else if (percentage == 0) {
+//                    showInfoDlg("Information", "Please select the Percentage", "Ok", "info");
+//                }
+                else if (finalmediaFileProfile == null || !finalmediaFileProfile.isFile()) {
+                    showInfoDlg("Information", "Please upload profile Image", "OK", "info");
+                }
+//                else if (finalmediaFileFront == null || !finalmediaFileFront.isFile()) {
+//                    showInfoDlg("Information", "Please upload License Front Image", "Ok", "info");
+//                }else if (finalmediaFileBack == null || !finalmediaFileBack.isFile()) {
+//                    showInfoDlg("Information", "Please upload License Back Image", "Ok", "info");
+//                }
+                else {
                     Intent intent = getIntent();
                     String firstname = intent.getStringExtra("firstName");
                     String lastname = intent.getStringExtra("lastName");
                     String emailadd = intent.getStringExtra("emailId");
                     phoneno = intent.getStringExtra("mobileNumber");
                     password = intent.getStringExtra("password");
-                    String vehicleno = intent.getStringExtra("vehicleno");
+//                    String vehicleno = intent.getStringExtra("vehicleno");
 
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.userType = "DRIVER";
@@ -174,12 +190,12 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     loginCredentials.mobileNumber = phoneno;
                     loginCredentials.password = password;
                     loginCredentials.licenseNo = license;
-                    loginCredentials.vehicleNumber = vehicleno;
+//                    loginCredentials.vehicleNumber = vehicleno;
                     loginCredentials.licenseValidUntil = expiryDate;
                     loginCredentials.licenseIssuedOn = issuedDate;
                     loginCredentials.alternateNumber = "";
                     loginCredentials.status = "REQUESTED";
-                    loginCredentials.defaultPercentageAccepted = percentageSpinner.getSelectedItem().toString();
+//                    loginCredentials.defaultPercentageAccepted = percentageSpinner.getSelectedItem().toString();
 
                     callMobileService(loginCredentials);
                 }
@@ -241,6 +257,21 @@ public class DocumentUploadActivity extends AppCompatActivity {
                 newFragment.show(getSupportFragmentManager(), "expirydatePicker");
             }
         });
+    }
+
+    public SpannableStringBuilder getRedManditoty(String text){
+        String simple = text;
+        String colored = " *";
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+
+        builder.append(simple);
+        int start = builder.length();
+        builder.append(colored);
+        int end = builder.length();
+
+        builder.setSpan(new ForegroundColorSpan(Color.RED), start, end,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return builder;
     }
 
     @Override
@@ -318,17 +349,17 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     for(int i = 0; i < Utils.getAllNYOPListInstantResponse.size(); i++){
                         percentageList.add(""+Utils.getAllNYOPListInstantResponse.get(i).getPercentage());
                     }
-                    ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(DocumentUploadActivity.this, android.R.layout.simple_spinner_item, percentageList);
-                    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    percentageSpinner.setAdapter(dataAdapter);
-                    percentageSpinner.setSelection(0);
+//                    ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(DocumentUploadActivity.this, android.R.layout.simple_spinner_item, percentageList);
+//                    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//                    percentageSpinner.setAdapter(dataAdapter);
+//                    percentageSpinner.setSelection(0);
                     //showInfoDlg("Success..", "Successfully registered.", "Ok", "success");
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -338,7 +369,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }
@@ -430,9 +461,9 @@ public class DocumentUploadActivity extends AppCompatActivity {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -442,7 +473,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }
@@ -457,9 +488,6 @@ public class DocumentUploadActivity extends AppCompatActivity {
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
 
-        RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileFront);
-        MultipartBody.Part frontBody = MultipartBody.Part.createFormData("licenseFrontImage", finalmediaFileFront.getName(), reqFile);
-
         RequestBody userType = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.userType);
         RequestBody firstName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.firstName);
         RequestBody lastName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.lastName);
@@ -467,22 +495,51 @@ public class DocumentUploadActivity extends AppCompatActivity {
         RequestBody mobileNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.mobileNumber);
         RequestBody password = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.password);
         RequestBody licenseNo = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseNo);
-        RequestBody vehicleNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.vehicleNumber);
+//        RequestBody vehicleNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.vehicleNumber);
         RequestBody licenseValidUntil = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseValidUntil);
         RequestBody licenseIssuedOn = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseIssuedOn);
         RequestBody alternateNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.alternateNumber);
         RequestBody status = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.status);
-        RequestBody defaultPercentageAccepted = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.defaultPercentageAccepted);
+//        RequestBody defaultPercentageAccepted = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.defaultPercentageAccepted);
 
-        reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileBack);
-        MultipartBody.Part backBody = MultipartBody.Part.createFormData("licenseBackImage", finalmediaFileBack.getName(), reqFile);
-
-        reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileProfile);
+        RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileProfile);
         MultipartBody.Part  profileBody = MultipartBody.Part.createFormData("userImage", finalmediaFileProfile.getName(), reqFile);
 
-        Call<SingleInstantResponse> call = apiService.saveUser(profileBody, frontBody, backBody, userType, firstName, lastName,
-                emailId, mobileNumber, password, licenseNo, vehicleNumber,
-                licenseValidUntil, licenseIssuedOn, alternateNumber, status, defaultPercentageAccepted);
+        Call<SingleInstantResponse> call;
+
+        if(finalmediaFileFront == null || !finalmediaFileFront.isFile()){
+            if(finalmediaFileBack == null || !finalmediaFileBack.isFile()){
+                call = apiService.saveUser(profileBody, userType, firstName, lastName,
+                        emailId, mobileNumber, password, licenseNo, licenseValidUntil, licenseIssuedOn, alternateNumber, status);
+            }else{
+                reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileBack);
+                MultipartBody.Part backBody = MultipartBody.Part.createFormData("licenseBackImage", finalmediaFileBack.getName(), reqFile);
+
+                call = apiService.saveUser(profileBody, backBody, userType, firstName, lastName,
+                        emailId, mobileNumber, password, licenseNo,
+                        licenseValidUntil, licenseIssuedOn, alternateNumber, status);
+            }
+        }else{
+            if(finalmediaFileBack == null || !finalmediaFileBack.isFile()){
+                reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileFront);
+                MultipartBody.Part frontBody = MultipartBody.Part.createFormData("licenseFrontImage", finalmediaFileFront.getName(), reqFile);
+
+                call = apiService.saveUser(profileBody, frontBody, userType, firstName, lastName,
+                        emailId, mobileNumber, password, licenseNo,
+                        licenseValidUntil, licenseIssuedOn, alternateNumber, status);
+
+            }else{
+                reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileFront);
+                MultipartBody.Part frontBody = MultipartBody.Part.createFormData("licenseFrontImage", finalmediaFileFront.getName(), reqFile);
+
+                reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileBack);
+                MultipartBody.Part backBody = MultipartBody.Part.createFormData("licenseBackImage", finalmediaFileBack.getName(), reqFile);
+
+                call = apiService.saveUser(profileBody, frontBody, backBody, userType, firstName, lastName,
+                        emailId, mobileNumber, password, licenseNo,
+                        licenseValidUntil, licenseIssuedOn, alternateNumber, status);
+            }
+        }
 
         call.enqueue(new Callback<SingleInstantResponse>() {
             @Override
@@ -506,13 +563,13 @@ public class DocumentUploadActivity extends AppCompatActivity {
 //                    editor.commit();
 //                    Utils.verifyLogInUserMobileInstantResponse = Utils.saveUserMobileInstantResponse;
                     insertDriverSession();
-                    showInfoDlg("Success..", "Successfully registered.", "Ok", "success");
+                    showInfoDlg("Success..", "Successfully registered.", "OK", "success");
                 } else {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -522,7 +579,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }

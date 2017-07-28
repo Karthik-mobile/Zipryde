@@ -126,7 +126,7 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
                 gotoNextActivity();
             }else{
                 //askSwitchOnGPS();
-                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
         }
     }
@@ -259,7 +259,7 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
                         gotoNextActivity();
                     }else{
                         //askSwitchOnGPS();
-                        showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                        showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
                     }
                     break;
             }
@@ -331,7 +331,7 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
                 gotoNextActivity();
             }else{
                 //askSwitchOnGPS();
-                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
         }
     }

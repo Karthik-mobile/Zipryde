@@ -99,7 +99,7 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
             if(statusOfGPS){
                 gotoNextActivity();
             }else{
-                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
         }
     }
@@ -204,7 +204,7 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
                         gotoNextActivity();
                     }else{
                         //askSwitchOnGPS();
-                        showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                        showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
                     }
                     break;
             }
@@ -247,7 +247,7 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
             if(statusOfGPS){
                 gotoNextActivity();
             }else{
-                showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
+                showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
         }
     }

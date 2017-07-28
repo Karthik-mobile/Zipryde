@@ -6,7 +6,23 @@ package com.trivectadigital.ziprydeuserapp.modelget;
 
 public class ListOfCurrentCabs {
 
-    String userId, latitude, longitude, isOnline;
+    String userId, latitude, longitude, isOnline, cabTypeId, cabType;
+
+    public String getCabTypeId() {
+        return cabTypeId;
+    }
+
+    public void setCabTypeId(String cabTypeId) {
+        this.cabTypeId = cabTypeId;
+    }
+
+    public String getCabType() {
+        return cabType;
+    }
+
+    public void setCabType(String cabType) {
+        this.cabType = cabType;
+    }
 
     public String getUserId() {
         return userId;

@@ -62,7 +62,6 @@ public class LoginActivity extends AppCompatActivity {
 
         phonenoEdit = (EditText) findViewById(R.id.phonenoEdit);
         passwordEdit = (EditText) findViewById(R.id.passwordEdit);
-        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
 
         sign_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,10 +69,11 @@ public class LoginActivity extends AppCompatActivity {
                 phoneno = phonenoEdit.getText().toString().trim();
                 password = passwordEdit.getText().toString().trim();
                 if(phoneno.isEmpty()){
-                    showInfoDlg("Information", "Please enter the phone number", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Mobile Number", "OK", "info");
                 }else if(password.isEmpty()){
-                    showInfoDlg("Information", "Please enter the password", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the Password", "OK", "info");
                 }else {
+                    apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.userType = "RIDER";
                     loginCredentials.mobileNumber = phoneno;
@@ -87,6 +87,16 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent ide = new Intent(LoginActivity.this, MobileNumberActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
+            }
+        });
+
+        ImageView settingsPage = (ImageView) findViewById(R.id.settingsPage);
+        settingsPage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent ide = new Intent(LoginActivity.this, SettingsActivity.class);
                 ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(ide);
             }
@@ -124,13 +134,13 @@ public class LoginActivity extends AppCompatActivity {
                     editor.putString("password", password);
                     editor.putString("LoginCredentials", json);
                     editor.commit();
-                    showInfoDlg("Success..", "Successfully logged in.", "Ok", "success");
+                    showInfoDlg("Success..", "Successfully logged in.", "OK", "success");
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -140,7 +150,7 @@ public class LoginActivity extends AppCompatActivity {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }
