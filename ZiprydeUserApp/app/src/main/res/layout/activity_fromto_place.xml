@@ -116,7 +116,7 @@
                             android:background="@drawable/rounded_light_edittext"
                             android:focusable="true"
                             android:focusableInTouchMode="true"
-                            android:hint="Enter place to search"
+                            android:hint="Enter the drop location"
                             android:paddingLeft="10dp"
                             android:singleLine="true" />
 

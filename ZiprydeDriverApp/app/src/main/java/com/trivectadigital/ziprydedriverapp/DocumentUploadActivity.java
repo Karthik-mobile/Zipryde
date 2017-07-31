@@ -163,15 +163,15 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     showInfoDlg("Information", "Please enter the Expiry date", "OK", "info");
                 }
 //                else if (percentage == 0) {
-//                    showInfoDlg("Information", "Please select the Percentage", "Ok", "info");
+//                    showInfoDlg("Information", "Please select the Percentage", "OK", "info");
 //                }
                 else if (finalmediaFileProfile == null || !finalmediaFileProfile.isFile()) {
                     showInfoDlg("Information", "Please upload profile Image", "OK", "info");
                 }
 //                else if (finalmediaFileFront == null || !finalmediaFileFront.isFile()) {
-//                    showInfoDlg("Information", "Please upload License Front Image", "Ok", "info");
+//                    showInfoDlg("Information", "Please upload License Front Image", "OK", "info");
 //                }else if (finalmediaFileBack == null || !finalmediaFileBack.isFile()) {
-//                    showInfoDlg("Information", "Please upload License Back Image", "Ok", "info");
+//                    showInfoDlg("Information", "Please upload License Back Image", "OK", "info");
 //                }
                 else {
                     Intent intent = getIntent();
@@ -182,6 +182,8 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     password = intent.getStringExtra("password");
 //                    String vehicleno = intent.getStringExtra("vehicleno");
 
+                    SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_PREF, 0);
+                    String regId = pref.getString("regId", null);
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.userType = "DRIVER";
                     loginCredentials.firstName = firstname;
@@ -197,6 +199,10 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     loginCredentials.status = "REQUESTED";
 //                    loginCredentials.defaultPercentageAccepted = percentageSpinner.getSelectedItem().toString();
 
+                    loginCredentials.deviceToken = regId;
+                    Gson gson = new Gson();
+                    String json = gson.toJson(loginCredentials);
+                    Log.e("json",""+json);
                     callMobileService(loginCredentials);
                 }
             }
@@ -353,7 +359,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
 //                    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 //                    percentageSpinner.setAdapter(dataAdapter);
 //                    percentageSpinner.setSelection(0);
-                    //showInfoDlg("Success..", "Successfully registered.", "Ok", "success");
+                    //showInfoDlg("Success..", "Successfully registered.", "OK", "success");
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -501,6 +507,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
         RequestBody alternateNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.alternateNumber);
         RequestBody status = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.status);
 //        RequestBody defaultPercentageAccepted = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.defaultPercentageAccepted);
+        RequestBody deviceToken = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.deviceToken);
 
         RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileProfile);
         MultipartBody.Part  profileBody = MultipartBody.Part.createFormData("userImage", finalmediaFileProfile.getName(), reqFile);
@@ -510,14 +517,14 @@ public class DocumentUploadActivity extends AppCompatActivity {
         if(finalmediaFileFront == null || !finalmediaFileFront.isFile()){
             if(finalmediaFileBack == null || !finalmediaFileBack.isFile()){
                 call = apiService.saveUser(profileBody, userType, firstName, lastName,
-                        emailId, mobileNumber, password, licenseNo, licenseValidUntil, licenseIssuedOn, alternateNumber, status);
+                        emailId, mobileNumber, password, licenseNo, licenseValidUntil, licenseIssuedOn, alternateNumber, status, deviceToken);
             }else{
                 reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileBack);
                 MultipartBody.Part backBody = MultipartBody.Part.createFormData("licenseBackImage", finalmediaFileBack.getName(), reqFile);
 
                 call = apiService.saveUser(profileBody, backBody, userType, firstName, lastName,
                         emailId, mobileNumber, password, licenseNo,
-                        licenseValidUntil, licenseIssuedOn, alternateNumber, status);
+                        licenseValidUntil, licenseIssuedOn, alternateNumber, status, deviceToken);
             }
         }else{
             if(finalmediaFileBack == null || !finalmediaFileBack.isFile()){
@@ -526,7 +533,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
 
                 call = apiService.saveUser(profileBody, frontBody, userType, firstName, lastName,
                         emailId, mobileNumber, password, licenseNo,
-                        licenseValidUntil, licenseIssuedOn, alternateNumber, status);
+                        licenseValidUntil, licenseIssuedOn, alternateNumber, status, deviceToken);
 
             }else{
                 reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileFront);
@@ -537,7 +544,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
 
                 call = apiService.saveUser(profileBody, frontBody, backBody, userType, firstName, lastName,
                         emailId, mobileNumber, password, licenseNo,
-                        licenseValidUntil, licenseIssuedOn, alternateNumber, status);
+                        licenseValidUntil, licenseIssuedOn, alternateNumber, status, deviceToken);
             }
         }
 

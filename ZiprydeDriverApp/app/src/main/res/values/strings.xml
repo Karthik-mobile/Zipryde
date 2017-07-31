@@ -11,7 +11,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
-        AIzaSyDaySH-sKqQiAxY27CX-2uYgNUUDYFES3g
+        AIzaSyD-oMmK6XXo25a_pt6XTy_eYyg8osBRsMM
     </string>
     <string name="title_activity_ride">RideActivity</string>
     <string name="title_activity_history">HistoryActivity</string>

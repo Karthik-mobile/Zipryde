@@ -96,9 +96,9 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
             case R.id.pinBtn:
                 String mobile = mobileEdit.getText().toString().trim();
                 if(mobile.isEmpty()){
-                    showInfoDlg("Info..!", "Please enter the mobile number", "Ok", "info");
+                    showInfoDlg("Info..!", "Please enter the mobile number", "OK", "info");
                 }else if(mobile.length() != 10){
-                    showInfoDlg("Info..!", "Please enter valid mobile number", "Ok", "info");
+                    showInfoDlg("Info..!", "Please enter valid mobile number", "OK", "info");
                 }else{
                     apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
                     callMobileService(mobile);
@@ -146,7 +146,7 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
                     startActivity(ide);
                     finish();
                 }else{
-                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
+                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "error");
                 }
             }
 
@@ -155,7 +155,7 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "error");
             }
         });
     }

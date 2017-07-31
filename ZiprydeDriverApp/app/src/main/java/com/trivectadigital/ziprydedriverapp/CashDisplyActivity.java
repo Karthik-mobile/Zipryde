@@ -126,9 +126,9 @@ public class CashDisplyActivity extends AppCompatActivity {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }else {
                     Intent ide = new Intent(CashDisplyActivity.this, NewDashBoardActivity.class);
@@ -143,7 +143,7 @@ public class CashDisplyActivity extends AppCompatActivity {
                 // Log error here since request failed
                 dialog.dismiss();
                 Log.e("onFailure", t.toString());
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }

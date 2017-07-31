@@ -29,6 +29,7 @@ import com.trivectadigital.ziprydedriverapp.assist.CurrentRideAdapter;
 import com.trivectadigital.ziprydedriverapp.assist.CurrentRideDetails;
 import com.trivectadigital.ziprydedriverapp.assist.CommissionAdapter;
 import com.trivectadigital.ziprydedriverapp.assist.CommissionDetails;
+import com.trivectadigital.ziprydedriverapp.assist.MessageReceivedEvent;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
 import com.trivectadigital.ziprydedriverapp.modelget.ListOfRequestedBooking;
 import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
@@ -38,6 +39,7 @@ import org.json.JSONObject;
 
 import java.util.LinkedList;
 
+import de.greenrobot.event.EventBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -132,6 +134,27 @@ public class NotificationsFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    public void onEventMainThread(MessageReceivedEvent messageReceivedEvent) {
+        Log.e("onEventMainThread", "RideActivity : "+messageReceivedEvent.message);
+        Log.e("PUSH_NOTIFICATION","RideActivity PUSH_NOTIFICATION");
+        Log.e("UserId","UserId "+ Utils.verifyLogInUserMobileInstantResponse.getUserId());
+        SingleInstantParameters loginCredentials = new SingleInstantParameters();
+        loginCredentials.driverId = ""+Utils.verifyLogInUserMobileInstantResponse.getUserId();
+        getBookingRequestedByDriverId(loginCredentials);
+    }
+
     public void getBookingRequestedByDriverId(SingleInstantParameters loginCredentials){
         final Dialog dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -166,9 +189,9 @@ public class NotificationsFragment extends Fragment {
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -178,7 +201,7 @@ public class NotificationsFragment extends Fragment {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }

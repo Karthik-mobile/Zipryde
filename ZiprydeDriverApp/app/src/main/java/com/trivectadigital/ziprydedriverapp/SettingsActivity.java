@@ -65,7 +65,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
             case R.id.updateBtn:
                 String ip = ipEdit.getText().toString().trim();
                 if(ip.isEmpty()){
-                    showInfoDlg("Info..!", "Please enter IP to update", "Ok", "info");
+                    showInfoDlg("Info..!", "Please enter IP to update", "OK", "info");
                 }else {
                     Matcher matcher = Utils.IP_ADDRESS.matcher(ip.split(":")[0]);
                     if (matcher.matches()) {
@@ -75,7 +75,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
                         editor.commit();
                         finish();
                     }else {
-                        showInfoDlg("Info..!", "Please enter proper IP address.", "Ok", "info");
+                        showInfoDlg("Info..!", "Please enter proper IP address.", "OK", "info");
                     }
                 }
                 break;

@@ -99,7 +99,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     showInfoDlg("Information", "Please enter valid Mobile Number", "OK", "info");
                 }
 //                else if (vehicleno.isEmpty()) {
-//                    showInfoDlg("Information", "Please enter the vehicle number", "Ok", "info");
+//                    showInfoDlg("Information", "Please enter the vehicle number", "OK", "info");
 //                }
                 else {
                     ide = new Intent(SignupActivity.this, DocumentUploadActivity.class);

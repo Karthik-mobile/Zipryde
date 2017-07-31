@@ -29,4 +29,5 @@ public class SingleInstantParameters {
     public String amountPaid;
     public String paymentType;
     public String paidDateTime;
+    public String deviceToken;
 }

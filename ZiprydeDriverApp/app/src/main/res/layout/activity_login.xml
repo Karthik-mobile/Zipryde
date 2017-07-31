@@ -82,7 +82,7 @@
             android:layout_height="50dp"
             android:layout_marginTop="15dp"
             android:background="@color/colorAccent"
-            android:text="Sign in"
+            android:text="LOG IN"
             android:textColor="@color/secondaryText"
             android:textSize="18dp" />
 
@@ -101,7 +101,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:text="Register as New"
+            android:text="Register as New Driver"
             android:textColor="@color/primaryText"
             android:textSize="16dp"  />
 

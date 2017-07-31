@@ -88,7 +88,7 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
             case R.id.verifyBtn:
                 String mobile = otpEdit.getText().toString().trim();
                 if(mobile.isEmpty()){
-                    showInfoDlg("Information", "Please enter the OTP", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the OTP", "OK", "info");
                 }else{
                     callMobileService(mobile);
                 }
@@ -132,7 +132,7 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
                     Utils.getOTPByMobileInstantResponse = response.body();
                     otpEdit.setText(""+ Utils.getOTPByMobileInstantResponse.getOtp());
                 }else{
-                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
+                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "error");
                 }
             }
 
@@ -141,7 +141,7 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "error");
             }
         });
     }
@@ -173,12 +173,12 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
                     Log.e("otpStatus", "" + otpStatus);
                     Utils.verifyOTPByMobileInstantResponse = response.body();
                     if (otpStatus.equals("VERIFIED")) {
-                        showInfoDlg("Success..", "PIN verified successfully.", "Ok", "verify success");
+                        showInfoDlg("Success..", "PIN verified successfully.", "OK", "verify success");
                     } else {
                         showInfoDlg("Error..", "PIN is INVALID. Please try again later..", "Resend", "invalid");
                     }
                 }else{
-                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
+                    showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "error");
                 }
             }
 
@@ -187,7 +187,7 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "error");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "error");
             }
         });
     }

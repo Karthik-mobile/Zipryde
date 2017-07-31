@@ -15,7 +15,7 @@
     <string name="place_details">&lt;b&gt;%1$s&lt;/b&gt;&lt;br/&gt;&lt;i&gt;Place Id: %2$s&lt;/i&gt;&lt;br/&gt;Address: %3$s&lt;br/&gt;Phone: %4$s&lt;br/&gt;Website: %5$s</string>
 
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
-        AIzaSyDaySH-sKqQiAxY27CX-2uYgNUUDYFES3g
+        AIzaSyA-vFXMTW1Hrtk0Nl_xkwbwqnTl6LFYmyk
     </string>
 
     <string-array name="sedan_micro_array">

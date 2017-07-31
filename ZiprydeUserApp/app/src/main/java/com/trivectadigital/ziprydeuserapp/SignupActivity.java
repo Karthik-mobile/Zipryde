@@ -111,6 +111,8 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 }else if(phoneno.length() != 10){
                     showInfoDlg("Information", "Please enter valid Mobile Number", "OK", "info");
                 }else{
+                    SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_PREF, 0);
+                    String regId = pref.getString("regId", null);
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.userType = "RIDER";
                     loginCredentials.firstName = firstname;
@@ -119,6 +121,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     loginCredentials.mobileNumber = phoneno;
                     loginCredentials.password = password;
                     loginCredentials.alternateNumber = "";
+                    loginCredentials.deviceToken = regId;
                     Gson gson = new Gson();
                     String json = gson.toJson(loginCredentials);
                     Log.e("json",""+json);
@@ -146,8 +149,9 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         RequestBody mobileNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.mobileNumber);
         RequestBody passw = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.password);
         RequestBody alternateNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.alternateNumber);
+        RequestBody deviceToken = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.deviceToken);
 
-        Call<SingleInstantResponse> call = apiService.saveUser(userType, firstName, lastName, emailId, mobileNumber, passw, alternateNumber);
+        Call<SingleInstantResponse> call = apiService.saveUser(userType, firstName, lastName, emailId, mobileNumber, passw, alternateNumber, deviceToken);
         call.enqueue(new Callback<SingleInstantResponse>() {
             @Override
             public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {

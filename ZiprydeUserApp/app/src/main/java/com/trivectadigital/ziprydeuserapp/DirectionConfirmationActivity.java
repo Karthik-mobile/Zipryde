@@ -1,14 +1,17 @@
 package com.trivectadigital.ziprydeuserapp;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatTextView;
@@ -26,11 +29,14 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.DataParser;
+import com.trivectadigital.ziprydeuserapp.assist.MessageReceivedEvent;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCarTypes;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCurrentCabs;
@@ -50,6 +56,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -64,6 +71,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.greenrobot.event.EventBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -103,6 +111,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
     Spinner noofSeatsSpinner;
     TextView textAmount1, textAmount2, textAmount3, textAmount4, basePrice, priceUpdateText, noCabsText;
     TextView microTimeTextSmall, microTimeTextBig, sedanTimeTextSmall, sedanTimeTextBig, suvTimeTextSmall, suvTimeTextBig;
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -504,15 +513,51 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         getAllCabTypes();
     }
 
+    Handler handler = new Handler();
+    Runnable finalizer;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(handler != null && finalizer != null){
+            handler.removeCallbacks(finalizer);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    public void onEventMainThread(MessageReceivedEvent messageReceivedEvent) {
+        Log.e("onEventMainThread", ""+messageReceivedEvent.message);
+        requestdialog.dismiss();
+        Log.e("PUSH_NOTIFICATION","PUSH_NOTIFICATION");
+        if(handler != null && finalizer != null){
+            handler.removeCallbacks(finalizer);
+        }
+        SingleInstantParameters loginCredentials = new SingleInstantParameters();
+        loginCredentials.bookingId = ""+ Utils.requestBookingResponse.getBookingId();
+        getBookingByBookingId(loginCredentials, 1);
+    }
+
+    Dialog requestdialog;
     public void callRequestBooking(SingleInstantParameters loginCredentials){
-        final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.requetsloadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+        requestdialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+        requestdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        requestdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        requestdialog.setContentView(R.layout.requetsloadingimage_layout);
+        requestdialog.setCanceledOnTouchOutside(false);
+        requestdialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        requestdialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        requestdialog.show();
 
         Call<SingleInstantResponse> call = apiService.requestBooking(loginCredentials);
         call.enqueue(new Callback<SingleInstantResponse>() {
@@ -528,26 +573,26 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     Log.e("bookingId",""+Utils.requestBookingResponse.getBookingId());
                     Log.e("bookingStatus",""+Utils.requestBookingResponse.getBookingStatus());
                     if(Utils.requestBookingResponse.getBookingStatus().equals("SCHEDULED")){
-                        dialog.dismiss();
+                        requestdialog.dismiss();
                         showInfoDlg("Booking Successful", "Your Booking request has been submitted successfully. Please wait till driver accepts...", "Done", "successBooking");
                     }else{
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
+                        finalizer = new Runnable() {
                             public void run() {
-                                dialog.dismiss();
+                                requestdialog.dismiss();
                                 SingleInstantParameters loginCredentials = new SingleInstantParameters();
                                 loginCredentials.bookingId = ""+ Utils.requestBookingResponse.getBookingId();
                                 getBookingByBookingId(loginCredentials, 1);
                             }
-                        }, 15000);
+                        };
+                        handler.postDelayed(finalizer, 30000);
                     }
                 }else{
-                    dialog.dismiss();
+                    requestdialog.dismiss();
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -556,8 +601,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                requestdialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }
@@ -585,27 +630,75 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     Utils.requestBookingResponse = response.body();
                     Log.e("bookingId",""+Utils.requestBookingResponse.getBookingId());
                     Log.e("bookingStatus",""+Utils.requestBookingResponse.getBookingStatus());
-                    if(count != 3){
                         if(Utils.requestBookingResponse.getBookingStatus().equals("SCHEDULED")){
                             dialog.dismiss();
                             showInfoDlg("Booking Successful", "Your Booking request has been accepted by driver...", "Done", "successBooking");
                         }else{
-                            new Handler().postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    dialog.dismiss();
-                                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
-                                    loginCredentials.bookingId = ""+ Utils.requestBookingResponse.getBookingId();
-                                    getBookingByBookingId(loginCredentials, 3);
-                                }
-                            }, 15000);
+//                            if(count != 3){
+//                                new Handler().postDelayed(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        dialog.dismiss();
+//                                        SingleInstantParameters loginCredentials = new SingleInstantParameters();
+//                                        loginCredentials.bookingId = ""+ Utils.requestBookingResponse.getBookingId();
+//                                        getBookingByBookingId(loginCredentials, 3);
+//                                    }
+//                                }, 10000);
+//                            }else{
+                                dialog.dismiss();
+                                String cabType = Utils.requestBookingResponse.getCabType();
+                                showInfoDlg("Booking Cancelled", "No "+cabType+" available / Driver Not accepted the request. Try after sometime", "Done", "requestCancelled");
+//                            }
                         }
-                    }else{
-                        dialog.dismiss();
-                        showInfoDlg("Booking Successful", "Your Booking request has been submitted successfully. Please wait till driver accepts...", "Done", "requestRequest");
-                    }
                 }else{
                     dialog.dismiss();
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+            }
+        });
+    }
+
+    private void updateBookingStatus(SingleInstantParameters loginCredentials){
+        final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<SingleInstantResponse> call = apiService.updateBookingStatus(loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
+            @Override
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                dialog.dismiss();
+                if(response.isSuccessful()){
+                    Utils.updateBookingStatusInstantResponse = response.body();
+                    Log.e("BookingStatus",""+Utils.updateBookingStatusInstantResponse.getBookingStatus());
+                    Intent ide = new Intent(DirectionConfirmationActivity.this, NavigationMenuActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
+                }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
                         showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
@@ -693,13 +786,13 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     noofSeatsSpinner.setAdapter(adapter);
                     noofSeatsSpinner.setSelection(0, true);
-                    //showInfoDlg("Success..", "Successfully registered.", "Ok", "success");
+                    //showInfoDlg("Success..", "Successfully registered.", "OK", "success");
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -709,7 +802,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }
@@ -772,14 +865,14 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         textAmount4.setText("$"+new DecimalFormat("##.#").format(price));
                         textAmount4.setTag(""+price);
                     }
-                    //showInfoDlg("Success..", "Successfully registered.", "Ok", "success");
+                    //showInfoDlg("Success..", "Successfully registered.", "OK", "success");
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
                         e.printStackTrace();
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -789,7 +882,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }
@@ -821,8 +914,11 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         }
 
         ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
-        if(navType.equalsIgnoreCase("successBooking") || navType.equalsIgnoreCase("requestRequest")){
+        if(navType.equalsIgnoreCase("successBooking") ){
             headerIcon.setImageResource(R.drawable.successicon);
+            newnegativeBtn.setVisibility(View.GONE);
+        }else if(navType.equalsIgnoreCase("requestCancelled")) {
+            headerIcon.setImageResource(R.drawable.erroricon);
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -842,11 +938,11 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
                     finish();
-                }else if(navType.equalsIgnoreCase("requestRequest")){
-                    Intent ide = new Intent(DirectionConfirmationActivity.this, NavigationMenuActivity.class);
-                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(ide);
-                    finish();
+                }else if(navType.equalsIgnoreCase("requestCancelled")){
+                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                    loginCredentials.bookingId = Utils.requestBookingResponse.getBookingId();
+                    loginCredentials.bookingStatus = "CANCELLED";
+                    updateBookingStatus(loginCredentials);
                 }
             }
         });
@@ -1254,9 +1350,9 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -1266,8 +1362,23 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // register new push message receiver
+        // by doing this, the activity will be notified each time a new message arrives
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(Utils.PUSH_NOTIFICATION));
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        super.onPause();
     }
 }

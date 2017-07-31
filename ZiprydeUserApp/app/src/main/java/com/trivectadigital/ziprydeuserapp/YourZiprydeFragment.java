@@ -107,7 +107,7 @@ public class YourZiprydeFragment extends Fragment {
                 String driverStatus = listOfBooking.getDriverStatus();
                 if(driverStatus != null){
                     if(driverStatus.equals("REQUESTED")) {
-                        showInfoDlg("Information", "Please wait till the driver accepts your request", "Ok", "info");
+                        showInfoDlg("Information", "Please wait till the driver accepts your request", "OK", "info");
                     }else{
                         Intent ide = new Intent(getActivity(), DriverInfoBookingActivity.class);
                         ide.putExtra("position", position);
@@ -115,7 +115,7 @@ public class YourZiprydeFragment extends Fragment {
                         startActivity(ide);
                     }
                 }else{
-                    showInfoDlg("Information", "Please wait till the driver accepts your request", "Ok", "info");
+                    showInfoDlg("Information", "Please wait till the driver accepts your request", "OK", "info");
                 }
             }
         });
@@ -162,9 +162,9 @@ public class YourZiprydeFragment extends Fragment {
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -174,7 +174,7 @@ public class YourZiprydeFragment extends Fragment {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }

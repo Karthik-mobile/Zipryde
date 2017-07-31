@@ -327,7 +327,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Logout"
+                    android:text="Log Out"
                     android:textColor="@color/whiteColor"
                     android:textSize="18dp"
                     android:textStyle="bold" />

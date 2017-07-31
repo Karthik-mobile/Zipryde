@@ -1,8 +1,10 @@
 package com.trivectadigital.ziprydedriverapp;
 
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -12,13 +14,19 @@ import android.widget.TextView;
 
 import com.trivectadigital.ziprydedriverapp.assist.CommissionAdapter;
 import com.trivectadigital.ziprydedriverapp.assist.CommissionDetails;
+import com.trivectadigital.ziprydedriverapp.assist.Utils;
+import com.trivectadigital.ziprydedriverapp.service.MyFirebaseMessagingService;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.LinkedList;
 
 public class NotificationActivity extends AppCompatActivity {
 
-    LinkedList<CommissionDetails> commissionDetailsList;
     ListView commissionList;
+
+    private static final String TAG = NotificationActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +51,25 @@ public class NotificationActivity extends AppCompatActivity {
             }
         });
 
-        commissionDetailsList = new LinkedList<CommissionDetails>();
-        commissionDetailsList.add(new CommissionDetails("101", "We have received your commission payment! Happy ride", "Today 22:03"));
-        commissionDetailsList.add(new CommissionDetails("102", "Please pay you commission on or before June 2017", "Today 20:28"));
-
+        try {
+            SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_NOTIFI, 0);
+            String notifications = pref.getString("notification", null);
+            if(notifications != null){
+                JSONArray jsonArray = new JSONArray(notifications);
+                Utils.commissionDetailsList = new LinkedList<CommissionDetails>();
+                for(int i = 0; i < jsonArray.length(); i++){
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+                    String message = jsonObject.getString("message");
+                    String time = jsonObject.getString("time");
+                    Utils.commissionDetailsList.add(new CommissionDetails(""+i, message, time));
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception: " + e.getMessage());
+        }
         commissionList = (ListView) findViewById(R.id.commissionList);
 
-        CommissionAdapter commissionAdapter = new CommissionAdapter(commissionDetailsList, this);
+        CommissionAdapter commissionAdapter = new CommissionAdapter(this);
         commissionList.setAdapter(commissionAdapter);
     }
 }

@@ -2,8 +2,10 @@ package com.trivectadigital.ziprydedriverapp;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -17,6 +19,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -29,8 +32,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydedriverapp.assist.GPSLocationService;
+import com.trivectadigital.ziprydedriverapp.assist.NotificationUtils;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -82,10 +87,32 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
     private long UPDATE_INTERVAL = 15000;  /* 15 secs */
     private long FASTEST_INTERVAL = 5000; /* 5 secs */
 
+    private BroadcastReceiver mRegistrationBroadcastReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+
+
+        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                // checking for type intent filter
+                if (intent.getAction().equals(Utils.REGISTRATION_COMPLETE)) {
+                    // gcm successfully registered
+                    // now subscribe to `global` topic to receive app wide notifications
+                    FirebaseMessaging.getInstance().subscribeToTopic(Utils.TOPIC_GLOBAL);
+
+                    displayFirebaseRegId();
+
+                }
+            }
+        };
+
+        displayFirebaseRegId();
+
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -147,7 +174,14 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
                     String json = prefs.getString("LoginCredentials", "");
                     Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
                     Log.e("FirstName",""+Utils.verifyLogInUserMobileInstantResponse.getFirstName());
-                    Intent ide = new Intent(SplashActivity.this, NewDashBoardActivity.class);
+                    Intent ide;
+                    Log.e("Utils.fromNotification",""+Utils.fromNotification);
+                    if(Utils.fromNotification){
+                        Utils.fromNotification = false;
+                        ide = new Intent(SplashActivity.this, RideActivity.class);
+                    }else{
+                        ide = new Intent(SplashActivity.this, NewDashBoardActivity.class);
+                    }
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
                     finish();
@@ -242,6 +276,18 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
+
+        // register GCM registration complete receiver
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(Utils.REGISTRATION_COMPLETE));
+
+        // register new push message receiver
+        // by doing this, the activity will be notified each time a new message arrives
+        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                new IntentFilter(Utils.PUSH_NOTIFICATION));
+
+        // clear the notification area when the app is opened
+        NotificationUtils.clearNotifications(getApplicationContext());
     }
 
     @Override
@@ -388,5 +434,18 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             mGoogleApiClient.disconnect();
         }
+    }// Fetches reg id from shared preferences
+    // and displays on the screen
+    private void displayFirebaseRegId() {
+        SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_PREF, 0);
+        String regId = pref.getString("regId", null);
+
+        Log.e("FirebaseRegId", "Firebase reg id: " + regId);
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        super.onPause();
     }
 }

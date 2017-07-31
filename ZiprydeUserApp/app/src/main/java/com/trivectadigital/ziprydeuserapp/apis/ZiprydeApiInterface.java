@@ -32,7 +32,7 @@ public interface ZiprydeApiInterface {
     @Multipart
     @POST("saveUser")
     Call<SingleInstantResponse> saveUser(@Part("userType") RequestBody userType, @Part("firstName") RequestBody firstName,
-                                         @Part("lastName") RequestBody lastName, @Part("emailId") RequestBody emailId, @Part("mobileNumber") RequestBody mobileNumber, @Part("password") RequestBody password, @Part("alternateNumber") RequestBody alternateNumber);
+                                         @Part("lastName") RequestBody lastName, @Part("emailId") RequestBody emailId, @Part("mobileNumber") RequestBody mobileNumber, @Part("password") RequestBody password, @Part("alternateNumber") RequestBody alternateNumber, @Part("deviceToken") RequestBody deviceToken);
 
     @Multipart
     @POST("saveUser")

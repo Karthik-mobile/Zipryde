@@ -27,6 +27,7 @@ public class SingleInstantParameters {
     public String userId;
     public String bookingId;
     public String bookingStatus;
+    public String deviceToken;
 }
 
 

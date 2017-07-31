@@ -193,7 +193,7 @@ public class NavigationMenuActivity extends AppCompatActivity
                 showNotificationFragment();
                 break;
             case R.id.historyLayout:
-                titleText.setText("Your ZipRydes Requests");
+                titleText.setText("ZipRyde Requests");
                 showHideNavigationMenu();
                 showHistoryFragment();
                 break;
@@ -203,7 +203,7 @@ public class NavigationMenuActivity extends AppCompatActivity
                 break;
             case R.id.logoutLayout:
                 //showHideNavigationMenu();
-                showInfoDlg("Information", "Are you sure do you want to Logout??", "YES", "logout");
+                showInfoDlg("Information", "Are you sure you want to Log Out?", "YES", "logout");
                 break;
             case R.id.editProfile:
                 Intent ide = new Intent(NavigationMenuActivity.this, EditProfileActivity.class);

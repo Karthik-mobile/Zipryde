@@ -16,13 +16,22 @@
 
         <TextView
             android:id="@+id/contentText"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginLeft="10dp"
+            android:layout_weight="1"
             android:text="We have received your commission payment! Happy ride"
             android:textColor="@color/primaryText"
             android:textSize="16dp" />
+
+        <ImageView
+            android:id="@+id/deleteImg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:focusable="false"
+            android:src="@drawable/ic_action_delete" />
 
     </LinearLayout>
 
@@ -35,5 +44,6 @@
         android:text="Today 18:23"
         android:textColor="@color/black_overlay"
         android:textSize="13dp" />
+
 
 </LinearLayout>

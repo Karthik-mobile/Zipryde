@@ -73,11 +73,17 @@ public class LoginActivity extends AppCompatActivity {
                 }else if(password.isEmpty()){
                     showInfoDlg("Information", "Please enter the Password", "OK", "info");
                 }else {
+                    SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_PREF, 0);
+                    String regId = pref.getString("regId", null);
                     apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.userType = "RIDER";
                     loginCredentials.mobileNumber = phoneno;
                     loginCredentials.password = password;
+                    loginCredentials.deviceToken = regId;
+                    Gson gson = new Gson();
+                    String json = gson.toJson(loginCredentials);
+                    Log.e("json",""+json);
                     callMobileService(loginCredentials);
                 }
             }

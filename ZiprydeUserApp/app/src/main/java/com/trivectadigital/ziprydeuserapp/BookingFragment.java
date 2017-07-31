@@ -280,7 +280,7 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
                 }else{
-                    showInfoDlg("Information", "Couldn't get the current location. Please wait..", "Ok", "warning");
+                    showInfoDlg("Information", "Couldn't get the current location. Please wait..", "OK", "warning");
                 }
             }
         });
@@ -422,7 +422,7 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                     ide.putExtra("Longitude",""+crtLocation.longitude);
                     startActivity(ide);
                 }else{
-                    showInfoDlg("Information", "You must enter destination to proceed.", "Ok", "warning");
+                    showInfoDlg("Information", "You must enter destination to proceed.", "OK", "warning");
                 }
             }
         });
@@ -679,9 +679,9 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -691,7 +691,7 @@ public class BookingFragment extends Fragment implements OnMapReadyCallback,
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }

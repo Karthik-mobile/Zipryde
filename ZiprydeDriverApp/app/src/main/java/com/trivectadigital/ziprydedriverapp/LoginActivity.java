@@ -69,15 +69,21 @@ public class LoginActivity extends AppCompatActivity {
                 phoneno = phonenoEdit.getText().toString().trim();
                 password = passwordEdit.getText().toString().trim();
                 if (phoneno.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the phone number", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the phone number", "OK", "info");
                 } else if (password.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the password", "Ok", "info");
+                    showInfoDlg("Information", "Please enter the password", "OK", "info");
                 } else {
+                    SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_PREF, 0);
+                    String regId = pref.getString("regId", null);
                     apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.userType = "DRIVER";
                     loginCredentials.mobileNumber = phoneno;
                     loginCredentials.password = password;
+                    loginCredentials.deviceToken = regId;
+                    Gson gson = new Gson();
+                    String json = gson.toJson(loginCredentials);
+                    Log.e("json",""+json);
                     callMobileService(loginCredentials);
                 }
             }
@@ -125,9 +131,9 @@ public class LoginActivity extends AppCompatActivity {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "info");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -136,7 +142,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onFailure(Call<Void> call, Throwable t) {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }
@@ -173,13 +179,13 @@ public class LoginActivity extends AppCompatActivity {
                     editor.putString("LoginCredentials", json);
                     editor.commit();
                     insertDriverSession();
-                    showInfoDlg("Success..", "Successfully logged in.", "Ok", "success");
+                    showInfoDlg("Success..", "Successfully logged in.", "OK", "success");
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -189,7 +195,7 @@ public class LoginActivity extends AppCompatActivity {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }

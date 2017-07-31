@@ -24,6 +24,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
@@ -67,6 +68,8 @@ public class FromToPlaceActivity extends AppCompatActivity implements GoogleApiC
         autocomplete_places = (AutoCompleteTextView) findViewById(R.id.autocomplete_places);
         autocomplete_placesdest = (AutoCompleteTextView) findViewById(R.id.autocomplete_placesdest);
 
+        AutocompleteFilter filter = new AutocompleteFilter.Builder().setCountry(Utils.countryCode).build();
+
         clearsearchImageView = (ImageView) findViewById(R.id.clearsearchImageView);
         clearsearchImageViewdest = (ImageView) findViewById(R.id.clearsearchImageViewdest);
 
@@ -107,7 +110,7 @@ public class FromToPlaceActivity extends AppCompatActivity implements GoogleApiC
         // Set up the adapter that will retrieve suggestions from the Places Geo Data API that cover
         // the entire world.
         mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, BOUNDS_GREATER_SYDNEY,
-                null);
+                filter);
         autocomplete_placesdest.setAdapter(mAdapter);
 
         autocomplete_placesdest.addTextChangedListener(new TextWatcher() {

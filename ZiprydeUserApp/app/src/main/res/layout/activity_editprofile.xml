@@ -48,6 +48,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:paddingTop="@dimen/nav_header_vertical_spacing"
+                    android:visibility="gone"
                     app:srcCompat="@drawable/person" />
 
             </LinearLayout>

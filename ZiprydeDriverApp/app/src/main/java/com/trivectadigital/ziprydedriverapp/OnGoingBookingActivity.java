@@ -4,13 +4,13 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -18,10 +18,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -31,11 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
-import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
-import com.trivectadigital.ziprydedriverapp.assist.DataParser;
-import com.trivectadigital.ziprydedriverapp.assist.Utils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -58,6 +50,10 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
+import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
+import com.trivectadigital.ziprydedriverapp.assist.DataParser;
+import com.trivectadigital.ziprydedriverapp.assist.Utils;
 import com.trivectadigital.ziprydedriverapp.modelget.ListOfBooking;
 import com.trivectadigital.ziprydedriverapp.modelget.ListOfRequestedBooking;
 import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
@@ -297,20 +293,20 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                         endtripBtn.setVisibility(View.GONE);
                         starttripBtn.setVisibility(View.VISIBLE);
                         confirmBtn.setVisibility(View.GONE);
-                        showInfoDlg("Success..", "Request Accepted Successfully.", "Ok", "success");
+                        showInfoDlg("Success..", "Request Accepted Successfully.", "OK", "success");
                     }else if(loginCredentials.driverStatus.equals("ON_TRIP")){
                         endtripBtn.setVisibility(View.VISIBLE);
                         starttripBtn.setVisibility(View.GONE);
-                        showInfoDlg("Success..", "Trip Started Successfully.", "Ok", "success");
+                        showInfoDlg("Success..", "Trip Started Successfully.", "OK", "success");
                     }else if(loginCredentials.driverStatus.equals("COMPLETED")){
-                        showInfoDlg("Success..", "Trip Ended Successfully.", "Ok", "trip success");
+                        showInfoDlg("Success..", "Trip Ended Successfully.", "OK", "trip success");
                     }
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -320,7 +316,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }
@@ -534,7 +530,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                         builder.include(marker.getPosition());
                     }
                     LatLngBounds bounds = builder.build();
-                    int padding = 200; // offset from edges of the map in pixels
+                    int padding = 50; // offset from edges of the map in pixels
                     CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
                     mMap.moveCamera(cu);
                     mMap.animateCamera(cu);

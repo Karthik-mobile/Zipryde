@@ -20,7 +20,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.trivectadigital.ziprydedriverapp.CashDisplyActivity;
+import com.trivectadigital.ziprydedriverapp.HistoryActivity;
 import com.trivectadigital.ziprydedriverapp.NewDashBoardActivity;
 import com.trivectadigital.ziprydedriverapp.OnGoingBookingActivity;
 import com.trivectadigital.ziprydedriverapp.R;
@@ -130,6 +132,9 @@ public class CurrentRideAdapter extends BaseAdapter {
                 loginCredentials.driverId = ""+Utils.verifyLogInUserMobileInstantResponse.getUserId();
                 loginCredentials.bookingId = currentRideDetails.getBookingId();
                 loginCredentials.driverStatus = "ACCEPTED";
+                Gson gson = new Gson();
+                String json = gson.toJson(loginCredentials);
+                Log.e("json",""+json);
                 updateBookingDriverStatus(loginCredentials);
             }
         });
@@ -214,7 +219,7 @@ public class CurrentRideAdapter extends BaseAdapter {
                 @Override
                 public void run() {
                     dialog.dismiss();
-                    Intent ide = new Intent(context, RideActivity.class);
+                    Intent ide = new Intent(context, HistoryActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     context.startActivity(ide);
                     ((AppCompatActivity)context).finish();

@@ -577,7 +577,10 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
             if (addresses != null) {
                 Address returnedAddress = addresses.get(0);
                 StringBuilder strReturnedAddress = new StringBuilder("");
-
+                Log.e("Country CODE",""+returnedAddress.getCountryCode());
+                Utils.countryCode = returnedAddress.getCountryCode();
+                Log.e("Country NAME",""+returnedAddress.getCountryName());
+                Log.e("Country Locality",""+returnedAddress.getLocality());
                 for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
                     strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
                 }
@@ -634,9 +637,9 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                 }else{
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
                     }
                 }
             }
@@ -646,7 +649,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }

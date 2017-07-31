@@ -89,7 +89,7 @@
                 android:layout_marginRight="10dp"
                 android:gravity="center_vertical"
                 android:text="Booking"
-                android:textColor="@color/primaryText"
+                android:textColor="@color/newBackTextColor"
                 android:textSize="12dp"
                 android:textStyle="bold" />
 

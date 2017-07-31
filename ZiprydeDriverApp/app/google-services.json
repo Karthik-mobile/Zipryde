@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "344743968798",
+    "firebase_url": "https://zipryde-6ded6.firebaseio.com",
+    "project_id": "zipryde-6ded6",
+    "storage_bucket": "zipryde-6ded6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:344743968798:android:038bb55179715f7d",
+        "android_client_info": {
+          "package_name": "com.trivectadigital.ziprydedriverapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "344743968798-1ivtdofe910ikvb9godmes8no1ald37k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDo_dSjW398TpFjGrOJrW_U8PJ2CPzkmKc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
