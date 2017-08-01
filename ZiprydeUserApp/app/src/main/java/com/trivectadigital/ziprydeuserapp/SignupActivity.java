@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -100,6 +101,8 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     showInfoDlg("Information", "Please enter the Last Name", "OK", "info");
                 }else if(emailadd.isEmpty()){
                     showInfoDlg("Information", "Please enter the Email Id", "OK", "info");
+                } else if (!Patterns.EMAIL_ADDRESS.matcher(emailadd).matches()) {
+                    showInfoDlg("Information", "Please enter the Proper Email Id", "OK", "info");
                 }else if(password.isEmpty()){
                     showInfoDlg("Information", "Please enter the Password", "OK", "info");
                 }else if(confirmpassword.isEmpty()){
@@ -122,6 +125,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     loginCredentials.password = password;
                     loginCredentials.alternateNumber = "";
                     loginCredentials.deviceToken = regId;
+                    loginCredentials.isEnable = 1;
                     Gson gson = new Gson();
                     String json = gson.toJson(loginCredentials);
                     Log.e("json",""+json);
@@ -138,6 +142,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
@@ -150,8 +155,9 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         RequestBody passw = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.password);
         RequestBody alternateNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.alternateNumber);
         RequestBody deviceToken = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.deviceToken);
+        RequestBody isEnable = RequestBody.create(MediaType.parse("text/plain"), ""+loginCredentials.isEnable);
 
-        Call<SingleInstantResponse> call = apiService.saveUser(userType, firstName, lastName, emailId, mobileNumber, passw, alternateNumber, deviceToken);
+        Call<SingleInstantResponse> call = apiService.saveUser(userType, firstName, lastName, emailId, mobileNumber, passw, alternateNumber, deviceToken, isEnable);
         call.enqueue(new Callback<SingleInstantResponse>() {
             @Override
             public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -209,7 +215,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("error") ){
+        if(navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("error") || navType.equalsIgnoreCase("server")){
             newnegativeBtn.setVisibility(View.GONE);
         }
 

@@ -12,9 +12,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
+        android:background="@color/colorAccent"
         android:paddingBottom="10dp"
-        android:background="@color/colorAccent">
+        android:paddingTop="10dp">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -98,6 +98,13 @@
 
         </LinearLayout>
 
+
+        <ImageView
+            android:id="@+id/callDriverImg"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_action_phone" />
+
         <LinearLayout
             android:id="@+id/cancelBookingLay"
             android:layout_width="wrap_content"
@@ -112,16 +119,16 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:textColor="@color/whiteColor"
-                android:text="Cancel" />
+                android:text="Cancel"
+                android:textColor="@color/whiteColor" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:textColor="@color/whiteColor"
-                android:text="Booking" />
+                android:text="Booking"
+                android:textColor="@color/whiteColor" />
 
             <ImageView
                 android:id="@+id/imgNext"

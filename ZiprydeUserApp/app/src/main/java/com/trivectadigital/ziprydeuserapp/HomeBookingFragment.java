@@ -147,6 +147,8 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
 
     ImageView imgNext;
 
+    LinearLayout gotoMyLocation;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -200,6 +202,22 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                     intent.putExtra("longitude",""+location.longitude);
                     intent.putExtra("address",""+address);
                     startActivity(intent);
+                }
+            }
+        });
+
+        gotoMyLocation = ((LinearLayout) view.findViewById(R.id.gotoMyLocation));
+
+        gotoMyLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(crtLatLan != null){
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLatLan));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLatLan,15));
+                    mMap.animateCamera(CameraUpdateFactory.zoomIn());
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                }else{
+                    showInfoDlg("Information", "Couldn't get the current location. Please wait..", "OK", "warning");
                 }
             }
         });
@@ -271,12 +289,10 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
             @Override
             public void onCameraIdle() {
                 Log.e("onCameraIdle","onCameraIdle");
-                location = mMap.getCameraPosition().target;
-                Utils.startingLatLan = location;
+                LatLng location = mMap.getCameraPosition().target;
                 Log.e("latitude",""+location.latitude);
                 Log.e("longitude",""+location.longitude);
-                address = getCompleteAddressString(location.latitude, location.longitude);
-                Log.e("address",""+address);
+                getNearByActiveDrivers(""+location.latitude, ""+location.longitude);
             }
         });
     }
@@ -290,6 +306,9 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                 Log.e("GPSLocation Longitude",""+String.valueOf(mLastLocation.getLongitude()));
                 if(mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
+                    location = crtLocation;
+                    Utils.startingLatLan = location;
+                    address = getCompleteAddressString(location.latitude, location.longitude);
                     mMap.addMarker(new MarkerOptions().position(crtLocation).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromResource(R.drawable.currentlocationicon)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,17));
@@ -343,7 +362,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning")){
+        if(navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("server")){
             newnegativeBtn.setVisibility(View.GONE);
         }else{
             newnegativeBtn.setVisibility(View.VISIBLE);
@@ -422,6 +441,9 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                 if(mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
                     crtLatLan = crtLocation;
+                    location = crtLocation;
+                    Utils.startingLatLan = location;
+                    address = getCompleteAddressString(location.latitude, location.longitude);
                     mMap.addMarker(new MarkerOptions().position(crtLocation).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromResource(R.drawable.currentlocationicon)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,17));
@@ -536,15 +558,18 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
     }
 
     @Override
-    public void onLocationChanged(Location location) {
-        if(location!=null) {
-            Log.e("LocationChanged", "Latitude : " + location.getLatitude() + " , Longitude : " + location.getLongitude());
+    public void onLocationChanged(Location locations) {
+        if(locations!=null) {
+            Log.e("LocationChanged", "Latitude : " + locations.getLatitude() + " , Longitude : " + locations.getLongitude());
             if (mLastLocation == null) {
-                mLastLocation = location;
+                mLastLocation = locations;
                 if(mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
                     getNearByActiveDrivers(""+mLastLocation.getLatitude(), ""+mLastLocation.getLongitude());
                     crtLatLan = crtLocation;
+                    location = crtLocation;
+                    Utils.startingLatLan = location;
+                    address = getCompleteAddressString(location.latitude, location.longitude);
                     mMap.addMarker(new MarkerOptions().position(crtLocation).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromResource(R.drawable.currentlocationicon)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,17));
@@ -608,6 +633,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();

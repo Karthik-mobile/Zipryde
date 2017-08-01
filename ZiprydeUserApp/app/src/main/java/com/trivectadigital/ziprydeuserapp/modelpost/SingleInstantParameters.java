@@ -28,6 +28,7 @@ public class SingleInstantParameters {
     public String bookingId;
     public String bookingStatus;
     public String deviceToken;
+    public int isEnable;
 }
 
 

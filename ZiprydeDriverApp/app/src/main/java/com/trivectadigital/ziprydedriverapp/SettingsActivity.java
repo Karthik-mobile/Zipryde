@@ -99,7 +99,7 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("info")){
+        if(navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server")){
             newnegativeBtn.setVisibility(View.GONE);
         }else{
             newnegativeBtn.setVisibility(View.VISIBLE);

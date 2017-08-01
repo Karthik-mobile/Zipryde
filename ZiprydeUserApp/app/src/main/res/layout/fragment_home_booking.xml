@@ -16,6 +16,26 @@
         tools:context=".HomeBookingFragment" />
 
     <LinearLayout
+        android:id="@+id/gotoMyLocation"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_above="@+id/pickupLay"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="25dp"
+        android:layout_marginRight="15dp"
+        android:background="@drawable/cardlayout"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_action_gps_fixed" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/pickupLay"
         android:layout_width="match_parent"
         android:layout_height="120dp"
         android:background="@color/colorAccent"

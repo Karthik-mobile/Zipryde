@@ -34,6 +34,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -83,50 +84,57 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
+        int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getBaseContext());
+        // Showing status
+        if(status != ConnectionResult.SUCCESS){
+            int requestCode = 10;
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this, requestCode);
+            dialog.show();
+        }else{
+            mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
 
-        mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
+                    // checking for type intent filter
+                    if (intent.getAction().equals(Utils.REGISTRATION_COMPLETE)) {
+                        // gcm successfully registered
+                        // now subscribe to `global` topic to receive app wide notifications
+                        FirebaseMessaging.getInstance().subscribeToTopic(Utils.TOPIC_GLOBAL);
 
-                // checking for type intent filter
-                if (intent.getAction().equals(Utils.REGISTRATION_COMPLETE)) {
-                    // gcm successfully registered
-                    // now subscribe to `global` topic to receive app wide notifications
-                    FirebaseMessaging.getInstance().subscribeToTopic(Utils.TOPIC_GLOBAL);
+                        displayFirebaseRegId();
 
-                    displayFirebaseRegId();
-
+                    }
                 }
+            };
+
+            displayFirebaseRegId();
+
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.hide();
             }
-        };
 
-        displayFirebaseRegId();
+            mContentView = findViewById(R.id.fullscreen_content);
+            delayedHide(100);
 
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
+            if (ContextCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // Should we show an explanation?
+                if (ActivityCompat.shouldShowRequestPermissionRationale(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    //This is called if user has denied the permission before
+                    //In this case I am just asking the permission again
+                    ActivityCompat.requestPermissions(SplashActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
 
-        mContentView = findViewById(R.id.fullscreen_content);
-        delayedHide(100);
-
-        if (ContextCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Should we show an explanation?
-            if (ActivityCompat.shouldShowRequestPermissionRationale(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                //This is called if user has denied the permission before
-                //In this case I am just asking the permission again
-                ActivityCompat.requestPermissions(SplashActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
-
+                } else {
+                    ActivityCompat.requestPermissions(SplashActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
+                }
             } else {
-                ActivityCompat.requestPermissions(SplashActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
-            }
-        } else {
-            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE );
-            boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            if(statusOfGPS){
-                gotoNextActivity();
-            }else{
-                showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
+                LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE );
+                boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                if(statusOfGPS){
+                    gotoNextActivity();
+                }else{
+                    showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
+                }
             }
         }
     }

@@ -108,6 +108,7 @@ public class NavigationMenuActivity extends AppCompatActivity implements View.On
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
@@ -251,6 +252,9 @@ public class NavigationMenuActivity extends AppCompatActivity implements View.On
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
+        if(navType.equalsIgnoreCase("server")){
+            newnegativeBtn.setVisibility(View.GONE);
+        }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
         dialogtitleText.setText(""+title);

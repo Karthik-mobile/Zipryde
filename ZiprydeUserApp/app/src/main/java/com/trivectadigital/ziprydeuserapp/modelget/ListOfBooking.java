@@ -43,6 +43,16 @@ public class ListOfBooking {
     private String driverId;
     @SerializedName("driverImage")
     private String driverImage;
+    @SerializedName("driverMobileNumber")
+    private String driverMobileNumber;
+
+    public String getDriverMobileNumber() {
+        return driverMobileNumber;
+    }
+
+    public void setDriverMobileNumber(String driverMobileNumber) {
+        this.driverMobileNumber = driverMobileNumber;
+    }
 
     public String getDriverImage() {
         return driverImage;

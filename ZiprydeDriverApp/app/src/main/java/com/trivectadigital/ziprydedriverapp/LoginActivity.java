@@ -38,7 +38,7 @@ public class LoginActivity extends AppCompatActivity {
     Button sign_btn;
     EditText phonenoEdit, passwordEdit;
     ZiprydeApiInterface apiService;
-    TextView gotoRegister;
+    TextView gotoRegister, gotoForgetPwd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +59,7 @@ public class LoginActivity extends AppCompatActivity {
 
         sign_btn = (Button) findViewById(R.id.sign_btn);
         gotoRegister = (TextView) findViewById(R.id.gotoRegister);
+        gotoForgetPwd = (TextView) findViewById(R.id.gotoForgetPwd);
 
         phonenoEdit = (EditText) findViewById(R.id.phonenoEdit);
         passwordEdit = (EditText) findViewById(R.id.passwordEdit);
@@ -104,6 +105,15 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent ide = new Intent(LoginActivity.this, SettingsActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
+            }
+        });
+
+        gotoForgetPwd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent ide = new Intent(LoginActivity.this, ForgetPasswordActivity.class);
                 ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(ide);
             }
@@ -155,6 +165,7 @@ public class LoginActivity extends AppCompatActivity {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();

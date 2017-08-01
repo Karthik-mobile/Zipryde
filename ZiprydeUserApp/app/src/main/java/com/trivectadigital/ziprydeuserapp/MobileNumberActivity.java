@@ -91,6 +91,7 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
@@ -149,7 +150,7 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("info")){
+        if(navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server")){
             newnegativeBtn.setVisibility(View.GONE);
         }else{
             newnegativeBtn.setVisibility(View.VISIBLE);

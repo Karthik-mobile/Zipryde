@@ -145,7 +145,7 @@ public class GPSLocationService extends Service implements GoogleApiClient.Conne
                 if(Utils.firstLocation != null) {
                     double distance = Utils.firstLocation.distanceTo(location);
                     Log.e("distance", "" + distance);
-                    if (distance >= 10) {
+                    if (distance >= 3) {
                         Utils.firstLocation = location;
                         SharedPreferences prefs = mContext.getSharedPreferences("LoginCredentials", MODE_PRIVATE);
                         String phoneno = prefs.getString("phoneNumber", null);

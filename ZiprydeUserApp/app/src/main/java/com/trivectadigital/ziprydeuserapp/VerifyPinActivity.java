@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.InputFilter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,6 +72,7 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
         resendCode.setOnClickListener(this);
 
         otpEdit = (EditText) findViewById(R.id.otpEdit);
+        otpEdit.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
         otpEdit.setText(""+ Utils.getOTPByMobileInstantResponse.getOtp());
     }
 
@@ -109,6 +111,7 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
@@ -153,6 +156,7 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
@@ -208,7 +212,7 @@ public class VerifyPinActivity extends AppCompatActivity implements View.OnClick
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("info")){
+        if(navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server")){
             newnegativeBtn.setVisibility(View.GONE);
         }
 

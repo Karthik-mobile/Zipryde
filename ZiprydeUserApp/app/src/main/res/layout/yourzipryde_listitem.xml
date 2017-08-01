@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="wrap_content"
     android:background="@color/appBackground"
     android:orientation="horizontal"
@@ -210,15 +211,17 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="16dp" />
 
-        <ImageView
+        <com.trivectadigital.ziprydeuserapp.assist.CircleImageView
             android:id="@+id/bookingProfileImg"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_gravity="end"
             android:layout_marginBottom="5dp"
             android:layout_marginTop="5dp"
+            android:src="@drawable/person"
             android:gravity="end"
-            android:src="@drawable/person" />
+            app:civ_border_color="@color/dark"
+            app:civ_border_width="2dp" />
 
     </LinearLayout>
 

@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -79,7 +80,17 @@ public class NavigationMenuActivity extends AppCompatActivity
         menuImgBlack.setVisibility(View.GONE);
 
         navigationView.setCheckedItem(R.id.nav_home);
-        showBookingFragment();
+
+        Intent intent = getIntent();
+        Log.e("intent ","intent : "+intent.getExtras());
+        if(intent.hasExtra("body")){
+            titleText.setText("ZipRyde Requests");
+            showHideNavigationMenu();
+            showHistoryFragment();
+        }else{
+            showBookingFragment();
+        }
+
 
         menuImgBlack.setOnClickListener(new View.OnClickListener() {
             @Override

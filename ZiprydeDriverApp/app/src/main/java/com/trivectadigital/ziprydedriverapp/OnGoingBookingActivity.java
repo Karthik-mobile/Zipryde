@@ -271,6 +271,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
@@ -679,7 +680,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning")){
+        if(navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("error") || navType.equalsIgnoreCase("server")){
             newnegativeBtn.setVisibility(View.GONE);
         }else{
             newnegativeBtn.setVisibility(View.VISIBLE);
@@ -749,6 +750,11 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 dialog.dismiss();
                 if(navType.equalsIgnoreCase("gps")){
                     startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_CHECK_SETTINGS);
+                }else if(navType.equalsIgnoreCase("error")){
+                    Intent ide = new Intent(OnGoingBookingActivity.this, HistoryActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
                 }
             }
         });

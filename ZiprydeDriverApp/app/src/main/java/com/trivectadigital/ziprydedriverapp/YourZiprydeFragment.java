@@ -104,11 +104,17 @@ public class YourZiprydeFragment extends Fragment {
         history_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent ide = new Intent(getActivity(), OnGoingBookingActivity.class);
-                ide.putExtra("position",position);
-                ide.putExtra("type","listbooking");
-                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(ide);
+                ListOfBooking listOfBooking = Utils.getBookingByDriverIdInstantResponse.get(position);
+                String bookingStatus = listOfBooking.getBookingStatus();
+                if(bookingStatus.equals("CANCELLED")){
+                    showInfoDlg("Information", "This booking has been cancelled. Please try some other bookings.", "OK", "info");
+                }else{
+                    Intent ide = new Intent(getActivity(), OnGoingBookingActivity.class);
+                    ide.putExtra("position",position);
+                    ide.putExtra("type","listbooking");
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                }
             }
         });
 
@@ -126,6 +132,7 @@ public class YourZiprydeFragment extends Fragment {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
@@ -184,7 +191,7 @@ public class YourZiprydeFragment extends Fragment {
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equals("info")){
+        if(navType.equals("info") || navType.equalsIgnoreCase("server")){
             newnegativeBtn.setVisibility(View.GONE);
         }
 

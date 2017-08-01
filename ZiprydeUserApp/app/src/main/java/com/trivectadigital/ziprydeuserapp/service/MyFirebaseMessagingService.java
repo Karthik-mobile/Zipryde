@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.trivectadigital.ziprydeuserapp.DriverInfoBookingActivity;
 import com.trivectadigital.ziprydeuserapp.NavigationMenuActivity;
 import com.trivectadigital.ziprydeuserapp.R;
 import com.trivectadigital.ziprydeuserapp.assist.MessageReceivedEvent;
@@ -43,7 +44,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Log.e(TAG, "Notification Body: " + remoteMessage.getNotification().getBody());
             Log.e(TAG, "Data Payload: " + remoteMessage.getData().toString());
 //            handleNotification(remoteMessage.getNotification().getBody());
-            handleDataMessage(remoteMessage.getNotification().getBody());
+            handleDataMessage(remoteMessage.getNotification().getBody(), remoteMessage.getData().get("notificationType"));
         }
 
         // Check if message contains a data payload.
@@ -74,7 +75,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //        }
     }
 
-    private void handleDataMessage(String message) {
+    private void handleDataMessage(String message, String title) {
         Log.e(TAG, "push json: ");
 
 //        try {
@@ -97,14 +98,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
 //                // app is in foreground, broadcast the push message
-                EventBus.getDefault().post(new MessageReceivedEvent(message));
+                EventBus.getDefault().post(new MessageReceivedEvent(message, title));
 //
 //                // play notification sound
                 NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
                 notificationUtils.playNotificationSound();
             } else {
 //                // app is in background, show the notification in notification tray
-                Intent resultIntent = new Intent(getApplicationContext(), NavigationMenuActivity.class);
+                Intent resultIntent = new Intent(getApplicationContext(), DriverInfoBookingActivity.class);
 //                resultIntent.putExtra("message", message);
 //
 //                // check for image attachment

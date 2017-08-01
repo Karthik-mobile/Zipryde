@@ -58,14 +58,27 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
+import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.PlaceAutocompleteAdapter;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
+import com.trivectadigital.ziprydeuserapp.modelget.ListOfCurrentCabs;
+import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
 
+import org.json.JSONObject;
+
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapReadyCallback,
                                                                                 GoogleApiClient.ConnectionCallbacks,
@@ -103,10 +116,16 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
 
     LinearLayout confirmBooking;
 
+    LinearLayout gotoMyLocation;
+
+    ZiprydeApiInterface apiService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_place_map);
+
+        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
 
         mGoogleApiClient = new GoogleApiClient.Builder(SelectPlaceMapActivity.this)
                 .addConnectionCallbacks(this)
@@ -159,6 +178,8 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         clearsearchImageView.setVisibility(View.GONE);
         // Register a listener that receives callbacks when a suggestion has been selected
         mAutocompleteView.setOnItemClickListener(mAutocompleteClickListener);
+
+        gotoMyLocation = ((LinearLayout) findViewById(R.id.gotoMyLocation));
 
         AutocompleteFilter filter = new AutocompleteFilter.Builder().setCountry(Utils.countryCode).build();
         // Set up the adapter that will retrieve suggestions from the Places Geo Data API that cover
@@ -213,12 +234,27 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
                     intent.putExtra("longitude",""+location.longitude);
                     intent.putExtra("address",""+address);
                     startActivity(intent);
+                    finish();
                 }else{
                     Utils.endingPlaceAddress = address;
                     Utils.endingLatLan = new LatLng(location.latitude, location.longitude);
                     Intent intent = new Intent(SelectPlaceMapActivity.this, DirectionConfirmationActivity.class);
                     startActivity(intent);
                     finish();
+                }
+            }
+        });
+
+        gotoMyLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(crtLatLan != null){
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLatLan));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLatLan,15));
+                    mMap.animateCamera(CameraUpdateFactory.zoomIn());
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                }else{
+                    showInfoDlg("Information", "Couldn't get the current location. Please wait..", "OK", "warning");
                 }
             }
         });
@@ -381,6 +417,70 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
                 mAutocompleteView.setText(address);
                 mAutocompleteView.setSelection(mAutocompleteView.getText().length());
                 clearsearchImageView.setVisibility(View.VISIBLE);
+                getNearByActiveDrivers(""+location.latitude, ""+location.longitude);
+            }
+        });
+    }
+
+    public void getNearByActiveDrivers(String latitude, String longitude){
+        Log.e("fromLatitude",""+latitude);
+        Log.e("fromLongitude",""+longitude);
+        SingleInstantParameters loginCredentials = new SingleInstantParameters();
+        loginCredentials.fromLatitude = latitude;
+        loginCredentials.fromLongitude = longitude;
+
+        final Dialog dialog = new Dialog(SelectPlaceMapActivity.this, android.R.style.Theme_Dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.loadingimage_layout);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        dialog.show();
+
+        Call<LinkedList<ListOfCurrentCabs>> call = apiService.getNearByActiveDrivers(loginCredentials);
+        call.enqueue(new Callback<LinkedList<ListOfCurrentCabs>>() {
+            @Override
+            public void onResponse(Call<LinkedList<ListOfCurrentCabs>> call, Response<LinkedList<ListOfCurrentCabs>> response) {
+                int statusCode = response.code();
+                Log.e("statusCode",""+statusCode);
+                Log.e("response.body",""+response.body());
+                Log.e("response.errorBody",""+response.errorBody());
+                Log.e("response.isSuccessful",""+response.isSuccessful());
+                dialog.dismiss();
+                if(response.isSuccessful()){
+                    Utils.getNearByActiveDriversInstantResponse = response.body();
+                    Log.e("size",""+Utils.getNearByActiveDriversInstantResponse.size());
+                    final List<Marker> markers = new LinkedList<Marker>();
+                    for(int i = 0; i < Utils.getNearByActiveDriversInstantResponse.size(); i++){
+                        String latitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLatitude();
+                        String longitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLongitude();
+                        String cabID = Utils.getNearByActiveDriversInstantResponse.get(i).getCabTypeId();
+                        String userId = Utils.getNearByActiveDriversInstantResponse.get(i).getUserId();
+                        Log.e("cabID userId","userId : "+userId+" cabID : "+cabID);
+                        Log.e("latitude longitude","latitude : "+latitude+" longitude : "+longitude);
+                        LatLng tempLatLong = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                        Marker marker = mMap.addMarker(new MarkerOptions().position(tempLatLong).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
+                        Log.e("marker contains",""+markers.contains(marker));
+                        markers.add(marker);
+                    }
+                }else{
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
+                    } catch (Exception e) {
+                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<LinkedList<ListOfCurrentCabs>> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure", t.toString());
+                dialog.dismiss();
+                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
             }
         });
     }
@@ -444,7 +544,7 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning")){
+        if(navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("server")){
             newnegativeBtn.setVisibility(View.GONE);
         }else{
             newnegativeBtn.setVisibility(View.VISIBLE);

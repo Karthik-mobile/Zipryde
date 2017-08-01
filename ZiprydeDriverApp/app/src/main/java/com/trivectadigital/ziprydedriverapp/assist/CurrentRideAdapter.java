@@ -154,6 +154,7 @@ public class CurrentRideAdapter extends BaseAdapter {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
@@ -210,6 +211,9 @@ public class CurrentRideAdapter extends BaseAdapter {
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
+        if(navType.equalsIgnoreCase("error")){
+            newnegativeBtn.setVisibility(View.GONE);
+        }
 
         if (navType.equalsIgnoreCase("success")) {
             headerIcon.setImageResource(R.drawable.successicon);
@@ -236,6 +240,12 @@ public class CurrentRideAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+                if(navType.equalsIgnoreCase("error")){
+                    Intent ide = new Intent(context, RideActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    context.startActivity(ide);
+                    ((AppCompatActivity)context).finish();
+                }
             }
         });
 

@@ -87,12 +87,11 @@
             android:textSize="18dp" />
 
         <TextView
-            android:id="@+id/gotoLogin"
+            android:id="@+id/gotoForgetPwd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:text="Forget Password?"
-            android:visibility="gone"
             android:textColor="@color/primaryText"
             android:textSize="16dp"  />
 

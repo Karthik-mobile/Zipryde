@@ -50,6 +50,9 @@ public interface ZiprydeApiInterface {
     @POST("zipryde/verifyLogInUser")
     Call<SingleInstantResponse> verifyLogInUser(@Body SingleInstantParameters parameters);
 
+    @POST("zipryde/updatePasswordByUserAndType")
+    Call<SingleInstantResponse> updatePasswordByUserAndType(@Body SingleInstantParameters parameters);
+
     @GET("zipryde/getAllNYOPList")
     Call<LinkedList<ListOfPercentage>> getAllNYOPList();
 

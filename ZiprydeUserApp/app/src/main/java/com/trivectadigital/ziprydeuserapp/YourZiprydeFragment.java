@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
+import com.trivectadigital.ziprydeuserapp.assist.MessageReceivedEvent;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.assist.ZiprydeHistoryAdapter;
 import com.trivectadigital.ziprydeuserapp.assist.ZiprydeHistoryDetails;
@@ -32,6 +33,7 @@ import org.json.JSONObject;
 
 import java.util.LinkedList;
 
+import de.greenrobot.event.EventBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -105,8 +107,11 @@ public class YourZiprydeFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ListOfBooking listOfBooking = Utils.getBookingByUserIdResponse.get(position);
                 String driverStatus = listOfBooking.getDriverStatus();
+                String bookingStatus = listOfBooking.getBookingStatus();
                 if(driverStatus != null){
-                    if(driverStatus.equals("REQUESTED")) {
+                    if(bookingStatus.equals("CANCELLED")){
+                        showInfoDlg("Information", "This booking has been cancelled. Please try some other bookings.", "OK", "info");
+                    }else if(driverStatus.equals("REQUESTED")) {
                         showInfoDlg("Information", "Please wait till the driver accepts your request", "OK", "info");
                     }else{
                         Intent ide = new Intent(getActivity(), DriverInfoBookingActivity.class);
@@ -115,7 +120,11 @@ public class YourZiprydeFragment extends Fragment {
                         startActivity(ide);
                     }
                 }else{
-                    showInfoDlg("Information", "Please wait till the driver accepts your request", "OK", "info");
+                    if(bookingStatus.equals("CANCELLED")){
+                        showInfoDlg("Information", "This booking has been cancelled. Please try some other bookings.", "OK", "info");
+                    }else{
+                        showInfoDlg("Information", "Please wait till the driver accepts your request", "OK", "info");
+                    }
                 }
             }
         });
@@ -128,12 +137,37 @@ public class YourZiprydeFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    public void onEventMainThread(MessageReceivedEvent messageReceivedEvent) {
+        Log.e("onEventMainThread", ""+messageReceivedEvent.message);
+        Log.e("Thread title", "" + messageReceivedEvent.title);
+        Log.e("PUSH_NOTIFICATION","PUSH_NOTIFICATION");
+        Log.e("UserId",""+Utils.verifyLogInUserMobileInstantResponse.getUserId());
+        if (!messageReceivedEvent.title.equals("BOOKING_CANCELLED")) {
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.customerId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
+            getBookingByUserId(loginCredentials);
+        }
+    }
+
     public void getBookingByUserId(SingleInstantParameters loginCredentials){
         final Dialog dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
@@ -191,7 +225,7 @@ public class YourZiprydeFragment extends Fragment {
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equals("info")){
+        if(navType.equals("info") || navType.equalsIgnoreCase("server")){
             newnegativeBtn.setVisibility(View.GONE);
         }
 

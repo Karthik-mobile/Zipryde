@@ -3,9 +3,12 @@ package com.trivectadigital.ziprydeuserapp.assist;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,7 +55,8 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
 
     private class ViewHolder {
         TextView bookingDatetime, bookingCRN, bookingStarting, bookingEnding, bookingPrice, bookingOfferPrice, bookingStatus;
-        ImageView bookingCarType, bookingProfileImg, cancelBookingImg;
+        ImageView bookingCarType, cancelBookingImg;
+        CircleImageView bookingProfileImg;
     }
 
     @Override
@@ -87,7 +91,7 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
             holder.bookingOfferPrice = (TextView) view.findViewById(R.id.bookingOfferPrice);
 
             holder.bookingCarType = (ImageView) view.findViewById(R.id.bookingCarType);
-            holder.bookingProfileImg = (ImageView) view.findViewById(R.id.bookingProfileImg);
+            holder.bookingProfileImg = (CircleImageView) view.findViewById(R.id.bookingProfileImg);
             holder.cancelBookingImg = (ImageView) view.findViewById(R.id.cancelBookingImg);
             holder.bookingStatus = (TextView) view.findViewById(R.id.bookingStatus);
 
@@ -105,7 +109,7 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
         String ziprydeBookingEnding = ziprydeHistoryDetails.getTo();
         String ziprydeBookingPrice = ziprydeHistoryDetails.getSuggestedPrice();
         String ziprydeBookingOfferPrice = ziprydeHistoryDetails.getOfferedPrice();
-//        String ziprydeBookingProfileImg = ziprydeHistoryDetails.getZiprydeBookingProfileImg();
+        String ziprydeBookingProfileImg = ""+ziprydeHistoryDetails.getDriverImage();
 
         holder.bookingDatetime.setText(""+ziprydeBookingDateTime);
         holder.bookingCRN.setText(""+ziprydeBookingCRN);
@@ -115,6 +119,16 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
         holder.bookingOfferPrice.setText("Offer $ "+ziprydeBookingOfferPrice);
 
         holder.cancelBookingImg.setVisibility(View.GONE);
+
+        if (ziprydeBookingProfileImg != null) {
+            if (!ziprydeBookingProfileImg.equalsIgnoreCase("null")) {
+                byte[] decodedString = Base64.decode(ziprydeBookingProfileImg, Base64.DEFAULT);
+                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                holder.bookingProfileImg.setImageBitmap(decodedByte);
+            }else{
+                holder.bookingProfileImg.setImageResource(R.drawable.person);
+            }
+        }
 
         String bookingStatus = ziprydeHistoryDetails.getBookingStatus();
         holder.bookingStatus.setText(""+bookingStatus);
@@ -144,6 +158,7 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.loadingimage_layout);
         dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();

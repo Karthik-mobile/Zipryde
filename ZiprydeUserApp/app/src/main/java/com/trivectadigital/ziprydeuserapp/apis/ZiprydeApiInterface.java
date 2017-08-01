@@ -32,7 +32,7 @@ public interface ZiprydeApiInterface {
     @Multipart
     @POST("saveUser")
     Call<SingleInstantResponse> saveUser(@Part("userType") RequestBody userType, @Part("firstName") RequestBody firstName,
-                                         @Part("lastName") RequestBody lastName, @Part("emailId") RequestBody emailId, @Part("mobileNumber") RequestBody mobileNumber, @Part("password") RequestBody password, @Part("alternateNumber") RequestBody alternateNumber, @Part("deviceToken") RequestBody deviceToken);
+                                         @Part("lastName") RequestBody lastName, @Part("emailId") RequestBody emailId, @Part("mobileNumber") RequestBody mobileNumber, @Part("password") RequestBody password, @Part("alternateNumber") RequestBody alternateNumber, @Part("deviceToken") RequestBody deviceToken, @Part("isEnable") RequestBody isEnable);
 
     @Multipart
     @POST("saveUser")
@@ -41,6 +41,9 @@ public interface ZiprydeApiInterface {
 
     @POST("verifyLogInUser")
     Call<SingleInstantResponse> verifyLogInUser(@Body SingleInstantParameters parameters);
+
+    @POST("updatePasswordByUserAndType")
+    Call<SingleInstantResponse> updatePasswordByUserAndType(@Body SingleInstantParameters parameters);
 
     @GET("getAllCabTypes")
     Call<LinkedList<ListOfCarTypes>> getAllCabTypes();

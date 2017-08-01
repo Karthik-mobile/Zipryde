@@ -65,6 +65,16 @@ public class SingleInstantResponse {
     private String driverImage;
     @SerializedName("geoLocationResponse")
     private GeoLocationRequest geoLocationResponse;
+    @SerializedName("driverMobileNumber")
+    private String driverMobileNumber;
+
+    public String getDriverMobileNumber() {
+        return driverMobileNumber;
+    }
+
+    public void setDriverMobileNumber(String driverMobileNumber) {
+        this.driverMobileNumber = driverMobileNumber;
+    }
 
     public String getDriverImage() {
         return driverImage;
