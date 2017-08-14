@@ -3,6 +3,8 @@ package com.trivectadigital.ziprydeuserapp;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -22,8 +24,24 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
+import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
+import com.trivectadigital.ziprydeuserapp.assist.ZiprydeHistoryAdapter;
+import com.trivectadigital.ziprydeuserapp.modelget.ListOfBooking;
+import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
+import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
+
+import org.json.JSONObject;
+
+import java.util.LinkedList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class NavigationMenuActivity extends AppCompatActivity
                                                 implements View.OnClickListener {
@@ -31,12 +49,13 @@ public class NavigationMenuActivity extends AppCompatActivity
     TextView titleText;
     Toolbar toolbar;
     ImageView menuImgBlack;
+    ZiprydeApiInterface apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigationmenu);
-
+        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -72,8 +91,17 @@ public class NavigationMenuActivity extends AppCompatActivity
         logoutLayout.setOnClickListener(this);
         TextView editProfile = (TextView) headerview.findViewById(R.id.editProfile);
         editProfile.setOnClickListener(this);
+        TextView buildNumber = (TextView) headerview.findViewById(R.id.buildNumber);
+        try {
+            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
+            String version = pInfo.versionName;
+            buildNumber.setText(version);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
         TextView nameProfile = (TextView) headerview.findViewById(R.id.nameProfile);
+        Log.e("LastName", "" + Utils.verifyLogInUserMobileInstantResponse.getLastName());
         nameProfile.setText(Utils.verifyLogInUserMobileInstantResponse.getFirstName()+" "+Utils.verifyLogInUserMobileInstantResponse.getLastName());
 
         menuImgBlack = (ImageView) findViewById(R.id.menuImgBlack);
@@ -91,6 +119,12 @@ public class NavigationMenuActivity extends AppCompatActivity
             showBookingFragment();
         }
 
+        if(intent.hasExtra("fromLogin")){
+            Log.e("UserId", "" + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.customerId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
+            getBookingByUserId(loginCredentials);
+        }
 
         menuImgBlack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,6 +132,65 @@ public class NavigationMenuActivity extends AppCompatActivity
                 showHideNavigationMenu();
             }
         });
+    }
+
+    public void getBookingByUserId(SingleInstantParameters loginCredentials) {
+        if (Utils.connectivity(NavigationMenuActivity.this)) {
+            final Dialog dialog = new Dialog(NavigationMenuActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
+
+            Call<LinkedList<ListOfBooking>> call = apiService.getBookingByUserId(loginCredentials);
+            call.enqueue(new Callback<LinkedList<ListOfBooking>>() {
+                @Override
+                public void onResponse(Call<LinkedList<ListOfBooking>> call, Response<LinkedList<ListOfBooking>> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.getBookingByUserIdResponse = response.body();
+                        Log.e("size", "" + Utils.getBookingByUserIdResponse.size());
+                        if(Utils.getBookingByUserIdResponse.size() > 0){
+                            Log.e("BookingId", "" + Utils.getBookingByUserIdResponse.get(0).getBookingId());
+                            String bookingStatus = Utils.getBookingByUserIdResponse.get(0).getBookingStatusCode();
+                            if (!bookingStatus.equals("CANCELLED") && !bookingStatus.equals("COMPLETED")) {
+                                Intent ide = new Intent(NavigationMenuActivity.this, DriverInfoBookingActivity.class);
+                                ide.putExtra("bookingId",""+Utils.getBookingByUserIdResponse.get(0).getBookingId());
+                                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(ide);
+                                finish();
+                            }
+                        }
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(NavigationMenuActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<LinkedList<ListOfBooking>> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(NavigationMenuActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(NavigationMenuActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void showBookingFragment() {
@@ -141,25 +234,6 @@ public class NavigationMenuActivity extends AppCompatActivity
         }
     }
 
-    public void showNotificationFragment() {
-        // Creating a fragment object
-        NotificationsFragment sFragment = new NotificationsFragment();
-        // Creating a Bundle object
-        Bundle data = new Bundle();
-        // Setting the index of the currently selected item of mDrawerList
-//            data.putInt("position", position);
-        // Setting the position to the fragment
-        sFragment.setArguments(data);
-        // Getting reference to the FragmentManager
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        // Creating a fragment transaction
-        FragmentTransaction ft = fragmentManager.beginTransaction();
-        // Adding a fragment to the fragment transaction
-        ft.replace(R.id.content_frame, sFragment);
-        // Committing the transaction
-        ft.commit();
-    }
-
     public void showHistoryFragment() {
         // Creating a fragment object
         YourZiprydeFragment sFragment = new YourZiprydeFragment();
@@ -201,7 +275,6 @@ public class NavigationMenuActivity extends AppCompatActivity
             case R.id.notificationLayout:
                 titleText.setText("Notifications");
                 showHideNavigationMenu();
-                showNotificationFragment();
                 break;
             case R.id.historyLayout:
                 titleText.setText("ZipRyde Requests");
@@ -222,6 +295,15 @@ public class NavigationMenuActivity extends AppCompatActivity
                 startActivity(ide);
                 break;
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = prefs.getString("LoginCredentials", "");
+        Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
     }
 
     Dialog dialog;

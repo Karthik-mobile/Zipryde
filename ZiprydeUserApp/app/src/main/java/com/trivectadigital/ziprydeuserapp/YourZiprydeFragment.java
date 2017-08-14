@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
@@ -106,32 +107,32 @@ public class YourZiprydeFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ListOfBooking listOfBooking = Utils.getBookingByUserIdResponse.get(position);
-                String driverStatus = listOfBooking.getDriverStatus();
-                String bookingStatus = listOfBooking.getBookingStatus();
-                if(driverStatus != null){
-                    if(bookingStatus.equals("CANCELLED")){
+                String driverStatus = listOfBooking.getDriverStatusCode();
+                String bookingStatus = listOfBooking.getBookingStatusCode();
+                if (driverStatus != null) {
+                    if (bookingStatus.equals("CANCELLED")) {
                         showInfoDlg("Information", "This booking has been cancelled. Please try some other bookings.", "OK", "info");
-                    }else if(driverStatus.equals("REQUESTED")) {
+                    } else if (driverStatus.equals("REQUESTED")) {
                         showInfoDlg("Information", "Please wait till the driver accepts your request", "OK", "info");
-                    }else{
+                    } else {
                         Intent ide = new Intent(getActivity(), DriverInfoBookingActivity.class);
                         ide.putExtra("position", position);
                         ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(ide);
                     }
-                }else{
-                    if(bookingStatus.equals("CANCELLED")){
+                } else {
+                    if (bookingStatus.equals("CANCELLED")) {
                         showInfoDlg("Information", "This booking has been cancelled. Please try some other bookings.", "OK", "info");
-                    }else{
+                    } else {
                         showInfoDlg("Information", "Please wait till the driver accepts your request", "OK", "info");
                     }
                 }
             }
         });
 
-        Log.e("UserId",""+Utils.verifyLogInUserMobileInstantResponse.getUserId());
+        Log.e("UserId", "" + Utils.verifyLogInUserMobileInstantResponse.getUserId());
         SingleInstantParameters loginCredentials = new SingleInstantParameters();
-        loginCredentials.customerId = ""+ Utils.verifyLogInUserMobileInstantResponse.getUserId();
+        loginCredentials.customerId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
         getBookingByUserId(loginCredentials);
 
         return view;
@@ -150,10 +151,10 @@ public class YourZiprydeFragment extends Fragment {
     }
 
     public void onEventMainThread(MessageReceivedEvent messageReceivedEvent) {
-        Log.e("onEventMainThread", ""+messageReceivedEvent.message);
+        Log.e("onEventMainThread", "" + messageReceivedEvent.message);
         Log.e("Thread title", "" + messageReceivedEvent.title);
-        Log.e("PUSH_NOTIFICATION","PUSH_NOTIFICATION");
-        Log.e("UserId",""+Utils.verifyLogInUserMobileInstantResponse.getUserId());
+        Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
+        Log.e("UserId", "" + Utils.verifyLogInUserMobileInstantResponse.getUserId());
         if (!messageReceivedEvent.title.equals("BOOKING_CANCELLED")) {
             SingleInstantParameters loginCredentials = new SingleInstantParameters();
             loginCredentials.customerId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
@@ -161,56 +162,60 @@ public class YourZiprydeFragment extends Fragment {
         }
     }
 
-    public void getBookingByUserId(SingleInstantParameters loginCredentials){
-        final Dialog dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+    public void getBookingByUserId(SingleInstantParameters loginCredentials) {
+        if (Utils.connectivity(getActivity())) {
+            final Dialog dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<LinkedList<ListOfBooking>> call = apiService.getBookingByUserId(loginCredentials);
-        call.enqueue(new Callback<LinkedList<ListOfBooking>>() {
-            @Override
-            public void onResponse(Call<LinkedList<ListOfBooking>> call, Response<LinkedList<ListOfBooking>> response) {
-                int statusCode = response.code();
-                Log.e("statusCode",""+statusCode);
-                Log.e("response.body",""+response.body());
-                Log.e("response.errorBody",""+response.errorBody());
-                Log.e("response.isSuccessful",""+response.isSuccessful());
-                dialog.dismiss();
-                if(response.isSuccessful()){
-                    Utils.getBookingByUserIdResponse = response.body();
-                    Log.e("size",""+Utils.getBookingByUserIdResponse.size());
-                    for(int i = 0; i < Utils.getBookingByUserIdResponse.size(); i++){
-                        Log.e("BookingId",""+Utils.getBookingByUserIdResponse.get(i).getBookingId());
-                        Log.e("CrnNumber",""+Utils.getBookingByUserIdResponse.get(i).getCrnNumber());
-                        Log.e("driverImage", "driverImage : "+Utils.getBookingByUserIdResponse.get(i).getDriverImage());
-                        Log.e("distanceInMiles",""+Utils.getBookingByUserIdResponse.get(i).getGeoLocationResponse().getDistanceInMiles());
-                    }
-                    ZiprydeHistoryAdapter ziprydeHistoryAdapter = new ZiprydeHistoryAdapter(Utils.getBookingByUserIdResponse, getActivity());
-                    history_list.setAdapter(ziprydeHistoryAdapter);
-                }else{
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+            Call<LinkedList<ListOfBooking>> call = apiService.getBookingByUserId(loginCredentials);
+            call.enqueue(new Callback<LinkedList<ListOfBooking>>() {
+                @Override
+                public void onResponse(Call<LinkedList<ListOfBooking>> call, Response<LinkedList<ListOfBooking>> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.getBookingByUserIdResponse = response.body();
+                        Log.e("size", "" + Utils.getBookingByUserIdResponse.size());
+                        for (int i = 0; i < Utils.getBookingByUserIdResponse.size(); i++) {
+                            Log.e("BookingId", "" + Utils.getBookingByUserIdResponse.get(i).getBookingId());
+                            Log.e("CrnNumber", "" + Utils.getBookingByUserIdResponse.get(i).getCrnNumber());
+                            Log.e("driverImage", "driverImage : " + Utils.getBookingByUserIdResponse.get(i).getDriverImage());
+                            Log.e("distanceInMiles", "" + Utils.getBookingByUserIdResponse.get(i).getGeoLocationResponse().getDistanceInMiles());
+                        }
+                        ZiprydeHistoryAdapter ziprydeHistoryAdapter = new ZiprydeHistoryAdapter(Utils.getBookingByUserIdResponse, getActivity());
+                        history_list.setAdapter(ziprydeHistoryAdapter);
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<LinkedList<ListOfBooking>> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<LinkedList<ListOfBooking>> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     Dialog dialog;
@@ -222,17 +227,17 @@ public class YourZiprydeFragment extends Fragment {
         //dialog.setCanceledOnTouchOutside(true);
 
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
-        positiveBtn.setText(""+btnText);
+        positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equals("info") || navType.equalsIgnoreCase("server")){
+        if (navType.equals("info") || navType.equalsIgnoreCase("server")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
-        dialogtitleText.setText(""+title);
+        dialogtitleText.setText("" + title);
         TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
-        dialogcontentText.setText(""+content);
+        dialogcontentText.setText("" + content);
 
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
@@ -84,7 +85,7 @@ public class LoginActivity extends AppCompatActivity {
                     loginCredentials.deviceToken = regId;
                     Gson gson = new Gson();
                     String json = gson.toJson(loginCredentials);
-                    Log.e("json",""+json);
+                    Log.e("json", "" + json);
                     callMobileService(loginCredentials);
                 }
             }
@@ -120,98 +121,107 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    public void insertDriverSession(){
-        Log.e("UserId","insertDriverSession - "+Utils.verifyLogInUserMobileInstantResponse.getUserId());
-        Log.e("Latitude","insertDriverSession - "+Utils.gpsLocationService.getLatitude());
-        Log.e("Longitude","insertDriverSession - "+Utils.gpsLocationService.getLongitude());
-        SingleInstantParameters loginCredentials = new SingleInstantParameters();
-        loginCredentials.userId = ""+Utils.verifyLogInUserMobileInstantResponse.getUserId();
-        loginCredentials.fromLatitude = ""+Utils.gpsLocationService.getLatitude();
-        loginCredentials.fromLongitude = ""+Utils.gpsLocationService.getLongitude();
+    public void insertDriverSession() {
+        if (Utils.connectivity(LoginActivity.this)) {
+            Log.e("UserId", "insertDriverSession - " + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+            Log.e("Latitude", "insertDriverSession - " + Utils.gpsLocationService.getLatitude());
+            Log.e("Longitude", "insertDriverSession - " + Utils.gpsLocationService.getLongitude());
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.userId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
+            loginCredentials.fromLatitude = "" + Utils.gpsLocationService.getLatitude();
+            loginCredentials.fromLongitude = "" + Utils.gpsLocationService.getLongitude();
 
-        Call<Void> call = apiService.updateDriverSession(loginCredentials);
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                if (!response.isSuccessful()) {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "info");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+            Call<Void> call = apiService.updateDriverSession(loginCredentials);
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    if (!response.isSuccessful()) {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "info");
+                        } catch (Exception e) {
+                            Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     String phoneno, password;
 
-    public void callMobileService(SingleInstantParameters loginCredentials){
-        final Dialog dialog = new Dialog(LoginActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+    public void callMobileService(SingleInstantParameters loginCredentials) {
+        if (Utils.connectivity(LoginActivity.this)) {
+            final Dialog dialog = new Dialog(LoginActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<SingleInstantResponse> call = apiService.verifyLogInUser(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode",""+statusCode);
-                Log.e("response.body",""+response.body());
-                Log.e("response.errorBody",""+response.errorBody());
-                Log.e("response.isSuccessful",""+response.isSuccessful());
-                dialog.dismiss();
-                if(response.isSuccessful()){
-                    Utils.verifyLogInUserMobileInstantResponse = response.body();
-                    Gson gson = new Gson();
-                    String json = gson.toJson(Utils.verifyLogInUserMobileInstantResponse);
-                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
-                    editor.putString("phoneNumber", phoneno);
-                    editor.putString("password", password);
-                    editor.putString("LoginCredentials", json);
-                    editor.commit();
-                    insertDriverSession();
-                    showInfoDlg("Success..", "Successfully logged in.", "OK", "success");
-                }else{
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+            Call<SingleInstantResponse> call = apiService.verifyLogInUser(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.verifyLogInUserMobileInstantResponse = response.body();
+                        Gson gson = new Gson();
+                        String json = gson.toJson(Utils.verifyLogInUserMobileInstantResponse);
+                        SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                        editor.putString("phoneNumber", phoneno);
+                        editor.putString("password", password);
+                        editor.putString("LoginCredentials", json);
+                        editor.commit();
+                        insertDriverSession();
+                        showInfoDlg("Success..", "Successfully logged in.", "OK", "success");
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     Dialog dialog;
+
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
         dialog = new Dialog(LoginActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -241,6 +251,7 @@ public class LoginActivity extends AppCompatActivity {
                 public void run() {
                     dialog.dismiss();
                     Intent ide = new Intent(LoginActivity.this, NewDashBoardActivity.class);
+                    ide.putExtra("fromLogin","fromLogin");
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
                     finish();

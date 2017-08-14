@@ -27,6 +27,8 @@ public class ListOfBooking {
     private String offeredPrice;
     @SerializedName("bookingStatus")
     private String bookingStatus;
+    @SerializedName("bookingStatusCode")
+    private String bookingStatusCode;
     @SerializedName("noOfPassengers")
     private String noOfPassengers;
     @SerializedName("geoLocationResponse")
@@ -37,6 +39,8 @@ public class ListOfBooking {
     private String bookingDateTime;
     @SerializedName("driverStatus")
     private String driverStatus;
+    @SerializedName("driverStatusCode")
+    private String driverStatusCode;
     @SerializedName("driverName")
     private String driverName;
     @SerializedName("driverId")
@@ -45,6 +49,22 @@ public class ListOfBooking {
     private String driverImage;
     @SerializedName("driverMobileNumber")
     private String driverMobileNumber;
+
+    public String getBookingStatusCode() {
+        return bookingStatusCode;
+    }
+
+    public void setBookingStatusCode(String bookingStatusCode) {
+        this.bookingStatusCode = bookingStatusCode;
+    }
+
+    public String getDriverStatusCode() {
+        return driverStatusCode;
+    }
+
+    public void setDriverStatusCode(String driverStatusCode) {
+        this.driverStatusCode = driverStatusCode;
+    }
 
     public String getDriverMobileNumber() {
         return driverMobileNumber;

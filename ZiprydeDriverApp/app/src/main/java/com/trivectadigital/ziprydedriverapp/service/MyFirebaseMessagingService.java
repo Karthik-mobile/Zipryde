@@ -132,10 +132,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //            Log.e(TAG, "imageUrl: " + imageUrl);
 //            Log.e(TAG, "timestamp: " + timestamp);
 
-
+        NotificationUtils.clearNotifications(getApplicationContext());
         if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
             EventBus.getDefault().post(new MessageReceivedEvent(message));
-        }
+//        }
 ////                // app is in foreground, broadcast the push message
 ////                Intent pushNotification = new Intent(Utils.PUSH_NOTIFICATION);
 ////                pushNotification.putExtra("message", message);
@@ -144,7 +144,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 ////                // play notification sound
 //                NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
 //                notificationUtils.playNotificationSound();
-//        } else {
+        } else {
 //                // app is in background, show the notification in notification tray
         Intent resultIntent = new Intent(getApplicationContext(), RideActivity.class);
 //        Utils.fromNotification = true;
@@ -162,7 +162,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //                    // image is present, show notification with image
 //                    showNotificationMessageWithBigImage(getApplicationContext(), title, message, timestamp, resultIntent, imageUrl);
 //                }
-//        }
+        }
 //        } catch (JSONException e) {
 //            Log.e(TAG, "Json Exception: " + e.getMessage());
 //        } catch (Exception e) {

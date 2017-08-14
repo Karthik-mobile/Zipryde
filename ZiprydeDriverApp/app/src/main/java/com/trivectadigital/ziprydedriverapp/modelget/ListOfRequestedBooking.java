@@ -18,6 +18,8 @@ public class ListOfRequestedBooking {
     private String customerId;
     @SerializedName("customerName")
     private String customerName;
+    @SerializedName("customerMobileNumber")
+    private String customerMobileNumber;
     @SerializedName("from")
     private String from;
     @SerializedName("to")
@@ -28,6 +30,8 @@ public class ListOfRequestedBooking {
     private String offeredPrice;
     @SerializedName("bookingStatus")
     private String bookingStatus;
+    @SerializedName("bookingStatusCode")
+    private String bookingStatusCode;
     @SerializedName("noOfPassengers")
     private String noOfPassengers;
     @SerializedName("geoLocationResponse")
@@ -36,6 +40,22 @@ public class ListOfRequestedBooking {
     private String crnNumber;
     @SerializedName("bookingDateTime")
     private String bookingDateTime;
+
+    public String getCustomerMobileNumber() {
+        return customerMobileNumber;
+    }
+
+    public void setCustomerMobileNumber(String customerMobileNumber) {
+        this.customerMobileNumber = customerMobileNumber;
+    }
+
+    public String getBookingStatusCode() {
+        return bookingStatusCode;
+    }
+
+    public void setBookingStatusCode(String bookingStatusCode) {
+        this.bookingStatusCode = bookingStatusCode;
+    }
 
     public GeoLocationRequest getGeoLocationResponse() {
         return geoLocationResponse;

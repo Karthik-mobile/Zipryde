@@ -16,8 +16,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.trivectadigital.ziprydedriverapp.assist.MessageReceivedEvent;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
+import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -56,6 +58,16 @@ public class RideActivity extends AppCompatActivity {
         Intent intent = getIntent();
         Log.e("intent ","intent : "+intent.getExtras());
         if(intent.hasExtra("body")){
+            SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+            Gson gson = new Gson();
+            String json = prefs.getString("LoginCredentials", "");
+            Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
+            Log.e("UserId", "UserId " + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+            prefs = getSharedPreferences("URLCredentials", MODE_PRIVATE);
+            String url = prefs.getString("url", null);
+            if (url != null) {
+                Utils.defaultIP = url;
+            }
             Log.e("message ","message : "+intent.getStringExtra("body"));
             try {
                 SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_NOTIFI, 0);
@@ -98,5 +110,27 @@ public class RideActivity extends AppCompatActivity {
                 Log.e("Exception", "Exception: " + e.getMessage());
             }
         }
+    }
+
+    @Override
+    protected void onStart() {
+        Log.e("onStart", "onStart");
+        SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = prefs.getString("LoginCredentials", "");
+        Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
+        Log.e("UserId", "UserId " + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        Log.e("onResume", "onResume");
+        SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = prefs.getString("LoginCredentials", "");
+        Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
+        Log.e("UserId", "UserId " + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+        super.onResume();
     }
 }

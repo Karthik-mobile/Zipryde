@@ -1,5 +1,6 @@
 package com.trivectadigital.ziprydedriverapp;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -10,6 +11,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.google.gson.Gson;
+import com.trivectadigital.ziprydedriverapp.assist.Utils;
+import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 
 public class HistoryActivity extends AppCompatActivity {
 
@@ -35,6 +40,15 @@ public class HistoryActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = prefs.getString("LoginCredentials", "");
+        Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
     }
 
 }

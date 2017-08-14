@@ -98,12 +98,32 @@
 
         </LinearLayout>
 
-
-        <ImageView
-            android:id="@+id/callDriverImg"
-            android:layout_width="50dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_action_phone" />
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <ImageView
+                android:id="@+id/callDriverImg"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_action_phone" />
+
+            <TextView
+                android:id="@+id/callDriverText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="CALL"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/whiteColor"
+                android:textSize="12dp" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/cancelBookingLay"
@@ -114,13 +134,19 @@
             android:orientation="vertical"
             android:padding="10dp">
 
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_action_close" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:text="Cancel"
-                android:textColor="@color/whiteColor" />
+                android:textColor="@color/black_overlay"
+                android:textSize="9dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -128,7 +154,8 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:text="Booking"
-                android:textColor="@color/whiteColor" />
+                android:textColor="@color/black_overlay"
+                android:textSize="9dp" />
 
             <ImageView
                 android:id="@+id/imgNext"
@@ -143,13 +170,38 @@
 
     </LinearLayout>
 
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        tools:context=".BookingFragment" />
+        android:layout_weight="1">
+
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".BookingFragment" />
+
+        <LinearLayout
+            android:id="@+id/getDirections"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="25dp"
+            android:layout_marginRight="15dp"
+            android:background="@drawable/cardlayout"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_action_directions" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -171,20 +223,31 @@
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:paddingLeft="15dp"
-                android:text="Driver on Route"
+                android:text="ZipRyde Status"
                 android:textColor="@color/primaryText"
-                android:textSize="22dp" />
+                android:textSize="20dp" />
 
             <TextView
                 android:id="@+id/bookingStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:gravity="center_vertical"
                 android:text="Booking"
                 android:textColor="@color/newBackTextColor"
-                android:textSize="16dp"
+                android:textSize="14dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/driverArrivingTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:textColor="@color/primaryText"
+                android:textSize="14dp"
                 android:textStyle="bold" />
 
         </LinearLayout>

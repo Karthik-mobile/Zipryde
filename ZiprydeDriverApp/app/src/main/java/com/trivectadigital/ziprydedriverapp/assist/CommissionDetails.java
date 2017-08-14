@@ -1,7 +1,7 @@
 package com.trivectadigital.ziprydedriverapp.assist;
 
 /**
- * Created by Hari on 18-06-2017.
+ * Created by Hari on 14-08-2017.
  */
 
 public class CommissionDetails {

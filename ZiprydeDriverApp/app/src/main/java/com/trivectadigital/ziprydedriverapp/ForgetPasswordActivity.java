@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
@@ -64,7 +65,7 @@ public class ForgetPasswordActivity extends AppCompatActivity {
         passwordLay = (LinearLayout) findViewById(R.id.passwordLay);
 
         otpEdit = (EditText) findViewById(R.id.otpEdit);
-        otpEdit.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
+        otpEdit.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
         mobileNumberEdit = (EditText) findViewById(R.id.mobileNumberEdit);
 
         verifyBtn = (Button) findViewById(R.id.verifyBtn);
@@ -72,9 +73,9 @@ public class ForgetPasswordActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String mobile = otpEdit.getText().toString().trim();
-                if(mobile.isEmpty()){
+                if (mobile.isEmpty()) {
                     showInfoDlg("Information", "Please enter the PIN", "OK", "info");
-                }else{
+                } else {
                     callMobileOTPService(mobile);
                 }
             }
@@ -95,11 +96,11 @@ public class ForgetPasswordActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String mobile = mobileNumberEdit.getText().toString().trim();
-                if(mobile.isEmpty()){
+                if (mobile.isEmpty()) {
                     showInfoDlg("Information", "Please enter the mobile number", "OK", "info");
-                }else if(mobile.length() != 10){
+                } else if (mobile.length() != 10) {
                     showInfoDlg("Information", "Please enter valid mobile number", "OK", "info");
-                }else{
+                } else {
                     callMobileService(mobile);
                 }
             }
@@ -126,184 +127,196 @@ public class ForgetPasswordActivity extends AppCompatActivity {
                 String mobile = mobileNumberFinalEdit.getText().toString().trim();
                 String password = passwordEdit.getText().toString();
                 String confirmpassword = confirmpasswordEdit.getText().toString();
-                if(mobile.isEmpty()){
+                if (mobile.isEmpty()) {
                     showInfoDlg("Information", "Please enter the mobile number", "OK", "info");
-                }else if(mobile.length() != 10){
+                } else if (mobile.length() != 10) {
                     showInfoDlg("Information", "Please enter valid mobile number", "OK", "info");
-                }else if(password.isEmpty()){
+                } else if (password.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Password", "OK", "info");
-                }else if(confirmpassword.isEmpty()){
+                } else if (confirmpassword.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Confirm Password", "OK", "info");
-                }else if (!password.equals(confirmpassword)) {
+                } else if (!password.equals(confirmpassword)) {
                     showInfoDlg("Information", "Password and Confirm Password are not matching", "OK", "info");
-                }else{
+                } else {
                     callMobilePasswordUpdateService(mobile, password);
                 }
             }
         });
     }
 
-    public void callMobilePasswordUpdateService(String mobile, String password){
-        final Dialog dialog = new Dialog(ForgetPasswordActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+    public void callMobilePasswordUpdateService(String mobile, String password) {
+        if (Utils.connectivity(ForgetPasswordActivity.this)) {
+            final Dialog dialog = new Dialog(ForgetPasswordActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        SingleInstantParameters loginCredentials = new SingleInstantParameters();
-        loginCredentials.mobileNumber = mobile;
-        loginCredentials.password = password;
-        loginCredentials.userType = "DRIVER";
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.mobileNumber = mobile;
+            loginCredentials.password = password;
+            loginCredentials.userType = "DRIVER";
 
-        Call<SingleInstantResponse> call = apiService.updatePasswordByUserAndType(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode",""+statusCode);
-                Log.e("response.body",""+response.body());
-                Log.e("response.errorBody",""+response.errorBody());
-                Log.e("response.isSuccessful",""+response.isSuccessful());
-                dialog.dismiss();
-                if(response.isSuccessful()){
-                    showInfoDlg("Success..", "Your Password has been reset successfully.", "OK", "password success");
-                }else{
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "error");
-            }
-        });
-
-    }
-
-    public void callMobileOTPService(String otp){
-        final Dialog dialog = new Dialog(ForgetPasswordActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
-
-        SingleInstantParameters loginCredentials = new SingleInstantParameters();
-        loginCredentials.mobileNumber = Utils.getOTPByMobileInstantResponse.getMobileNumber();
-        loginCredentials.otp = otp;
-
-        Call<SingleInstantResponse> call = apiService.verifyOTPByMobile(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode",""+statusCode);
-                Log.e("response.body",""+response.body());
-                Log.e("response.errorBody",""+response.errorBody());
-                Log.e("response.isSuccessful",""+response.isSuccessful());
-                dialog.dismiss();
-                if(response.isSuccessful()){
-                    Log.e("response", "" + response.body());
-                    String otpStatus = response.body().getOtpStatus();
-                    Log.e("otpStatus", "" + otpStatus);
-                    Utils.verifyOTPByMobileInstantResponse = response.body();
-                    if (otpStatus.equals("VERIFIED")) {
-                        showInfoDlg("Success..", "PIN verified successfully.", "OK", "verify success");
+            Call<SingleInstantResponse> call = apiService.updatePasswordByUserAndType(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        showInfoDlg("Success..", "Your Password has been reset successfully.", "OK", "password success");
                     } else {
-                        showInfoDlg("Error..", "PIN is INVALID. Please try again later..", "OK", "invalid");
-                    }
-                }else{
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(ForgetPasswordActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "error");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(ForgetPasswordActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(ForgetPasswordActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
-    public void callMobileService(String mobile){
-        final Dialog dialog = new Dialog(ForgetPasswordActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
-        SingleInstantParameters loginCredentials = new SingleInstantParameters();
-        loginCredentials.mobileNumber = mobile;
+    public void callMobileOTPService(String otp) {
+        if (Utils.connectivity(ForgetPasswordActivity.this)) {
+            final Dialog dialog = new Dialog(ForgetPasswordActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<SingleInstantResponse> call = apiService.getOTPByMobile(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode",""+statusCode);
-                Log.e("response.body",""+response.body());
-                Log.e("response.errorBody",""+response.errorBody());
-                Log.e("response.isSuccessful",""+response.isSuccessful());
-                dialog.dismiss();
-                if(response.isSuccessful()){
-                    Log.e("response", "" + response.body());
-                    String mobileNumber = response.body().getMobileNumber();
-                    Log.e("mobileNumber", "" + mobileNumber);
-                    String otp = response.body().getOtp();
-                    Log.e("otp", "" + otp);
-                    String validity = response.body().getValidity();
-                    Log.e("validity", "" + validity);
-                    Utils.getOTPByMobileInstantResponse = response.body();
-                    otpEdit.setText(""+ Utils.getOTPByMobileInstantResponse.getOtp());
-                    otpLay.setVisibility(View.VISIBLE);
-                    mobileLay.setVisibility(View.GONE);
-                    passwordLay.setVisibility(View.GONE);
-                }else{
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.mobileNumber = Utils.getOTPByMobileInstantResponse.getMobileNumber();
+            loginCredentials.otp = otp;
+
+            Call<SingleInstantResponse> call = apiService.verifyOTPByMobile(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Log.e("response", "" + response.body());
+                        String otpStatus = response.body().getOtpStatus();
+                        Log.e("otpStatus", "" + otpStatus);
+                        Utils.verifyOTPByMobileInstantResponse = response.body();
+                        if (otpStatus.equals("VERIFIED")) {
+                            showInfoDlg("Success..", "PIN verified successfully.", "OK", "verify success");
+                        } else {
+                            showInfoDlg("Error..", "PIN is INVALID. Please try again later..", "OK", "invalid");
+                        }
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(ForgetPasswordActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "error");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(ForgetPasswordActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(ForgetPasswordActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void callMobileService(String mobile) {
+        if (Utils.connectivity(ForgetPasswordActivity.this)) {
+            final Dialog dialog = new Dialog(ForgetPasswordActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.mobileNumber = mobile;
+
+            Call<SingleInstantResponse> call = apiService.getOTPByMobile(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Log.e("response", "" + response.body());
+                        String mobileNumber = response.body().getMobileNumber();
+                        Log.e("mobileNumber", "" + mobileNumber);
+                        String otp = response.body().getOtp();
+                        Log.e("otp", "" + otp);
+                        String validity = response.body().getValidity();
+                        Log.e("validity", "" + validity);
+                        Utils.getOTPByMobileInstantResponse = response.body();
+                        otpEdit.setText("" + Utils.getOTPByMobileInstantResponse.getOtp());
+                        otpLay.setVisibility(View.VISIBLE);
+                        mobileLay.setVisibility(View.GONE);
+                        passwordLay.setVisibility(View.GONE);
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(ForgetPasswordActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(ForgetPasswordActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(ForgetPasswordActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     Dialog dialog;
+
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
         dialog = new Dialog(ForgetPasswordActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -312,21 +325,21 @@ public class ForgetPasswordActivity extends AppCompatActivity {
         //dialog.setCanceledOnTouchOutside(true);
 
         ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
-        if(navType.equalsIgnoreCase("error")){
+        if (navType.equalsIgnoreCase("error")) {
             headerIcon.setImageResource(R.drawable.erroricon);
         }
 
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
-        positiveBtn.setText(""+btnText);
+        positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server")){
+        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server")) {
             newnegativeBtn.setVisibility(View.GONE);
-        }else{
+        } else {
             newnegativeBtn.setVisibility(View.VISIBLE);
         }
 
-        if(navType.equalsIgnoreCase("verify success")){
+        if (navType.equalsIgnoreCase("verify success")) {
             headerIcon.setImageResource(R.drawable.successicon);
             positiveBtn.setVisibility(View.GONE);
             newnegativeBtn.setVisibility(View.GONE);
@@ -341,7 +354,7 @@ public class ForgetPasswordActivity extends AppCompatActivity {
             }, 1000);
         }
 
-        if(navType.equalsIgnoreCase("password success")){
+        if (navType.equalsIgnoreCase("password success")) {
             headerIcon.setImageResource(R.drawable.successicon);
             positiveBtn.setVisibility(View.GONE);
             newnegativeBtn.setVisibility(View.GONE);
@@ -355,9 +368,9 @@ public class ForgetPasswordActivity extends AppCompatActivity {
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
-        dialogtitleText.setText(""+title);
+        dialogtitleText.setText("" + title);
         TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
-        dialogcontentText.setText(""+content);
+        dialogcontentText.setText("" + content);
 
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override

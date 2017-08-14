@@ -39,6 +39,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
@@ -75,13 +76,13 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     int position = -1;
 
-    TextView driverNameText, cabTypeText, fromAddressText, toAddressText, bookingStatus;
+    TextView driverNameText, cabTypeText, fromAddressText, toAddressText, bookingStatus, callDriverText, driverArrivingTime;
     ListOfBooking listOfBooking;
     ZiprydeApiInterface apiService;
 
     CircleImageView user_view;
 
-    LinearLayout cancelBookingLay;
+    LinearLayout cancelBookingLay, getDirections;
 
     String bookingStatusFinal = "";
     String bookingIdFinal = "";
@@ -90,6 +91,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
     ImageView callDriverImg;
 
     public static final int ACTIONCALL = 0x1;
+    Polyline polyline;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,11 +105,14 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         fromAddressText = (TextView) findViewById(R.id.fromAddressText);
         toAddressText = (TextView) findViewById(R.id.toAddressText);
         bookingStatus = (TextView) findViewById(R.id.bookingStatus);
+        callDriverText = (TextView) findViewById(R.id.callDriverText);
+        driverArrivingTime = (TextView) findViewById(R.id.driverArrivingTime);
         user_view = (CircleImageView) findViewById(R.id.user_view);
 
         callDriverImg = (ImageView) findViewById(R.id.callDriverImg);
 
         cancelBookingLay = (LinearLayout) findViewById(R.id.cancelBookingLay);
+        getDirections = (LinearLayout) findViewById(R.id.getDirections);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -116,21 +121,21 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
         Intent intent = getIntent();
         if (intent.hasExtra("position")) {
-            Log.e("intent 111","intent : "+intent.getExtras());
+            Log.e("intent 111", "intent : " + intent.getExtras());
             position = intent.getIntExtra("position", -1);
             initiateViewToDisplay();
         } else if (intent.hasExtra("bookingId")) {
-            Log.e("intent 222","intent : "+intent.getExtras());
+            Log.e("intent 222", "intent : " + intent.getExtras());
             String id = intent.getStringExtra("bookingId");
-            Log.e("id 111",""+id);
+            Log.e("id 111", "" + id);
             SingleInstantParameters loginCredentials = new SingleInstantParameters();
             loginCredentials.bookingId = "" + id;
             Gson gson = new Gson();
             String json = gson.toJson(loginCredentials);
             Log.e("json", "" + json);
             getBookingByBookingId(loginCredentials, 1);
-        }else {
-            Log.e("intent 333","intent : "+intent.getExtras());
+        } else {
+            Log.e("intent 333", "intent : " + intent.getExtras());
             if (intent.hasExtra("from")) {
                 initiateViewToDisplay();
             }
@@ -162,9 +167,9 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                         ActivityCompat.requestPermissions(DriverInfoBookingActivity.this, new String[]{android.Manifest.permission.CALL_PHONE}, ACTIONCALL);
                     }
                 } else {
-                    Log.e("DriverMobileNumber",""+bookingDriverMobileNumber);
-                    if(bookingDriverMobileNumber != null){
-                        if(!bookingDriverMobileNumber.equalsIgnoreCase("null")){
+                    Log.e("DriverMobileNumber", "" + bookingDriverMobileNumber);
+                    if (bookingDriverMobileNumber != null) {
+                        if (!bookingDriverMobileNumber.equalsIgnoreCase("null")) {
                             Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + bookingDriverMobileNumber));
                             startActivity(intent);
                         }
@@ -173,24 +178,46 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
             }
         });
+
+        getDirections.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (Utils.connectivity(DriverInfoBookingActivity.this)) {
+                    if (polyline != null) {
+                        polyline.remove();
+                    }
+                    if (origin != null && dest != null) {
+                        String url = getUrl(origin, dest);
+                        Log.d("url", "" + url);
+                        FetchUrl FetchUrl = new FetchUrl();
+                        FetchUrl.execute(url);
+                    }
+                } else {
+                    Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
+
+    LatLng origin = Utils.startingLatLan;
+    LatLng dest = Utils.endingLatLan;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(ActivityCompat.checkSelfPermission(DriverInfoBookingActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(DriverInfoBookingActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED) {
             switch (requestCode) {
                 case ACTIONCALL:
-                    Log.e("DriverMobileNumber",""+bookingDriverMobileNumber);
-                    if(bookingDriverMobileNumber != null){
-                        if(!bookingDriverMobileNumber.equalsIgnoreCase("null")){
+                    Log.e("DriverMobileNumber", "" + bookingDriverMobileNumber);
+                    if (bookingDriverMobileNumber != null) {
+                        if (!bookingDriverMobileNumber.equalsIgnoreCase("null")) {
                             Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + bookingDriverMobileNumber));
                             startActivity(intent);
                         }
                     }
                     break;
             }
-        }else{
+        } else {
             Toast.makeText(DriverInfoBookingActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
         }
     }
@@ -204,7 +231,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             fromAddressText.setText(listOfBooking.getFrom());
             toAddressText.setText(listOfBooking.getTo());
             bookingStatus.setText(listOfBooking.getBookingStatus());
-            bookingStatusFinal = listOfBooking.getBookingStatus();
+            bookingStatusFinal = listOfBooking.getBookingStatusCode();
             bookingDriverMobileNumber = listOfBooking.getDriverMobileNumber();
             Log.e("DriverId", listOfBooking.getDriverId());
             Log.e("driverImage", "driverImage : " + listOfBooking.getDriverImage());
@@ -217,20 +244,26 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                 }
             }
 
-            if (listOfBooking.getBookingStatus() != null) {
-                if (listOfBooking.getBookingStatus().equals("SCHEDULED")) {
+            if (bookingStatusFinal != null) {
+                if (bookingStatusFinal.equals("SCHEDULED")) {
                     cancelBookingLay.setVisibility(View.VISIBLE);
                     callDriverImg.setVisibility(View.VISIBLE);
+                    callDriverText.setVisibility(View.VISIBLE);
+                    driverArrivingTime.setVisibility(View.VISIBLE);
                 } else {
                     cancelBookingLay.setVisibility(View.GONE);
                     callDriverImg.setVisibility(View.GONE);
+                    callDriverText.setVisibility(View.GONE);
+                    driverArrivingTime.setVisibility(View.GONE);
                 }
             } else {
                 cancelBookingLay.setVisibility(View.GONE);
                 callDriverImg.setVisibility(View.GONE);
+                callDriverText.setVisibility(View.GONE);
+                driverArrivingTime.setVisibility(View.GONE);
             }
 
-            if (!listOfBooking.getBookingStatus().equals("COMPLETED")) {
+            if (!bookingStatusFinal.equals("COMPLETED")) {
                 SingleInstantParameters loginCredentials = new SingleInstantParameters();
                 loginCredentials.userId = "" + listOfBooking.getDriverId();
                 getGeoLocationByDriverId(loginCredentials);
@@ -242,7 +275,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             fromAddressText.setText(Utils.requestBookingResponse.getFrom());
             toAddressText.setText(Utils.requestBookingResponse.getTo());
             bookingStatus.setText(Utils.requestBookingResponse.getBookingStatus());
-            bookingStatusFinal = Utils.requestBookingResponse.getBookingStatus();
+            bookingStatusFinal = Utils.requestBookingResponse.getBookingStatusCode();
             bookingDriverMobileNumber = Utils.requestBookingResponse.getDriverMobileNumber();
             Log.e("DriverId", Utils.requestBookingResponse.getDriverId());
             Log.e("driverImage", "driverImage : " + Utils.requestBookingResponse.getDriverImage());
@@ -254,24 +287,40 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     user_view.setImageBitmap(decodedByte);
                 }
             }
-            if (Utils.requestBookingResponse.getBookingStatus() != null) {
-                if (Utils.requestBookingResponse.getBookingStatus().equals("SCHEDULED")) {
+            if (bookingStatusFinal != null) {
+                if (bookingStatusFinal.equals("SCHEDULED")) {
                     cancelBookingLay.setVisibility(View.VISIBLE);
                     callDriverImg.setVisibility(View.VISIBLE);
+                    callDriverText.setVisibility(View.VISIBLE);
+                    driverArrivingTime.setVisibility(View.VISIBLE);
                 } else {
                     cancelBookingLay.setVisibility(View.GONE);
                     callDriverImg.setVisibility(View.GONE);
+                    callDriverText.setVisibility(View.GONE);
+                    driverArrivingTime.setVisibility(View.GONE);
                 }
             } else {
                 cancelBookingLay.setVisibility(View.GONE);
                 callDriverImg.setVisibility(View.GONE);
+                callDriverText.setVisibility(View.GONE);
+                driverArrivingTime.setVisibility(View.GONE);
             }
 
-            if (!Utils.requestBookingResponse.getBookingStatus().equals("COMPLETED")) {
+            if (!bookingStatusFinal.equals("COMPLETED")) {
                 SingleInstantParameters loginCredentials = new SingleInstantParameters();
                 loginCredentials.userId = "" + Utils.requestBookingResponse.getDriverId();
                 getGeoLocationByDriverId(loginCredentials);
             }
+        }
+
+        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("COMPLETED")) {
+            SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+            editor.putString("bookingId", bookingIdFinal);
+            editor.commit();
+        } else {
+            SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+            editor.putString("bookingId", "");
+            editor.commit();
         }
     }
 
@@ -291,239 +340,295 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         Log.e("Thread message", "" + messageReceivedEvent.message);
         Log.e("Thread title", "" + messageReceivedEvent.title);
         Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
-        if (!messageReceivedEvent.title.equals("BOOKING_CANCELLED")) {
+        if(!messageReceivedEvent.title.equals("BOOKING_PAYMENT_SUCCESS")) {
             SingleInstantParameters loginCredentials = new SingleInstantParameters();
             loginCredentials.bookingId = "" + bookingIdFinal;
             getBookingByBookingId(loginCredentials);
+        }else {
+            onBackPressed();
         }
     }
 
-    public void getBookingByBookingId(SingleInstantParameters loginCredentials) {
-        final Dialog dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = prefs.getString("LoginCredentials", "");
+        Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
+    }
 
-        Call<SingleInstantResponse> call = apiService.getBookingByBookingId(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                if (response.isSuccessful()) {
-                    dialog.dismiss();
-                    Utils.requestBookingResponse = response.body();
-                    bookingIdFinal = Utils.requestBookingResponse.getBookingId();
-                    driverNameText.setText(Utils.requestBookingResponse.getDriverName());
-                    cabTypeText.setText(Utils.requestBookingResponse.getCabType());
-                    fromAddressText.setText(Utils.requestBookingResponse.getFrom());
-                    toAddressText.setText(Utils.requestBookingResponse.getTo());
-                    bookingStatus.setText(Utils.requestBookingResponse.getBookingStatus());
-                    bookingStatusFinal = Utils.requestBookingResponse.getBookingStatus();
-                    bookingDriverMobileNumber = Utils.requestBookingResponse.getDriverMobileNumber();
-                    Log.e("DriverId", Utils.requestBookingResponse.getDriverId());
-                    Log.e("driverImage", "driverImage : " + Utils.requestBookingResponse.getDriverImage());
-                    String driverImage = "" + Utils.requestBookingResponse.getDriverImage();
-                    if (driverImage != null) {
-                        if (!driverImage.equalsIgnoreCase("null")) {
-                            byte[] decodedString = Base64.decode(driverImage, Base64.DEFAULT);
-                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                            user_view.setImageBitmap(decodedByte);
+    public void getBookingByBookingId(SingleInstantParameters loginCredentials) {
+        if (Utils.connectivity(DriverInfoBookingActivity.this)) {
+            final Dialog dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
+
+            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    if (response.isSuccessful()) {
+                        dialog.dismiss();
+                        Utils.requestBookingResponse = response.body();
+                        bookingIdFinal = Utils.requestBookingResponse.getBookingId();
+                        driverNameText.setText(Utils.requestBookingResponse.getDriverName());
+                        cabTypeText.setText(Utils.requestBookingResponse.getCabType());
+                        fromAddressText.setText(Utils.requestBookingResponse.getFrom());
+                        toAddressText.setText(Utils.requestBookingResponse.getTo());
+                        bookingStatus.setText(Utils.requestBookingResponse.getBookingStatus());
+                        bookingStatusFinal = Utils.requestBookingResponse.getBookingStatusCode();
+                        bookingDriverMobileNumber = Utils.requestBookingResponse.getDriverMobileNumber();
+                        Log.e("DriverId", Utils.requestBookingResponse.getDriverId());
+                        Log.e("driverImage", "driverImage : " + Utils.requestBookingResponse.getDriverImage());
+                        String driverImage = "" + Utils.requestBookingResponse.getDriverImage();
+                        if (driverImage != null) {
+                            if (!driverImage.equalsIgnoreCase("null")) {
+                                byte[] decodedString = Base64.decode(driverImage, Base64.DEFAULT);
+                                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                                user_view.setImageBitmap(decodedByte);
+                            }
                         }
-                    }
-                    if (Utils.requestBookingResponse.getBookingStatus() != null) {
-                        if (Utils.requestBookingResponse.getBookingStatus().equals("SCHEDULED")) {
-                            cancelBookingLay.setVisibility(View.VISIBLE);
-                            callDriverImg.setVisibility(View.VISIBLE);
+                        if (bookingStatusFinal != null) {
+                            if (bookingStatusFinal.equals("SCHEDULED")) {
+                                cancelBookingLay.setVisibility(View.VISIBLE);
+                                callDriverImg.setVisibility(View.VISIBLE);
+                                callDriverText.setVisibility(View.VISIBLE);
+                                driverArrivingTime.setVisibility(View.VISIBLE);
+                            } else {
+                                cancelBookingLay.setVisibility(View.GONE);
+                                callDriverImg.setVisibility(View.GONE);
+                                callDriverText.setVisibility(View.GONE);
+                                driverArrivingTime.setVisibility(View.GONE);
+                            }
                         } else {
                             cancelBookingLay.setVisibility(View.GONE);
                             callDriverImg.setVisibility(View.GONE);
+                            callDriverText.setVisibility(View.GONE);
+                            driverArrivingTime.setVisibility(View.GONE);
                         }
+
+                        if (!bookingStatusFinal.equals("COMPLETED")) {
+                            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                            loginCredentials.userId = "" + Utils.requestBookingResponse.getDriverId();
+                            getGeoLocationByDriverId(loginCredentials);
+                        }
+
+                        if (bookingStatusFinal.equals("CANCELLED")) {
+                            showInfoDlg("Booking Cancelled", "Requested booking has been cancelled. Try after sometime", "Done", "requestCancelled");
+                        }
+
+                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("COMPLETED")) {
+                            SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+                            editor.putString("bookingId", bookingIdFinal);
+                            editor.commit();
+                        } else {
+                            SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+                            editor.putString("bookingId", "");
+                            editor.commit();
+                        }
+
                     } else {
-                        cancelBookingLay.setVisibility(View.GONE);
-                        callDriverImg.setVisibility(View.GONE);
-                    }
-
-                    if (!bookingIdFinal.equals("COMPLETED")) {
-                        SingleInstantParameters loginCredentials = new SingleInstantParameters();
-                        loginCredentials.userId = "" + Utils.requestBookingResponse.getDriverId();
-                        getGeoLocationByDriverId(loginCredentials);
-                    }
-
-                } else {
-                    dialog.dismiss();
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                        dialog.dismiss();
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void getBookingByBookingId(SingleInstantParameters loginCredentials, final int count) {
-        final Dialog dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+        if (Utils.connectivity(DriverInfoBookingActivity.this)) {
+            final Dialog dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<SingleInstantResponse> call = apiService.getBookingByBookingId(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                if (response.isSuccessful()) {
-                    dialog.dismiss();
-                    Utils.requestBookingResponse = response.body();
-                    bookingIdFinal = Utils.requestBookingResponse.getBookingId();
-                    driverNameText.setText(Utils.requestBookingResponse.getDriverName());
-                    cabTypeText.setText(Utils.requestBookingResponse.getCabType());
-                    fromAddressText.setText(Utils.requestBookingResponse.getFrom());
-                    toAddressText.setText(Utils.requestBookingResponse.getTo());
-                    bookingStatus.setText(Utils.requestBookingResponse.getBookingStatus());
-                    bookingStatusFinal = Utils.requestBookingResponse.getBookingStatus();
-                    bookingDriverMobileNumber = Utils.requestBookingResponse.getDriverMobileNumber();
-                    Log.e("DriverId", Utils.requestBookingResponse.getDriverId());
-                    Log.e("driverImage", "driverImage : " + Utils.requestBookingResponse.getDriverImage());
-                    String driverImage = "" + Utils.requestBookingResponse.getDriverImage();
-                    if (driverImage != null) {
-                        if (!driverImage.equalsIgnoreCase("null")) {
-                            byte[] decodedString = Base64.decode(driverImage, Base64.DEFAULT);
-                            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-                            user_view.setImageBitmap(decodedByte);
+            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    if (response.isSuccessful()) {
+                        dialog.dismiss();
+                        Utils.requestBookingResponse = response.body();
+                        bookingIdFinal = Utils.requestBookingResponse.getBookingId();
+                        driverNameText.setText(Utils.requestBookingResponse.getDriverName());
+                        cabTypeText.setText(Utils.requestBookingResponse.getCabType());
+                        fromAddressText.setText(Utils.requestBookingResponse.getFrom());
+                        toAddressText.setText(Utils.requestBookingResponse.getTo());
+                        bookingStatus.setText(Utils.requestBookingResponse.getBookingStatus());
+                        bookingStatusFinal = Utils.requestBookingResponse.getBookingStatusCode();
+                        bookingDriverMobileNumber = Utils.requestBookingResponse.getDriverMobileNumber();
+                        Log.e("DriverId", Utils.requestBookingResponse.getDriverId());
+                        Log.e("driverImage", "driverImage : " + Utils.requestBookingResponse.getDriverImage());
+                        String driverImage = "" + Utils.requestBookingResponse.getDriverImage();
+                        if (driverImage != null) {
+                            if (!driverImage.equalsIgnoreCase("null")) {
+                                byte[] decodedString = Base64.decode(driverImage, Base64.DEFAULT);
+                                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                                user_view.setImageBitmap(decodedByte);
+                            }
                         }
-                    }
-                    if (Utils.requestBookingResponse.getBookingStatus() != null) {
-                        if (Utils.requestBookingResponse.getBookingStatus().equals("SCHEDULED")) {
-                            cancelBookingLay.setVisibility(View.VISIBLE);
-                            callDriverImg.setVisibility(View.VISIBLE);
+                        if (bookingStatusFinal != null) {
+                            if (bookingStatusFinal.equals("SCHEDULED")) {
+                                cancelBookingLay.setVisibility(View.VISIBLE);
+                                callDriverImg.setVisibility(View.VISIBLE);
+                                callDriverText.setVisibility(View.VISIBLE);
+                                driverArrivingTime.setVisibility(View.VISIBLE);
+                            } else {
+                                cancelBookingLay.setVisibility(View.GONE);
+                                callDriverImg.setVisibility(View.GONE);
+                                callDriverText.setVisibility(View.GONE);
+                                driverArrivingTime.setVisibility(View.GONE);
+                            }
                         } else {
                             cancelBookingLay.setVisibility(View.GONE);
                             callDriverImg.setVisibility(View.GONE);
+                            callDriverText.setVisibility(View.GONE);
+                            driverArrivingTime.setVisibility(View.GONE);
                         }
+
+                        String fromLat = Utils.requestBookingResponse.getGeoLocationResponse().getFromLatitude();
+                        String fromLong = Utils.requestBookingResponse.getGeoLocationResponse().getFromLongitude();
+                        String toLat = Utils.requestBookingResponse.getGeoLocationResponse().getToLatitude();
+                        String toLong = Utils.requestBookingResponse.getGeoLocationResponse().getToLongitude();
+
+                        origin = new LatLng(Double.parseDouble(fromLat), Double.parseDouble(fromLong));
+                        dest = new LatLng(Double.parseDouble(toLat), Double.parseDouble(toLong));
+
+                        startingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(origin).icon(BitmapDescriptorFactory.fromResource(R.drawable.startpoint)));
+                        startingMarker.setTag("starting");
+                        markers.add(startingMarker);
+                        endingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(dest).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
+                        endingMarker.setTag("ending");
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 15));
+                        mMap.animateCamera(CameraUpdateFactory.zoomIn());
+                        mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+
+                        if (!bookingStatusFinal.equals("COMPLETED")) {
+                            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                            loginCredentials.userId = "" + Utils.requestBookingResponse.getDriverId();
+                            getGeoLocationByDriverId(loginCredentials);
+                        }
+
+                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("COMPLETED")) {
+                            SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+                            editor.putString("bookingId", bookingIdFinal);
+                            editor.commit();
+                        } else {
+                            SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+                            editor.putString("bookingId", "");
+                            editor.commit();
+                        }
+
                     } else {
-                        cancelBookingLay.setVisibility(View.GONE);
-                        callDriverImg.setVisibility(View.GONE);
-                    }
-
-                    String fromLat = Utils.requestBookingResponse.getGeoLocationResponse().getFromLatitude();
-                    String fromLong = Utils.requestBookingResponse.getGeoLocationResponse().getFromLongitude();
-                    String toLat = Utils.requestBookingResponse.getGeoLocationResponse().getToLatitude();
-                    String toLong = Utils.requestBookingResponse.getGeoLocationResponse().getToLongitude();
-
-                    LatLng origin = new LatLng(Double.parseDouble(fromLat), Double.parseDouble(fromLong));
-                    LatLng dest = new LatLng(Double.parseDouble(toLat), Double.parseDouble(toLong));
-
-                    startingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(origin).icon(BitmapDescriptorFactory.fromResource(R.drawable.startpoint)));
-                    startingMarker.setTag("starting");
-                    endingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(dest).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
-                    endingMarker.setTag("ending");
-
-                    // Getting URL to the Google Directions API
-                    String url = getUrl(origin, dest);
-                    Log.d("url", "" + url);
-                    FetchUrl FetchUrl = new FetchUrl();
-                    // Start downloading json data from Google Directions API
-                    FetchUrl.execute(url);
-
-                    if (!bookingIdFinal.equals("COMPLETED")) {
-                        SingleInstantParameters loginCredentials = new SingleInstantParameters();
-                        loginCredentials.userId = "" + Utils.requestBookingResponse.getDriverId();
-                        getGeoLocationByDriverId(loginCredentials);
-                    }
-
-                } else {
-                    dialog.dismiss();
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                        dialog.dismiss();
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
 
     private void updateBookingStatus(SingleInstantParameters loginCredentials) {
-        final Dialog dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+        if (Utils.connectivity(DriverInfoBookingActivity.this)) {
+            final Dialog dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<SingleInstantResponse> call = apiService.updateBookingStatus(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                dialog.dismiss();
-                if (response.isSuccessful()) {
-                    Utils.updateBookingStatusInstantResponse = response.body();
-                    Log.e("BookingStatus", "" + Utils.updateBookingStatusInstantResponse.getBookingStatus());
-                    showInfoDlg("Success..", "Request Cancelled Successfully.", "Ok", "success");
-                } else {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+            Call<SingleInstantResponse> call = apiService.updateBookingStatus(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.updateBookingStatusInstantResponse = response.body();
+                        Log.e("BookingStatus", "" + Utils.updateBookingStatusInstantResponse.getBookingStatus());
+                        showInfoDlg("Success..", "Your ZipRyde has been cancelled.", "Ok", "success");
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     Marker driverMarker;
@@ -532,11 +637,15 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     @Override
     public void onBackPressed() {
-        if (handler != null && finalizer != null) {
-            handler.removeCallbacks(finalizer);
+        if (bookingStatusFinal.equals("COMPLETED") || bookingStatusFinal.equals("CANCELLED")) {
+            if (handler != null && finalizer != null) {
+                handler.removeCallbacks(finalizer);
+            }
+            Intent ide = new Intent(DriverInfoBookingActivity.this, NavigationMenuActivity.class);
+            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(ide);
+            finish();
         }
-
-        finish();
     }
 
     @Override
@@ -548,73 +657,91 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
     }
 
     public void getGeoLocationByDriverId(final SingleInstantParameters loginCredentials) {
-        Gson gson = new Gson();
-        String json = gson.toJson(loginCredentials);
-        Log.e("GeoLocationId json", "" + json);
-        Call<SingleInstantResponse> call = apiService.getGeoLocationByDriverId(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                if (response.isSuccessful()) {
-                    Utils.getGeoLocationByDriverIdResponse = response.body();
-                    Log.e("Latitude", "" + Utils.getGeoLocationByDriverIdResponse.getLatitude());
-                    Log.e("Longitude", "" + Utils.getGeoLocationByDriverIdResponse.getLongitude());
+        if (Utils.connectivity(DriverInfoBookingActivity.this)) {
+            Gson gson = new Gson();
+            String json = gson.toJson(loginCredentials);
+            Log.e("GeoLocationId json", "" + json);
+            Call<SingleInstantResponse> call = apiService.getGeoLocationByDriverId(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    if (response.isSuccessful()) {
+                        Utils.getGeoLocationByDriverIdResponse = response.body();
+                        Log.e("Latitude", "" + Utils.getGeoLocationByDriverIdResponse.getLatitude());
+                        Log.e("Longitude", "" + Utils.getGeoLocationByDriverIdResponse.getLongitude());
 
-                    if(Utils.getGeoLocationByDriverIdResponse.getLatitude() != null && Utils.getGeoLocationByDriverIdResponse.getLongitude() != null){
-                        LatLng driverLatLng = new LatLng(Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLatitude()), Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLongitude()));
+                        if (Utils.getGeoLocationByDriverIdResponse.getLatitude() != null && Utils.getGeoLocationByDriverIdResponse.getLongitude() != null) {
+                            LatLng driverLatLng = new LatLng(Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLatitude()), Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLongitude()));
 
-                        if (driverMarker != null)
-                            driverMarker.remove();
+                            if (driverMarker != null)
+                                driverMarker.remove();
 
-                        driverMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(driverLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
+                            driverMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(driverLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
 
-                        finalizer = new Runnable() {
-                            public void run() {
-                                Log.e("bookingStatusFinal",""+bookingStatusFinal);
-                                if (!bookingStatusFinal.equals("COMPLETED")) {
-                                    if(!bookingStatusFinal.equals("CANCELLED")) {
-                                        getGeoLocationByDriverId(loginCredentials);
+                            finalizer = new Runnable() {
+                                public void run() {
+                                    Log.e("bookingStatusFinal", "" + bookingStatusFinal);
+                                    if (!bookingStatusFinal.equals("COMPLETED")) {
+                                        if (!bookingStatusFinal.equals("CANCELLED")) {
+                                            getGeoLocationByDriverId(loginCredentials);
+                                        }
                                     }
                                 }
-                            }
-                        };
-                        handler.postDelayed(finalizer, 10000);
-                    }else{
-                        finalizer = new Runnable() {
-                            public void run() {
-                                Log.e("bookingStatusFinal",""+bookingStatusFinal);
-                                if (!bookingStatusFinal.equals("COMPLETED")) {
-                                    if(!bookingStatusFinal.equals("CANCELLED")) {
-                                        getGeoLocationByDriverId(loginCredentials);
+                            };
+                            handler.postDelayed(finalizer, 10000);
+
+                            if (bookingStatusFinal.equals("SCHEDULED")) {
+                                driverArrivingTime.setVisibility(View.VISIBLE);
+                                if (Utils.connectivity(DriverInfoBookingActivity.this)) {
+                                    if (origin != null) {
+                                        String url = getUrl(driverLatLng, origin);
+                                        Log.d("url", "" + url);
+                                        FetchUrl FetchUrl = new FetchUrl("driverSelect");
+                                        FetchUrl.execute(url);
                                     }
+                                } else {
+                                    Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                                 }
                             }
-                        };
-                        handler.postDelayed(finalizer, 10000);
-                    }
 
-                } else {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                        } else {
+                            finalizer = new Runnable() {
+                                public void run() {
+                                    Log.e("bookingStatusFinal", "" + bookingStatusFinal);
+                                    if (!bookingStatusFinal.equals("COMPLETED")) {
+                                        if (!bookingStatusFinal.equals("CANCELLED")) {
+                                            getGeoLocationByDriverId(loginCredentials);
+                                        }
+                                    }
+                                }
+                            };
+                            handler.postDelayed(finalizer, 10000);
+                        }
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
@@ -633,7 +760,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("error") || navType.equalsIgnoreCase("server")) {
+        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("error") || navType.equalsIgnoreCase("server") || navType.equals("requestCancelled")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -691,12 +818,33 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
     Marker startingMarker, endingMarker;
     boolean mapReady = false;
 
+    List<Marker> markers = new LinkedList<Marker>();
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mapReady = true;
-        LatLng origin = Utils.startingLatLan;
-        LatLng dest = Utils.endingLatLan;
+
+        markers = new LinkedList<Marker>();
+        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                //markers.add(endingMarker);
+                if (markers.size() > 0) {
+                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                    for (Marker marker : markers) {
+                        builder.include(marker.getPosition());
+                    }
+                    LatLngBounds bounds = builder.build();
+                    int padding = 0; // offset from edges of the map in pixels
+                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+                    mMap.moveCamera(cu);
+                    mMap.animateCamera(cu);
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(8), 1000, null);
+                }
+            }
+        });
+
         if (position != -1) {
             ListOfBooking listOfBooking = Utils.getBookingByUserIdResponse.get(position);
             String fromLat = listOfBooking.getGeoLocationResponse().getFromLatitude();
@@ -709,57 +857,35 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
             startingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(origin).icon(BitmapDescriptorFactory.fromResource(R.drawable.startpoint)));
             startingMarker.setTag("starting");
+            markers.add(startingMarker);
             endingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(dest).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
             endingMarker.setTag("ending");
-
-            // Getting URL to the Google Directions API
-            String url = getUrl(origin, dest);
-            Log.d("url", "" + url);
-            FetchUrl FetchUrl = new FetchUrl();
-            // Start downloading json data from Google Directions API
-            FetchUrl.execute(url);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 15));
+            mMap.animateCamera(CameraUpdateFactory.zoomIn());
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
         } else {
             // Booked
-            if(Utils.requestBookingResponse.getGeoLocationResponse() != null) {
-                String fromLat = Utils.requestBookingResponse.getGeoLocationResponse().getFromLatitude();
-                String fromLong = Utils.requestBookingResponse.getGeoLocationResponse().getFromLongitude();
-                String toLat = Utils.requestBookingResponse.getGeoLocationResponse().getToLatitude();
-                String toLong = Utils.requestBookingResponse.getGeoLocationResponse().getToLongitude();
+            if (Utils.requestBookingResponse != null) {
+                if (Utils.requestBookingResponse.getGeoLocationResponse() != null) {
+                    String fromLat = Utils.requestBookingResponse.getGeoLocationResponse().getFromLatitude();
+                    String fromLong = Utils.requestBookingResponse.getGeoLocationResponse().getFromLongitude();
+                    String toLat = Utils.requestBookingResponse.getGeoLocationResponse().getToLatitude();
+                    String toLong = Utils.requestBookingResponse.getGeoLocationResponse().getToLongitude();
 
-                origin = new LatLng(Double.parseDouble(fromLat), Double.parseDouble(fromLong));
-                dest = new LatLng(Double.parseDouble(toLat), Double.parseDouble(toLong));
+                    origin = new LatLng(Double.parseDouble(fromLat), Double.parseDouble(fromLong));
+                    dest = new LatLng(Double.parseDouble(toLat), Double.parseDouble(toLong));
 
-                startingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(origin).icon(BitmapDescriptorFactory.fromResource(R.drawable.startpoint)));
-                startingMarker.setTag("starting");
-                endingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(dest).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
-                endingMarker.setTag("ending");
-
-                // Getting URL to the Google Directions API
-                String url = getUrl(origin, dest);
-                Log.d("url", "" + url);
-                FetchUrl FetchUrl = new FetchUrl();
-                // Start downloading json data from Google Directions API
-                FetchUrl.execute(url);
+                    startingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(origin).icon(BitmapDescriptorFactory.fromResource(R.drawable.startpoint)));
+                    startingMarker.setTag("starting");
+                    markers.add(startingMarker);
+                    endingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(dest).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
+                    endingMarker.setTag("ending");
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 15));
+                    mMap.animateCamera(CameraUpdateFactory.zoomIn());
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                }
             }
         }
-
-        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-            @Override
-            public void onMapLoaded() {
-                List<Marker> markers = new LinkedList<Marker>();
-                markers.add(startingMarker);
-                markers.add(endingMarker);
-                LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                for (Marker marker : markers) {
-                    builder.include(marker.getPosition());
-                }
-                LatLngBounds bounds = builder.build();
-                int padding = 50; // offset from edges of the map in pixels
-                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-                mMap.moveCamera(cu);
-                mMap.animateCamera(cu);
-            }
-        });
     }
 
     private String getUrl(LatLng origin, LatLng dest) {
@@ -824,6 +950,16 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
     // Fetches data from url passed
     private class FetchUrl extends AsyncTask<String, Void, String> {
 
+        String displayType = "";
+
+        public FetchUrl(String displayType) {
+            this.displayType = displayType;
+        }
+
+        public FetchUrl() {
+            this.displayType = "";
+        }
+
         @Override
         protected String doInBackground(String... url) {
 
@@ -844,7 +980,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 
-            ParserTask parserTask = new ParserTask();
+            ParserTask parserTask = new ParserTask(displayType);
             // Invokes the thread for parsing the JSON data
             parserTask.execute(result);
 
@@ -855,6 +991,16 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
      * A class to parse the Google Places in JSON format
      */
     private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        String displayType = "";
+
+        public ParserTask(String displayType) {
+            this.displayType = displayType;
+        }
+
+        public ParserTask() {
+            this.displayType = "";
+        }
 
         // Parsing the data in non-ui thread
         @Override
@@ -917,7 +1063,12 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
             // Drawing polyline in the Google Map for the i-th route
             if (lineOptions != null) {
-                mMap.addPolyline(lineOptions);
+                if(displayType.equalsIgnoreCase("")) {
+                    polyline = mMap.addPolyline(lineOptions);
+                }
+                if(!displayType.equalsIgnoreCase("")) {
+                    driverArrivingTime.setText(Utils.parsedDuration);
+                }
             } else {
                 Log.d("onPostExecute", "without Polylines drawn");
             }

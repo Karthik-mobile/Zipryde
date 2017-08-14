@@ -37,6 +37,7 @@ import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.DataParser;
 import com.trivectadigital.ziprydeuserapp.assist.MessageReceivedEvent;
+import com.trivectadigital.ziprydeuserapp.assist.TimeDataParser;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCarTypes;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCurrentCabs;
@@ -110,7 +111,6 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
     Spinner noofSeatsSpinner;
     TextView textAmount1, textAmount2, textAmount3, textAmount4, basePrice, priceUpdateText, noCabsText;
     TextView microTimeTextSmall, microTimeTextBig, sedanTimeTextSmall, sedanTimeTextBig, suvTimeTextSmall, suvTimeTextBig;
-    private BroadcastReceiver mRegistrationBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -554,92 +554,97 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
     Dialog requestdialog;
 
     public void callRequestBooking(SingleInstantParameters loginCredentials) {
-        requestdialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
-        requestdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        requestdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        requestdialog.setContentView(R.layout.requetsloadingimage_layout);
-        requestdialog.setCanceledOnTouchOutside(false);
-        requestdialog.setCancelable(false);
-        requestdialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        requestdialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        requestdialog.show();
+        if (Utils.connectivity(DirectionConfirmationActivity.this)) {
+            requestdialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+            requestdialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            requestdialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            requestdialog.setContentView(R.layout.requetsloadingimage_layout);
+            requestdialog.setCanceledOnTouchOutside(false);
+            requestdialog.setCancelable(false);
+            requestdialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            requestdialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            requestdialog.show();
 
-        Call<SingleInstantResponse> call = apiService.requestBooking(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                if (response.isSuccessful()) {
-                    Utils.requestBookingResponse = response.body();
-                    Log.e("bookingId", "" + Utils.requestBookingResponse.getBookingId());
-                    Log.e("bookingStatus", "" + Utils.requestBookingResponse.getBookingStatus());
-                    if (Utils.requestBookingResponse.getBookingStatus().equals("SCHEDULED")) {
-                        requestdialog.dismiss();
-                        showInfoDlg("Booking Successful", "Your Booking request has been submitted successfully. Please wait till driver accepts...", "Done", "successBooking");
+            Call<SingleInstantResponse> call = apiService.requestBooking(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    if (response.isSuccessful()) {
+                        Utils.requestBookingResponse = response.body();
+                        Log.e("bookingId", "" + Utils.requestBookingResponse.getBookingId());
+                        Log.e("bookingStatus", "" + Utils.requestBookingResponse.getBookingStatusCode());
+                        if (Utils.requestBookingResponse.getBookingStatusCode().equals("SCHEDULED")) {
+                            requestdialog.dismiss();
+                            showInfoDlg("Booking Successful", "Your Booking request has been submitted successfully. Please wait till driver accepts...", "Done", "successBooking");
+                        } else {
+                            finalizer = new Runnable() {
+                                public void run() {
+                                    requestdialog.dismiss();
+                                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                                    loginCredentials.bookingId = "" + Utils.requestBookingResponse.getBookingId();
+                                    getBookingByBookingId(loginCredentials, 1);
+                                }
+                            };
+                            handler.postDelayed(finalizer, 30000);
+                        }
                     } else {
-                        finalizer = new Runnable() {
-                            public void run() {
-                                requestdialog.dismiss();
-                                SingleInstantParameters loginCredentials = new SingleInstantParameters();
-                                loginCredentials.bookingId = "" + Utils.requestBookingResponse.getBookingId();
-                                getBookingByBookingId(loginCredentials, 1);
-                            }
-                        };
-                        handler.postDelayed(finalizer, 30000);
-                    }
-                } else {
-                    requestdialog.dismiss();
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                        requestdialog.dismiss();
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                requestdialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    requestdialog.dismiss();
+                    Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void getBookingByBookingId(SingleInstantParameters loginCredentials, final int count) {
-        final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.requetsloadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+        if (Utils.connectivity(DirectionConfirmationActivity.this)) {
+            final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.requetsloadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<SingleInstantResponse> call = apiService.getBookingByBookingId(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                if (response.isSuccessful()) {
-                    dialog.dismiss();
-                    Utils.requestBookingResponse = response.body();
-                    Log.e("bookingId", "" + Utils.requestBookingResponse.getBookingId());
-                    Log.e("bookingStatus", "" + Utils.requestBookingResponse.getBookingStatus());
-                    if (Utils.requestBookingResponse.getBookingStatus().equals("SCHEDULED")) {
-                        showInfoDlg("Booking Successful", "Your Booking request has been accepted by driver...", "Done", "successBooking");
-                    } else {
+            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    if (response.isSuccessful()) {
+                        dialog.dismiss();
+                        Utils.requestBookingResponse = response.body();
+                        Log.e("bookingId", "" + Utils.requestBookingResponse.getBookingId());
+                        Log.e("bookingStatus", "" + Utils.requestBookingResponse.getBookingStatusCode());
+                        if (Utils.requestBookingResponse.getBookingStatusCode().equals("SCHEDULED")) {
+                            showInfoDlg("Booking Successful", "Your Booking request has been accepted by driver...", "Done", "successBooking");
+                        } else {
 //                            if(count != 3){
 //                                new Handler().postDelayed(new Runnable() {
 //                                    @Override
@@ -651,77 +656,84 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
 //                                    }
 //                                }, 10000);
 //                            }else{
-                        String cabType = Utils.requestBookingResponse.getCabType();
-                        showInfoDlg("Booking Cancelled", "No " + cabType + " available / Driver Not accepted the request. Try after sometime", "Done", "requestCancelled");
+                            String cabType = Utils.requestBookingResponse.getCabType();
+                            showInfoDlg("Booking Cancelled", "No " + cabType + " available / Driver Not accepted the request. Try after sometime", "Done", "requestCancelled");
 //                            }
-                    }
-                } else {
-                    dialog.dismiss();
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                        }
+                    } else {
+                        dialog.dismiss();
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void updateBookingStatus(SingleInstantParameters loginCredentials) {
-        final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+        if (Utils.connectivity(DirectionConfirmationActivity.this)) {
+            final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<SingleInstantResponse> call = apiService.updateBookingStatus(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                dialog.dismiss();
-                if (response.isSuccessful()) {
-                    Utils.updateBookingStatusInstantResponse = response.body();
-                    Log.e("BookingStatus", "" + Utils.updateBookingStatusInstantResponse.getBookingStatus());
-                    Intent ide = new Intent(DirectionConfirmationActivity.this, NavigationMenuActivity.class);
-                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(ide);
-                    finish();
-                } else {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+            Call<SingleInstantResponse> call = apiService.updateBookingStatus(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.updateBookingStatusInstantResponse = response.body();
+                        Log.e("BookingStatus", "" + Utils.updateBookingStatusInstantResponse.getBookingStatus());
+                        Intent ide = new Intent(DirectionConfirmationActivity.this, NavigationMenuActivity.class);
+                        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(ide);
+                        finish();
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void sendPassengerInformation(int count) {
@@ -741,172 +753,180 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
     }
 
     private void getAllCabTypes() {
-        final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+        if (Utils.connectivity(DirectionConfirmationActivity.this)) {
+            final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<LinkedList<ListOfCarTypes>> call = apiService.getAllCabTypes();
-        call.enqueue(new Callback<LinkedList<ListOfCarTypes>>() {
-            @Override
-            public void onResponse(Call<LinkedList<ListOfCarTypes>> call, Response<LinkedList<ListOfCarTypes>> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                dialog.dismiss();
-                if (response.isSuccessful()) {
-                    Utils.getAllCabTypesInstantResponse = response.body();
-                    Log.e("Size", "" + Utils.getAllCabTypesInstantResponse.size());
-                    selectedCarType = 2;
-                    selectedCarModel = "Mini";
-                    carTypeText.setText(selectedCarModel);
-                    for (int i = 0; i < Utils.getAllCabTypesInstantResponse.size(); i++) {
-                        Log.e("CARTYPE", "" + Utils.getAllCabTypesInstantResponse.get(i).getType());
-                        if (i == 0) {
-                            microTextSmall.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
-                            //getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
-                            microTextBig.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
-                            microTimeTextSmall.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
-                            microTimeTextBig.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
-                        } else if (i == 1) {
-                            sedanTextSmall.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
-                            sedanTextBig.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
-                            sedanTimeTextSmall.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
-                            sedanTimeTextBig.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
-                        } else {
-                            suvTextSmall.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
-                            getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
-                            suvTextBig.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
-                            suvTimeTextSmall.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
-                            suvTimeTextBig.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+            Call<LinkedList<ListOfCarTypes>> call = apiService.getAllCabTypes();
+            call.enqueue(new Callback<LinkedList<ListOfCarTypes>>() {
+                @Override
+                public void onResponse(Call<LinkedList<ListOfCarTypes>> call, Response<LinkedList<ListOfCarTypes>> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.getAllCabTypesInstantResponse = response.body();
+                        Log.e("Size", "" + Utils.getAllCabTypesInstantResponse.size());
+                        selectedCarType = 2;
+                        selectedCarModel = "Mini";
+                        carTypeText.setText(selectedCarModel);
+                        for (int i = 0; i < Utils.getAllCabTypesInstantResponse.size(); i++) {
+                            Log.e("CARTYPE", "" + Utils.getAllCabTypesInstantResponse.get(i).getType());
+                            if (i == 0) {
+                                microTextSmall.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
+                                //getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+                                microTextBig.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
+                                microTimeTextSmall.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+                                microTimeTextBig.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+                            } else if (i == 1) {
+                                sedanTextSmall.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
+                                sedanTextBig.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
+                                sedanTimeTextSmall.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+                                sedanTimeTextBig.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+                            } else {
+                                suvTextSmall.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
+                                getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+                                suvTextBig.setText(Utils.getAllCabTypesInstantResponse.get(i).getType());
+                                suvTimeTextSmall.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+                                suvTimeTextBig.setTag(Utils.getAllCabTypesInstantResponse.get(i).getCabTypeId());
+                            }
+                        }
+                        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
+                                R.array.suv_array, android.R.layout.simple_spinner_item);
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        noofSeatsSpinner.setAdapter(adapter);
+                        noofSeatsSpinner.setSelection(0, true);
+                        //showInfoDlg("Success..", "Successfully registered.", "OK", "success");
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
                     }
-                    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
-                            R.array.suv_array, android.R.layout.simple_spinner_item);
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    noofSeatsSpinner.setAdapter(adapter);
-                    noofSeatsSpinner.setSelection(0, true);
-                    //showInfoDlg("Success..", "Successfully registered.", "OK", "success");
-                } else {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<LinkedList<ListOfCarTypes>> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<LinkedList<ListOfCarTypes>> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void getFairEstimateDetails(SingleInstantParameters singleInstantParameters) {
-        final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+        if (Utils.connectivity(DirectionConfirmationActivity.this)) {
+            final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<LinkedList<ListOfFairEstimate>> call = apiService.getAllNYOPByCabTypeAndDistance(singleInstantParameters);
-        call.enqueue(new Callback<LinkedList<ListOfFairEstimate>>() {
-            @Override
-            public void onResponse(Call<LinkedList<ListOfFairEstimate>> call, Response<LinkedList<ListOfFairEstimate>> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                dialog.dismiss();
-                if (response.isSuccessful()) {
-                    Utils.getAllNYOPByCabTypeAndDistanceInstantResponse = response.body();
-                    Log.e("size", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size());
-                    if (Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 0) {
-                        String status = Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(0).getStatus();
-                        Log.e("status", "" + status);
-                        String errorMessage = Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(0).getErrorMessage();
-                        Log.e("errorMessage", "" + errorMessage);
-                        if(status.equalsIgnoreCase("true")){
-                            fairDetailsVisible = true;
-                            vehicleTypeLay.setVisibility(View.GONE);
-                            requestTypeLay.setVisibility(View.VISIBLE);
-                            if (Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 0) {
-                                Log.e("getPrice", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(0).getPrice());
-                                double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(0).getPrice());
-                                Log.e("price 11", "" + price);
-                                textAmount1.setText("$" + new DecimalFormat("##.#").format(price));
-                                textAmount1.setTag("" + price);
-                                requestPickupBtn.setTag(textAmount1.getTag().toString().trim());
-                                basePrice.setText("$" + new DecimalFormat("##.#").format(price));
-                                basePrice.setTag("" + price);
-                                priceUpdateText.setText("$" + new DecimalFormat("##.#").format(price));
-                            }
+            Call<LinkedList<ListOfFairEstimate>> call = apiService.getAllNYOPByCabTypeAndDistance(singleInstantParameters);
+            call.enqueue(new Callback<LinkedList<ListOfFairEstimate>>() {
+                @Override
+                public void onResponse(Call<LinkedList<ListOfFairEstimate>> call, Response<LinkedList<ListOfFairEstimate>> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.getAllNYOPByCabTypeAndDistanceInstantResponse = response.body();
+                        Log.e("size", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size());
+                        if (Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 0) {
+                            String status = Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(0).getStatus();
+                            Log.e("status", "" + status);
+                            String errorMessage = Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(0).getErrorMessage();
+                            Log.e("errorMessage", "" + errorMessage);
+                            if (status.equalsIgnoreCase("true")) {
+                                fairDetailsVisible = true;
+                                vehicleTypeLay.setVisibility(View.GONE);
+                                requestTypeLay.setVisibility(View.VISIBLE);
+                                if (Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 0) {
+                                    Log.e("getPrice", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(0).getPrice());
+                                    double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(0).getPrice());
+                                    Log.e("price 11", "" + price);
+                                    textAmount1.setText("$" + new DecimalFormat("##.#").format(price));
+                                    textAmount1.setTag("" + price);
+                                    requestPickupBtn.setTag(textAmount1.getTag().toString().trim());
+                                    basePrice.setText("$" + new DecimalFormat("##.#").format(price));
+                                    basePrice.setTag("" + price);
+                                    priceUpdateText.setText("$" + new DecimalFormat("##.#").format(price));
+                                }
 
-                            if (Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 1) {
-                                Log.e("getPrice", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(1).getPrice());
-                                double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(1).getPrice());
-                                Log.e("price 22", "" + price);
-                                textAmount2.setText("$" + new DecimalFormat("##.#").format(price));
-                                textAmount2.setTag("" + price);
-                            }
+                                if (Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 1) {
+                                    Log.e("getPrice", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(1).getPrice());
+                                    double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(1).getPrice());
+                                    Log.e("price 22", "" + price);
+                                    textAmount2.setText("$" + new DecimalFormat("##.#").format(price));
+                                    textAmount2.setTag("" + price);
+                                }
 
-                            if (Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 2) {
-                                Log.e("getPrice", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(2).getPrice());
-                                double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(2).getPrice());
-                                Log.e("price 33", "" + price);
-                                textAmount3.setText("$" + new DecimalFormat("##.#").format(price));
-                                textAmount3.setTag("" + price);
-                            }
+                                if (Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 2) {
+                                    Log.e("getPrice", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(2).getPrice());
+                                    double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(2).getPrice());
+                                    Log.e("price 33", "" + price);
+                                    textAmount3.setText("$" + new DecimalFormat("##.#").format(price));
+                                    textAmount3.setTag("" + price);
+                                }
 
-                            if (Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 3) {
-                                Log.e("getPrice", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(3).getPrice());
-                                double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(3).getPrice());
-                                Log.e("price 44", "" + price);
-                                textAmount4.setText("$" + new DecimalFormat("##.#").format(price));
-                                textAmount4.setTag("" + price);
+                                if (Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 3) {
+                                    Log.e("getPrice", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(3).getPrice());
+                                    double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(3).getPrice());
+                                    Log.e("price 44", "" + price);
+                                    textAmount4.setText("$" + new DecimalFormat("##.#").format(price));
+                                    textAmount4.setTag("" + price);
+                                }
+                            } else {
+                                showInfoDlg("Invalid drop!", "" + errorMessage, "OK", "invalid");
                             }
-                        }else{
-                            showInfoDlg("Invalid drop!", ""+errorMessage, "OK", "invalid");
+                        }
+
+                        //showInfoDlg("Success..", "Successfully registered.", "OK", "success");
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
                     }
-
-                    //showInfoDlg("Success..", "Successfully registered.", "OK", "success");
-                } else {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<LinkedList<ListOfFairEstimate>> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<LinkedList<ListOfFairEstimate>> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void changeTextBgColorToOrange(TextView amountText1, TextView amountText2, TextView amountText3, TextView amountText4) {
@@ -941,7 +961,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         } else if (navType.equalsIgnoreCase("requestCancelled")) {
             headerIcon.setImageResource(R.drawable.erroricon);
             newnegativeBtn.setVisibility(View.GONE);
-        }else if(navType.equalsIgnoreCase("invalid")){
+        } else if (navType.equalsIgnoreCase("invalid")) {
             headerIcon.setVisibility(View.GONE);
             newnegativeBtn.setVisibility(View.GONE);
         }
@@ -968,7 +988,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     loginCredentials.bookingId = Utils.requestBookingResponse.getBookingId();
                     loginCredentials.bookingStatus = "CANCELLED";
                     updateBookingStatus(loginCredentials);
-                }else if(navType.equalsIgnoreCase("invalid")){
+                } else if (navType.equalsIgnoreCase("invalid")) {
                     onBackPressed();
                 }
             }
@@ -1057,12 +1077,16 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         markers.add(startingMarker);
         markers.add(endingMarker);
 
-        // Getting URL to the Google Directions API
-        String url = getUrl(origin, dest);
-        Log.d("url", "" + url);
-        FetchUrl FetchUrl = new FetchUrl();
-        // Start downloading json data from Google Directions API
-        FetchUrl.execute(url);
+        if (Utils.connectivity(DirectionConfirmationActivity.this)) {
+            // Getting URL to the Google Directions API
+            String url = getUrl(origin, dest);
+            Log.d("url", "" + url);
+            FetchUrl FetchUrl = new FetchUrl();
+            // Start downloading json data from Google Directions API
+            FetchUrl.execute(url);
+        } else {
+            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
 
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
@@ -1142,6 +1166,15 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
     // Fetches data from url passed
     private class FetchUrl extends AsyncTask<String, Void, String> {
 
+        String cabType = "";
+
+        public FetchUrl(String cabType) {
+            this.cabType = cabType;
+        }
+
+        public FetchUrl() {
+        }
+
         @Override
         protected String doInBackground(String... url) {
 
@@ -1162,9 +1195,69 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
 
-            ParserTask parserTask = new ParserTask();
-            // Invokes the thread for parsing the JSON data
-            parserTask.execute(result);
+            if(cabType.equalsIgnoreCase("")) {
+                ParserTask parserTask = new ParserTask();
+                // Invokes the thread for parsing the JSON data
+                parserTask.execute(result);
+            }else{
+                ParserTimeTask parserTask = new ParserTimeTask(cabType);
+                // Invokes the thread for parsing the JSON data
+                parserTask.execute(result);
+            }
+
+        }
+    }
+
+    /**
+     * A class to parse the Google Places in JSON format
+     */
+    private class ParserTimeTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        String cabType = "";
+
+        public ParserTimeTask(String cabType) {
+            this.cabType = cabType;
+        }
+
+        // Parsing the data in non-ui thread
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... jsonData) {
+
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+
+            try {
+                jObject = new JSONObject(jsonData[0]);
+                Log.d("ParserTask", jsonData[0].toString());
+                TimeDataParser parser = new TimeDataParser();
+                Log.d("ParserTask", parser.toString());
+
+                // Starts parsing data
+                routes = parser.parse(jObject);
+                Log.d("ParserTask", "Executing routes");
+                Log.d("ParserTask", routes.toString());
+
+            } catch (Exception e) {
+                Log.d("ParserTask", e.toString());
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+        // Executes in UI thread, after the parsing process
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> result) {
+
+            if(cabType.equalsIgnoreCase("micro")){
+                microTimeTextSmall.setText(Utils.cabparsedDuration);
+                microTimeTextBig.setText(Utils.cabparsedDuration);
+            }else if(cabType.equalsIgnoreCase("sedan")){
+                sedanTimeTextSmall.setText(Utils.cabparsedDuration);
+                sedanTimeTextBig.setText(Utils.cabparsedDuration);
+            }else{
+                suvTimeTextSmall.setText(Utils.cabparsedDuration);
+                suvTimeTextBig.setText(Utils.cabparsedDuration);
+            }
 
         }
     }
@@ -1239,9 +1332,11 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
 
                 }
             } else {
+                mMap.getUiSettings().setScrollGesturesEnabled(false);
+                mMap.getUiSettings().setZoomGesturesEnabled(false);
                 noCabsLay.setVisibility(View.VISIBLE);
                 vehicleTypeLay.setVisibility(View.GONE);
-                noCabsText.setText("Unfortunately, There is NO route between Pickup and Drop Location");
+                noCabsText.setText("The service is not available for the selected route");
             }
 
             // Drawing polyline in the Google Map for the i-th route
@@ -1254,138 +1349,177 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         }
     }
 
+    boolean microCabTimeSearch = true;
+    boolean sedanCabTimeSearch = true;
+    boolean suvCabTimeSearch = true;
+
     public void getNearByActiveDrivers(String latitude, String longitude) {
-        Log.e("fromLatitude", "" + latitude);
-        Log.e("fromLongitude", "" + longitude);
-        SingleInstantParameters loginCredentials = new SingleInstantParameters();
-        loginCredentials.fromLatitude = latitude;
-        loginCredentials.fromLongitude = longitude;
+        if (Utils.connectivity(DirectionConfirmationActivity.this)) {
+            Log.e("fromLatitude", "" + latitude);
+            Log.e("fromLongitude", "" + longitude);
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.fromLatitude = latitude;
+            loginCredentials.fromLongitude = longitude;
 
-        final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+            final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<LinkedList<ListOfCurrentCabs>> call = apiService.getNearByActiveDrivers(loginCredentials);
-        call.enqueue(new Callback<LinkedList<ListOfCurrentCabs>>() {
-            @Override
-            public void onResponse(Call<LinkedList<ListOfCurrentCabs>> call, Response<LinkedList<ListOfCurrentCabs>> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                dialog.dismiss();
-                if (response.isSuccessful()) {
-                    Utils.getNearByActiveDriversInstantResponse = response.body();
-                    Log.e("size", "" + Utils.getNearByActiveDriversInstantResponse.size());
+            Call<LinkedList<ListOfCurrentCabs>> call = apiService.getNearByActiveDrivers(loginCredentials);
+            call.enqueue(new Callback<LinkedList<ListOfCurrentCabs>>() {
+                @Override
+                public void onResponse(Call<LinkedList<ListOfCurrentCabs>> call, Response<LinkedList<ListOfCurrentCabs>> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.getNearByActiveDriversInstantResponse = response.body();
+                        Log.e("size", "" + Utils.getNearByActiveDriversInstantResponse.size());
 
-                    if (Utils.getNearByActiveDriversInstantResponse.size() <= 0) {
-                        noCabsLay.setVisibility(View.VISIBLE);
-                        vehicleTypeLay.setVisibility(View.GONE);
-                    } else {
-                        vehicleTypeLay.setVisibility(View.VISIBLE);
-                        for (int i = 0; i < Utils.getNearByActiveDriversInstantResponse.size(); i++) {
-                            String cabtypeId = Utils.getNearByActiveDriversInstantResponse.get(i).getCabTypeId();
-                            Log.e("cabtypeId", "" + cabtypeId);
-                            if (cabtypeId != null) {
-                                if (cabtypeId.equalsIgnoreCase(microTimeTextSmall.getTag().toString().trim())) {
-                                    microTimeTextSmall.setText("2 min");
-                                    microTimeTextBig.setText("2 min");
-                                    getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(0).getCabTypeId());
-                                    microLayBig.setVisibility(View.VISIBLE);
-                                    suvLaySmall.setVisibility(View.VISIBLE);
-                                    sedanLaySmall.setVisibility(View.VISIBLE);
-                                    microLaySmall.setVisibility(View.GONE);
-                                    suvLayBig.setVisibility(View.GONE);
-                                    sedanLayBig.setVisibility(View.GONE);
-                                    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
-                                            R.array.sedan_micro_array, android.R.layout.simple_spinner_item);
-                                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                    noofSeatsSpinner.setAdapter(adapter);
-                                    noofSeatsSpinner.setSelection(0, true);
-                                    textSeatCapacity.setText("Seats 1-4");
-                                } else if (cabtypeId.equalsIgnoreCase(sedanTimeTextSmall.getTag().toString().trim())) {
-                                    sedanTimeTextSmall.setText("2 min");
-                                    sedanTimeTextBig.setText("2 min");
-                                    getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(1).getCabTypeId());
-                                    microLaySmall.setVisibility(View.VISIBLE);
-                                    suvLayBig.setVisibility(View.GONE);
-                                    sedanLaySmall.setVisibility(View.GONE);
-                                    microLayBig.setVisibility(View.GONE);
-                                    suvLaySmall.setVisibility(View.VISIBLE);
-                                    sedanLayBig.setVisibility(View.VISIBLE);
-                                    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
-                                            R.array.sedan_micro_array, android.R.layout.simple_spinner_item);
-                                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                    noofSeatsSpinner.setAdapter(adapter);
-                                    noofSeatsSpinner.setSelection(0, true);
-                                    textSeatCapacity.setText("Seats 1-4");
-                                } else if (cabtypeId.equalsIgnoreCase(suvTimeTextSmall.getTag().toString().trim())) {
-                                    suvTimeTextSmall.setText("2 min");
-                                    suvTimeTextBig.setText("2 min");
-                                    getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(2).getCabTypeId());
-                                    microLaySmall.setVisibility(View.VISIBLE);
-                                    suvLayBig.setVisibility(View.VISIBLE);
-                                    sedanLaySmall.setVisibility(View.VISIBLE);
-                                    microLayBig.setVisibility(View.GONE);
-                                    suvLaySmall.setVisibility(View.GONE);
-                                    sedanLayBig.setVisibility(View.GONE);
-                                    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
-                                            R.array.suv_array, android.R.layout.simple_spinner_item);
-                                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                    noofSeatsSpinner.setAdapter(adapter);
-                                    noofSeatsSpinner.setSelection(0, true);
-                                    textSeatCapacity.setText("Seats 1-7");
+                        if (Utils.getNearByActiveDriversInstantResponse.size() <= 0) {
+                            mMap.getUiSettings().setScrollGesturesEnabled(false);
+                            mMap.getUiSettings().setZoomGesturesEnabled(false);
+                            noCabsLay.setVisibility(View.VISIBLE);
+                            vehicleTypeLay.setVisibility(View.GONE);
+                        } else {
+                            vehicleTypeLay.setVisibility(View.VISIBLE);
+                            for (int i = 0; i < Utils.getNearByActiveDriversInstantResponse.size(); i++) {
+                                String cabtypeId = Utils.getNearByActiveDriversInstantResponse.get(i).getCabTypeId();
+                                Log.e("cabtypeId", "" + cabtypeId);
+                                if (cabtypeId != null) {
+                                    if (cabtypeId.equalsIgnoreCase(microTimeTextSmall.getTag().toString().trim())) {
+                                        if(microCabTimeSearch){
+                                            microCabTimeSearch = false;
+                                            if (Utils.connectivity(DirectionConfirmationActivity.this)) {
+                                                LatLng cabLatLng = new LatLng(Double.parseDouble(Utils.getNearByActiveDriversInstantResponse.get(i).getLatitude()), Double.parseDouble(Utils.getNearByActiveDriversInstantResponse.get(i).getLongitude()));
+                                                String url = getUrl(cabLatLng, Utils.startingLatLan);
+                                                Log.d("url", "" + url);
+                                                FetchUrl FetchUrl = new FetchUrl("micro");
+                                                FetchUrl.execute(url);
+                                            } else {
+                                                Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                                            }
+                                        }
+                                        getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(0).getCabTypeId());
+                                        microLayBig.setVisibility(View.VISIBLE);
+                                        suvLaySmall.setVisibility(View.VISIBLE);
+                                        sedanLaySmall.setVisibility(View.VISIBLE);
+                                        microLaySmall.setVisibility(View.GONE);
+                                        suvLayBig.setVisibility(View.GONE);
+                                        sedanLayBig.setVisibility(View.GONE);
+                                        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
+                                                R.array.sedan_micro_array, android.R.layout.simple_spinner_item);
+                                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                        noofSeatsSpinner.setAdapter(adapter);
+                                        noofSeatsSpinner.setSelection(0, true);
+                                        textSeatCapacity.setText("Seats 1-4");
+                                    } else if (cabtypeId.equalsIgnoreCase(sedanTimeTextSmall.getTag().toString().trim())) {
+                                        if(sedanCabTimeSearch){
+                                            sedanCabTimeSearch = false;
+                                            if (Utils.connectivity(DirectionConfirmationActivity.this)) {
+                                                LatLng cabLatLng = new LatLng(Double.parseDouble(Utils.getNearByActiveDriversInstantResponse.get(i).getLatitude()), Double.parseDouble(Utils.getNearByActiveDriversInstantResponse.get(i).getLongitude()));
+                                                String url = getUrl(cabLatLng, Utils.startingLatLan);
+                                                Log.d("url", "" + url);
+                                                FetchUrl FetchUrl = new FetchUrl("sedan");
+                                                FetchUrl.execute(url);
+                                            } else {
+                                                Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                                            }
+                                        }
+                                        getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(1).getCabTypeId());
+                                        microLaySmall.setVisibility(View.VISIBLE);
+                                        suvLayBig.setVisibility(View.GONE);
+                                        sedanLaySmall.setVisibility(View.GONE);
+                                        microLayBig.setVisibility(View.GONE);
+                                        suvLaySmall.setVisibility(View.VISIBLE);
+                                        sedanLayBig.setVisibility(View.VISIBLE);
+                                        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
+                                                R.array.sedan_micro_array, android.R.layout.simple_spinner_item);
+                                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                        noofSeatsSpinner.setAdapter(adapter);
+                                        noofSeatsSpinner.setSelection(0, true);
+                                        textSeatCapacity.setText("Seats 1-4");
+                                    } else if (cabtypeId.equalsIgnoreCase(suvTimeTextSmall.getTag().toString().trim())) {
+                                        if(suvCabTimeSearch){
+                                            suvCabTimeSearch = false;
+                                            if (Utils.connectivity(DirectionConfirmationActivity.this)) {
+                                                LatLng cabLatLng = new LatLng(Double.parseDouble(Utils.getNearByActiveDriversInstantResponse.get(i).getLatitude()), Double.parseDouble(Utils.getNearByActiveDriversInstantResponse.get(i).getLongitude()));
+                                                String url = getUrl(cabLatLng, Utils.startingLatLan);
+                                                Log.d("url", "" + url);
+                                                FetchUrl FetchUrl = new FetchUrl("suv");
+                                                FetchUrl.execute(url);
+                                            } else {
+                                                Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                                            }
+                                        }
+                                        getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(2).getCabTypeId());
+                                        microLaySmall.setVisibility(View.VISIBLE);
+                                        suvLayBig.setVisibility(View.VISIBLE);
+                                        sedanLaySmall.setVisibility(View.VISIBLE);
+                                        microLayBig.setVisibility(View.GONE);
+                                        suvLaySmall.setVisibility(View.GONE);
+                                        sedanLayBig.setVisibility(View.GONE);
+                                        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(DirectionConfirmationActivity.this,
+                                                R.array.suv_array, android.R.layout.simple_spinner_item);
+                                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                        noofSeatsSpinner.setAdapter(adapter);
+                                        noofSeatsSpinner.setSelection(0, true);
+                                        textSeatCapacity.setText("Seats 1-7");
+                                    }
                                 }
+                                String latitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLatitude();
+                                String longitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLongitude();
+                                Log.e("latitude longitude", "latitude : " + latitude + " longitude : " + longitude);
+                                LatLng tempLatLong = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                                Marker marker = mMap.addMarker(new MarkerOptions().position(tempLatLong).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
+                                markers.add(marker);
                             }
-                            String latitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLatitude();
-                            String longitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLongitude();
-                            Log.e("latitude longitude", "latitude : " + latitude + " longitude : " + longitude);
-                            LatLng tempLatLong = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
-                            Marker marker = mMap.addMarker(new MarkerOptions().position(tempLatLong).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
-                            markers.add(marker);
+                        }
+
+
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
                     }
-
-
-                } else {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<LinkedList<ListOfCurrentCabs>> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<LinkedList<ListOfCurrentCabs>> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // register new push message receiver
-        // by doing this, the activity will be notified each time a new message arrives
-        LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
-                new IntentFilter(Utils.PUSH_NOTIFICATION));
+        SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = prefs.getString("LoginCredentials", "");
+        Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
     }
 
     @Override
     protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
         super.onPause();
     }
 }

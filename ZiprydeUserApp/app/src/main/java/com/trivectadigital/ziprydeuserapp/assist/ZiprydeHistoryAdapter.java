@@ -20,7 +20,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.trivectadigital.ziprydeuserapp.DirectionConfirmationActivity;
 import com.trivectadigital.ziprydeuserapp.NavigationMenuActivity;
 import com.trivectadigital.ziprydeuserapp.R;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
@@ -109,14 +111,14 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
         String ziprydeBookingEnding = ziprydeHistoryDetails.getTo();
         String ziprydeBookingPrice = ziprydeHistoryDetails.getSuggestedPrice();
         String ziprydeBookingOfferPrice = ziprydeHistoryDetails.getOfferedPrice();
-        String ziprydeBookingProfileImg = ""+ziprydeHistoryDetails.getDriverImage();
+        String ziprydeBookingProfileImg = "" + ziprydeHistoryDetails.getDriverImage();
 
-        holder.bookingDatetime.setText(""+ziprydeBookingDateTime);
-        holder.bookingCRN.setText(""+ziprydeBookingCRN);
-        holder.bookingStarting.setText(""+ziprydeBookingStarting);
-        holder.bookingEnding.setText(""+ziprydeBookingEnding);
-        holder.bookingPrice.setText("$ "+ziprydeBookingPrice);
-        holder.bookingOfferPrice.setText("Offer $ "+ziprydeBookingOfferPrice);
+        holder.bookingDatetime.setText("" + ziprydeBookingDateTime);
+        holder.bookingCRN.setText("" + ziprydeBookingCRN);
+        holder.bookingStarting.setText("" + ziprydeBookingStarting);
+        holder.bookingEnding.setText("" + ziprydeBookingEnding);
+        holder.bookingPrice.setText("$ " + ziprydeBookingPrice);
+        holder.bookingOfferPrice.setText("Offer $ " + ziprydeBookingOfferPrice);
 
         holder.cancelBookingImg.setVisibility(View.GONE);
 
@@ -125,15 +127,15 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
                 byte[] decodedString = Base64.decode(ziprydeBookingProfileImg, Base64.DEFAULT);
                 Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
                 holder.bookingProfileImg.setImageBitmap(decodedByte);
-            }else{
+            } else {
                 holder.bookingProfileImg.setImageResource(R.drawable.person);
             }
         }
 
         String bookingStatus = ziprydeHistoryDetails.getBookingStatus();
-        holder.bookingStatus.setText(""+bookingStatus);
-        Log.e("bookingStatus",""+bookingStatus);
-        if(bookingStatus != null) {
+        holder.bookingStatus.setText("" + bookingStatus);
+        Log.e("bookingStatus", "" + bookingStatus);
+        if (bookingStatus != null) {
             if (bookingStatus.equals("SCHEDULED")) {
                 holder.cancelBookingImg.setVisibility(View.VISIBLE);
             }
@@ -152,52 +154,57 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
         return view;
     }
 
-    private void updateBookingStatus(SingleInstantParameters loginCredentials){
-        final Dialog dialog = new Dialog(context, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+    private void updateBookingStatus(SingleInstantParameters loginCredentials) {
+        if (Utils.connectivity(context)) {
+            final Dialog dialog = new Dialog(context, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<SingleInstantResponse> call = apiService.updateBookingStatus(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode",""+statusCode);
-                Log.e("response.body",""+response.body());
-                Log.e("response.errorBody",""+response.errorBody());
-                Log.e("response.isSuccessful",""+response.isSuccessful());
-                dialog.dismiss();
-                if(response.isSuccessful()){
-                    Utils.updateBookingStatusInstantResponse = response.body();
-                    Log.e("BookingStatus",""+Utils.updateBookingStatusInstantResponse.getBookingStatus());
-                    showInfoDlg("Success..", "Request Cancelled Successfully.", "Ok", "success");
-                }else{
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+            Call<SingleInstantResponse> call = apiService.updateBookingStatus(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.updateBookingStatusInstantResponse = response.body();
+                        Log.e("BookingStatus", "" + Utils.updateBookingStatusInstantResponse.getBookingStatus());
+                        showInfoDlg("Success..", "Your ZipRyde has been cancelled.", "Ok", "success");
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(context, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(context, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(context, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     Dialog dialog;
+
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
         dialog = new Dialog(context, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -211,7 +218,7 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
         }
 
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
-        positiveBtn.setText(""+btnText);
+        positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
 
@@ -231,9 +238,9 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
-        dialogtitleText.setText(""+title);
+        dialogtitleText.setText("" + title);
         TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
-        dialogcontentText.setText(""+content);
+        dialogcontentText.setText("" + content);
 
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override

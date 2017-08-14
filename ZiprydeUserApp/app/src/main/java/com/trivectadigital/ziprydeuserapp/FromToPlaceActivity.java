@@ -1,6 +1,7 @@
 package com.trivectadigital.ziprydeuserapp;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -32,8 +33,10 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.assist.PlaceAutocompleteAdapter;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
+import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
 
 public class FromToPlaceActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -107,10 +110,11 @@ public class FromToPlaceActivity extends AppCompatActivity implements GoogleApiC
         });
 
         autocomplete_placesdest.setOnItemClickListener(mAutocompleteClickListener);
+
         // Set up the adapter that will retrieve suggestions from the Places Geo Data API that cover
         // the entire world.
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, BOUNDS_GREATER_SYDNEY,
-                filter);
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, BOUNDS_GREATER_SYDNEY, filter);
+
         autocomplete_placesdest.setAdapter(mAdapter);
 
         autocomplete_placesdest.addTextChangedListener(new TextWatcher() {
@@ -138,10 +142,10 @@ public class FromToPlaceActivity extends AppCompatActivity implements GoogleApiC
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(FromToPlaceActivity.this, SelectPlaceMapActivity.class);
-                intent.putExtra("address",""+address);
-                intent.putExtra("latitude",""+latitude);
-                intent.putExtra("longitude",""+longitude);
-                intent.putExtra("fromPlace","fromPlace");
+                intent.putExtra("address", "" + address);
+                intent.putExtra("latitude", "" + latitude);
+                intent.putExtra("longitude", "" + longitude);
+                intent.putExtra("fromPlace", "fromPlace");
                 startActivity(intent);
                 finish();
             }
@@ -206,6 +210,15 @@ public class FromToPlaceActivity extends AppCompatActivity implements GoogleApiC
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = prefs.getString("LoginCredentials", "");
+        Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
+    }
+
     /**
      * Listener that handles selections from suggestions from the AutoCompleteTextView that
      * displays Place suggestions.
@@ -268,12 +281,12 @@ public class FromToPlaceActivity extends AppCompatActivity implements GoogleApiC
 
             LatLng geoLatLng = place.getLatLng();
             Log.e(TAG, "Lat : " + geoLatLng.latitude + " Lng : " + geoLatLng.longitude);
-            String tempAddress = ""+place.getAddress();
+            String tempAddress = "" + place.getAddress();
             String address = "";
-            if(tempAddress.contains(place.getName())){
+            if (tempAddress.contains(place.getName())) {
                 address = tempAddress;
-            }else{
-                address = place.getName()+ "," + place.getAddress();
+            } else {
+                address = place.getName() + "," + place.getAddress();
             }
 //            String address = ""+place.getAddress();
 

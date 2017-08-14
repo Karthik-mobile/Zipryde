@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
@@ -87,11 +88,11 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     showInfoDlg("Information", "Please enter the Email Id", "OK", "info");
                 } else if (!Patterns.EMAIL_ADDRESS.matcher(emailadd).matches()) {
                     showInfoDlg("Information", "Please enter the Proper Email Id", "OK", "info");
-                }else if (password.isEmpty()) {
+                } else if (password.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Password", "OK", "info");
-                }else if (confirmpassword.isEmpty()) {
+                } else if (confirmpassword.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Confirm Password", "OK", "info");
-                }else if (!password.equals(confirmpassword)) {
+                } else if (!password.equals(confirmpassword)) {
                     showInfoDlg("Information", "Password and Confirm Password are not Matched", "OK", "info");
                 } else if (phoneno.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Mobile Number", "OK", "info");
@@ -102,22 +103,27 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
 //                    showInfoDlg("Information", "Please enter the vehicle number", "OK", "info");
 //                }
                 else {
-                    ide = new Intent(SignupActivity.this, DocumentUploadActivity.class);
-                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    ide.putExtra("firstName", firstname);
-                    ide.putExtra("lastName", lastname);
-                    ide.putExtra("emailId", emailadd);
-                    ide.putExtra("mobileNumber", phoneno);
-                    ide.putExtra("password", password);
+                    if (Utils.connectivity(SignupActivity.this)) {
+                        ide = new Intent(SignupActivity.this, DocumentUploadActivity.class);
+                        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        ide.putExtra("firstName", firstname);
+                        ide.putExtra("lastName", lastname);
+                        ide.putExtra("emailId", emailadd);
+                        ide.putExtra("mobileNumber", phoneno);
+                        ide.putExtra("password", password);
 //                    ide.putExtra("vehicleno", vehicleno);
-                    startActivity(ide);
-                    finish();
+                        startActivity(ide);
+                        finish();
+                    } else {
+                        Toast.makeText(SignupActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    }
                 }
                 break;
         }
     }
 
     Dialog dialog;
+
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
         dialog = new Dialog(SignupActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));

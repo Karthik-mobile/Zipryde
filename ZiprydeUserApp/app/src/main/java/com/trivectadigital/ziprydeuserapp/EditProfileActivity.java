@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
@@ -67,16 +68,17 @@ public class EditProfileActivity extends AppCompatActivity {
         });
 
         firstnameEdit = (EditText) findViewById(R.id.firstnameEdit);
-        firstnameEdit.setText(""+ Utils.verifyLogInUserMobileInstantResponse.getFirstName());
+        firstnameEdit.setText("" + Utils.verifyLogInUserMobileInstantResponse.getFirstName());
 
+        Log.e("LastName", "" + Utils.verifyLogInUserMobileInstantResponse.getLastName());
         lastnameEdit = (EditText) findViewById(R.id.lastnameEdit);
-        lastnameEdit.setText(""+ Utils.verifyLogInUserMobileInstantResponse.getLastName());
+        lastnameEdit.setText("" + Utils.verifyLogInUserMobileInstantResponse.getLastName());
 
         emailaddEdit = (EditText) findViewById(R.id.emailaddEdit);
-        emailaddEdit.setText(""+ Utils.verifyLogInUserMobileInstantResponse.getEmailId());
+        emailaddEdit.setText("" + Utils.verifyLogInUserMobileInstantResponse.getEmailId());
 
         mobileEdit = (EditText) findViewById(R.id.mobileEdit);
-        mobileEdit.setText(""+ Utils.verifyLogInUserMobileInstantResponse.getMobileNumber());
+        mobileEdit.setText("" + Utils.verifyLogInUserMobileInstantResponse.getMobileNumber());
 
         edit_btn = (Button) findViewById(R.id.edit_btn);
         edit_btn.setOnClickListener(new View.OnClickListener() {
@@ -87,17 +89,17 @@ public class EditProfileActivity extends AppCompatActivity {
                 String phoneno = mobileEdit.getText().toString();
                 String emailadd = emailaddEdit.getText().toString();
 
-                if(firstname.isEmpty()){
+                if (firstname.isEmpty()) {
                     showInfoDlg("Information", "Please enter the First Name", "OK", "info");
-                }else if(lastname.isEmpty()){
+                } else if (lastname.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Last Name", "OK", "info");
-                }else if(emailadd.isEmpty()){
+                } else if (emailadd.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Email Id", "OK", "info");
-                }else if(phoneno.isEmpty()){
+                } else if (phoneno.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Mobile Number", "OK", "info");
-                }else if(phoneno.length() != 10){
+                } else if (phoneno.length() != 10) {
                     showInfoDlg("Information", "Please enter valid Mobile Number", "OK", "info");
-                }else{
+                } else {
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.userType = "RIDER";
                     loginCredentials.firstName = firstname;
@@ -108,67 +110,87 @@ public class EditProfileActivity extends AppCompatActivity {
                     loginCredentials.alternateNumber = "";
                     Gson gson = new Gson();
                     String json = gson.toJson(loginCredentials);
-                    Log.e("json",""+json);
+                    Log.e("json", "" + json);
                     callMobileService(loginCredentials);
                 }
             }
         });
     }
 
-    public void callMobileService(SingleInstantParameters loginCredentials){
-        final Dialog dialog = new Dialog(EditProfileActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = prefs.getString("LoginCredentials", "");
+        Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
+    }
 
-        RequestBody userType = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.userType);
-        RequestBody firstName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.firstName);
-        RequestBody lastName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.lastName);
-        RequestBody emailId = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.emailId);
-        RequestBody mobileNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.mobileNumber);
-        RequestBody userId = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.userId);
-        RequestBody alternateNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.alternateNumber);
+    public void callMobileService(SingleInstantParameters loginCredentials) {
+        if (Utils.connectivity(EditProfileActivity.this)) {
+            final Dialog dialog = new Dialog(EditProfileActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<SingleInstantResponse> call = apiService.saveUpdateUser(userType, firstName, lastName, emailId, mobileNumber, userId, alternateNumber);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode",""+statusCode);
-                Log.e("response.body",""+response.body());
-                Log.e("response.errorBody",""+response.errorBody());
-                Log.e("response.isSuccessful",""+response.isSuccessful());
-                dialog.dismiss();
-                if(response.isSuccessful()){
-                    Utils.saveUserMobileInstantResponse = response.body();
-                    Utils.verifyLogInUserMobileInstantResponse = Utils.saveUserMobileInstantResponse;
-                    showInfoDlg("Success..", "Successfully updated.", "OK", "success");
-                }else{
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+            RequestBody userType = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.userType);
+            RequestBody firstName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.firstName);
+            RequestBody lastName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.lastName);
+            RequestBody emailId = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.emailId);
+            RequestBody mobileNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.mobileNumber);
+            RequestBody userId = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.userId);
+            RequestBody alternateNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.alternateNumber);
+
+            Call<SingleInstantResponse> call = apiService.saveUpdateUser(userType, firstName, lastName, emailId, mobileNumber, userId, alternateNumber);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.saveUserMobileInstantResponse = response.body();
+                        Log.e("LastName", "" + Utils.saveUserMobileInstantResponse.getLastName());
+                        Utils.verifyLogInUserMobileInstantResponse = Utils.saveUserMobileInstantResponse;
+                        Gson gson = new Gson();
+                        String json = gson.toJson(Utils.verifyLogInUserMobileInstantResponse);
+                        SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                        editor.putString("LoginCredentials", json);
+                        editor.commit();
+                        showInfoDlg("Success..", "Successfully updated.", "OK", "success");
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(EditProfileActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(EditProfileActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(EditProfileActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     Dialog dialog;
+
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
         dialog = new Dialog(EditProfileActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -177,19 +199,19 @@ public class EditProfileActivity extends AppCompatActivity {
         //dialog.setCanceledOnTouchOutside(true);
 
         ImageView headerIcon = (ImageView) dialog.findViewById(R.id.headerIcon);
-        if(navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("error")){
+        if (navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("error")) {
             headerIcon.setImageResource(R.drawable.erroricon);
         }
 
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
-        positiveBtn.setText(""+btnText);
+        positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("error") || navType.equalsIgnoreCase("server")){
+        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("error") || navType.equalsIgnoreCase("server")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
-        if(navType.equalsIgnoreCase("success")){
+        if (navType.equalsIgnoreCase("success")) {
             headerIcon.setImageResource(R.drawable.successicon);
             positiveBtn.setVisibility(View.GONE);
             newnegativeBtn.setVisibility(View.GONE);
@@ -206,9 +228,9 @@ public class EditProfileActivity extends AppCompatActivity {
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
-        dialogtitleText.setText(""+title);
+        dialogtitleText.setText("" + title);
         TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
-        dialogcontentText.setText(""+content);
+        dialogcontentText.setText("" + content);
 
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override

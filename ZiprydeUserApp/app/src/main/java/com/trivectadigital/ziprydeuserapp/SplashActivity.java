@@ -84,6 +84,14 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
+
+        mContentView = findViewById(R.id.fullscreen_content);
+        delayedHide(100);
+
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getBaseContext());
         // Showing status
         if(status != ConnectionResult.SUCCESS){
@@ -91,50 +99,46 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
             Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this, requestCode);
             dialog.show();
         }else{
-            mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
+            if (Utils.connectivity(SplashActivity.this)) {
+                mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
 
-                    // checking for type intent filter
-                    if (intent.getAction().equals(Utils.REGISTRATION_COMPLETE)) {
-                        // gcm successfully registered
-                        // now subscribe to `global` topic to receive app wide notifications
-                        FirebaseMessaging.getInstance().subscribeToTopic(Utils.TOPIC_GLOBAL);
+                        // checking for type intent filter
+                        if (intent.getAction().equals(Utils.REGISTRATION_COMPLETE)) {
+                            // gcm successfully registered
+                            // now subscribe to `global` topic to receive app wide notifications
+                            FirebaseMessaging.getInstance().subscribeToTopic(Utils.TOPIC_GLOBAL);
 
-                        displayFirebaseRegId();
+                            displayFirebaseRegId();
 
+                        }
+                    }
+                };
+
+                displayFirebaseRegId();
+
+                if (ContextCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // Should we show an explanation?
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                        //This is called if user has denied the permission before
+                        //In this case I am just asking the permission again
+                        ActivityCompat.requestPermissions(SplashActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
+
+                    } else {
+                        ActivityCompat.requestPermissions(SplashActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
+                    }
+                } else {
+                    LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                    boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                    if (statusOfGPS) {
+                        gotoNextActivity();
+                    } else {
+                        showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
                     }
                 }
-            };
-
-            displayFirebaseRegId();
-
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.hide();
-            }
-
-            mContentView = findViewById(R.id.fullscreen_content);
-            delayedHide(100);
-
-            if (ContextCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    //This is called if user has denied the permission before
-                    //In this case I am just asking the permission again
-                    ActivityCompat.requestPermissions(SplashActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
-
-                } else {
-                    ActivityCompat.requestPermissions(SplashActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
-                }
             } else {
-                LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE );
-                boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                if(statusOfGPS){
-                    gotoNextActivity();
-                }else{
-                    showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
-                }
+                Toast.makeText(SplashActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -157,7 +161,15 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
                     Gson gson = new Gson();
                     String json = prefs.getString("LoginCredentials", "");
                     Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
-                    Intent ide = new Intent(SplashActivity.this, NavigationMenuActivity.class);
+                    prefs = getSharedPreferences("BookingCredentials", MODE_PRIVATE);
+                    String bookingIdFinal = prefs.getString("bookingId", "");
+                    Intent ide;
+                    if(bookingIdFinal.equals("")){
+                        ide = new Intent(SplashActivity.this, NavigationMenuActivity.class);
+                    }else{
+                        ide = new Intent(SplashActivity.this, DriverInfoBookingActivity.class);
+                        ide.putExtra("bookingId",""+bookingIdFinal);
+                    }
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
                     finish();

@@ -85,7 +85,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
     public static EditText issuedDateEdit, expiryDateEdit;
     public static String textField = "issued";
     ImageView uploadImgFront, uploadImgBack;
-//    Spinner percentageSpinner;
+    //    Spinner percentageSpinner;
     CircleImageView uploadProfilePic;
 
     private Uri fileUri;
@@ -157,9 +157,9 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     showInfoDlg("Information", "Please enter the License number", "OK", "info");
                 } else if (restri.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Restrictions", "OK", "info");
-                }else if (issuedDate.isEmpty()) {
+                } else if (issuedDate.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Issue date", "OK", "info");
-                }else if (expiryDate.isEmpty()) {
+                } else if (expiryDate.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Expiry date", "OK", "info");
                 }
 //                else if (percentage == 0) {
@@ -202,7 +202,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     loginCredentials.deviceToken = regId;
                     Gson gson = new Gson();
                     String json = gson.toJson(loginCredentials);
-                    Log.e("json",""+json);
+                    Log.e("json", "" + json);
                     callMobileService(loginCredentials);
                 }
             }
@@ -213,7 +213,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
         uploadImgFront.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isStoragePermissionGranted()){
+                if (isStoragePermissionGranted()) {
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     fileUri = getOutputMediaFileUri();
                     intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
@@ -225,7 +225,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
         uploadImgBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isStoragePermissionGranted()){
+                if (isStoragePermissionGranted()) {
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     fileUri = getOutputMediaFileUri();
                     intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
@@ -237,7 +237,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
         uploadProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(isStoragePermissionGranted()){
+                if (isStoragePermissionGranted()) {
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     fileUri = getOutputMediaFileUri();
                     intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
@@ -265,7 +265,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
         });
     }
 
-    public SpannableStringBuilder getRedManditoty(String text){
+    public SpannableStringBuilder getRedManditoty(String text) {
         String simple = text;
         String colored = " *";
         SpannableStringBuilder builder = new SpannableStringBuilder();
@@ -298,9 +298,9 @@ public class DocumentUploadActivity extends AppCompatActivity {
             int day = c.get(Calendar.DAY_OF_MONTH);
 
             DatePickerDialog dialog = new DatePickerDialog(getActivity(), this, year, month, day);
-            if(textField.equalsIgnoreCase("issued")) {
+            if (textField.equalsIgnoreCase("issued")) {
                 dialog.getDatePicker().setMaxDate(new Date().getTime());
-            }else {
+            } else {
                 dialog.getDatePicker().setMinDate(new Date().getTime());
             }
             // Create a new instance of DatePickerDialog and return it
@@ -310,92 +310,95 @@ public class DocumentUploadActivity extends AppCompatActivity {
         public void onDateSet(DatePicker view, int year, int month, int day) {
             // Do something with the date chosen by the user
             month = month + 1;
-            String mm = ""+month;
-            if((""+month).length() < 2){
-                mm = "0"+month;
+            String mm = "" + month;
+            if (("" + month).length() < 2) {
+                mm = "0" + month;
             }
-            String dd = ""+day;
-            if((""+day).length() < 2){
-                dd = "0"+day;
+            String dd = "" + day;
+            if (("" + day).length() < 2) {
+                dd = "0" + day;
             }
-            if(textField.equalsIgnoreCase("issued")) {
+            if (textField.equalsIgnoreCase("issued")) {
                 issuedDateEdit.setText(mm + "-" + dd + "-" + year);
-            }else{
+            } else {
                 expiryDateEdit.setText(mm + "-" + dd + "-" + year);
             }
         }
     }
 
-    private void getAllNYOPList(){
-        final Dialog dialog = new Dialog(DocumentUploadActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+    private void getAllNYOPList() {
+        if (Utils.connectivity(DocumentUploadActivity.this)) {
+            final Dialog dialog = new Dialog(DocumentUploadActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<LinkedList<ListOfPercentage>> call = apiService.getAllNYOPList();
-        call.enqueue(new Callback<LinkedList<ListOfPercentage>>() {
-            @Override
-            public void onResponse(Call<LinkedList<ListOfPercentage>> call, Response<LinkedList<ListOfPercentage>> response) {
-                int statusCode = response.code();
-                Log.e("statusCode",""+statusCode);
-                Log.e("response.body",""+response.body());
-                Log.e("response.errorBody",""+response.errorBody());
-                Log.e("response.isSuccessful",""+response.isSuccessful());
-                dialog.dismiss();
-                if(response.isSuccessful()){
-                    Utils.getAllNYOPListInstantResponse = response.body();
-                    Log.e("Size",""+ Utils.getAllNYOPListInstantResponse.size());
-                    LinkedList<String> percentageList = new LinkedList<String>();
-                    percentageList.add("");
+            Call<LinkedList<ListOfPercentage>> call = apiService.getAllNYOPList();
+            call.enqueue(new Callback<LinkedList<ListOfPercentage>>() {
+                @Override
+                public void onResponse(Call<LinkedList<ListOfPercentage>> call, Response<LinkedList<ListOfPercentage>> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.getAllNYOPListInstantResponse = response.body();
+                        Log.e("Size", "" + Utils.getAllNYOPListInstantResponse.size());
+                        LinkedList<String> percentageList = new LinkedList<String>();
+                        percentageList.add("");
 //                    percentageList.add("0");
-                    for(int i = 0; i < Utils.getAllNYOPListInstantResponse.size(); i++){
-                        percentageList.add(""+Utils.getAllNYOPListInstantResponse.get(i).getPercentage());
-                    }
+                        for (int i = 0; i < Utils.getAllNYOPListInstantResponse.size(); i++) {
+                            percentageList.add("" + Utils.getAllNYOPListInstantResponse.get(i).getPercentage());
+                        }
 //                    ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(DocumentUploadActivity.this, android.R.layout.simple_spinner_item, percentageList);
 //                    dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 //                    percentageSpinner.setAdapter(dataAdapter);
 //                    percentageSpinner.setSelection(0);
-                    //showInfoDlg("Success..", "Successfully registered.", "OK", "success");
-                }else{
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                        //showInfoDlg("Success..", "Successfully registered.", "OK", "success");
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<LinkedList<ListOfPercentage>> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<LinkedList<ListOfPercentage>> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
-    public  boolean isStoragePermissionGranted() {
+    public boolean isStoragePermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED) {
-                Log.v("Permission","Permission is granted");
+                Log.v("Permission", "Permission is granted");
                 return true;
             } else {
 
-                Log.v("Permission","Permission is revoked");
+                Log.v("Permission", "Permission is revoked");
                 ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 return false;
             }
-        }
-        else { //permission is automatically granted on sdk<23 upon installation
-            Log.v("Permission","Permission is granted");
+        } else { //permission is automatically granted on sdk<23 upon installation
+            Log.v("Permission", "Permission is granted");
             return true;
         }
     }
@@ -403,8 +406,8 @@ public class DocumentUploadActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
-            Log.v("Permission","Permission: "+permissions[0]+ "was "+grantResults[0]);
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            Log.v("Permission", "Permission: " + permissions[0] + "was " + grantResults[0]);
             //resume tasks needing this permission
 //            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 //            fileUri = getOutputMediaFileUri();
@@ -445,124 +448,129 @@ public class DocumentUploadActivity extends AppCompatActivity {
 
         File mediaFile;
         mediaFile = new File(mediaStorageDir.getPath() + File.separator
-                    + "IMG_" + timeStamp + ".jpg");
+                + "IMG_" + timeStamp + ".jpg");
         finalmediaFile = mediaFile;
         return mediaFile;
     }
 
-    public void insertDriverSession(){
-        SingleInstantParameters loginCredentials = new SingleInstantParameters();
-        loginCredentials.userId = ""+Utils.saveUserMobileInstantResponse.getUserId();
-        loginCredentials.fromLatitude = ""+Utils.gpsLocationService.getLatitude();
-        loginCredentials.fromLongitude = ""+Utils.gpsLocationService.getLongitude();
+    public void insertDriverSession() {
+        if (Utils.connectivity(DocumentUploadActivity.this)) {
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.userId = "" + Utils.saveUserMobileInstantResponse.getUserId();
+            loginCredentials.fromLatitude = "" + Utils.gpsLocationService.getLatitude();
+            loginCredentials.fromLongitude = "" + Utils.gpsLocationService.getLongitude();
 
-        Call<Void> call = apiService.insertDriverSession(loginCredentials);
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                if (!response.isSuccessful()) {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+            Call<Void> call = apiService.insertDriverSession(loginCredentials);
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    if (!response.isSuccessful()) {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     public void callMobileService(SingleInstantParameters loginCredentials) {
-        final Dialog dialog = new Dialog(DocumentUploadActivity.this, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+        if (Utils.connectivity(DocumentUploadActivity.this)) {
+            final Dialog dialog = new Dialog(DocumentUploadActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        RequestBody userType = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.userType);
-        RequestBody firstName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.firstName);
-        RequestBody lastName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.lastName);
-        RequestBody emailId = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.emailId);
-        RequestBody mobileNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.mobileNumber);
-        RequestBody password = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.password);
-        RequestBody licenseNo = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseNo);
+            RequestBody userType = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.userType);
+            RequestBody firstName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.firstName);
+            RequestBody lastName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.lastName);
+            RequestBody emailId = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.emailId);
+            RequestBody mobileNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.mobileNumber);
+            RequestBody password = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.password);
+            RequestBody licenseNo = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseNo);
 //        RequestBody vehicleNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.vehicleNumber);
-        RequestBody licenseValidUntil = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseValidUntil);
-        RequestBody licenseIssuedOn = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseIssuedOn);
-        RequestBody alternateNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.alternateNumber);
-        RequestBody status = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.status);
+            RequestBody licenseValidUntil = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseValidUntil);
+            RequestBody licenseIssuedOn = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseIssuedOn);
+            RequestBody alternateNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.alternateNumber);
+            RequestBody status = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.status);
 //        RequestBody defaultPercentageAccepted = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.defaultPercentageAccepted);
-        RequestBody deviceToken = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.deviceToken);
+            RequestBody deviceToken = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.deviceToken);
 
-        RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileProfile);
-        MultipartBody.Part  profileBody = MultipartBody.Part.createFormData("userImage", finalmediaFileProfile.getName(), reqFile);
+            RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileProfile);
+            MultipartBody.Part profileBody = MultipartBody.Part.createFormData("userImage", finalmediaFileProfile.getName(), reqFile);
 
-        Call<SingleInstantResponse> call;
+            Call<SingleInstantResponse> call;
 
-        if(finalmediaFileFront == null || !finalmediaFileFront.isFile()){
-            if(finalmediaFileBack == null || !finalmediaFileBack.isFile()){
-                call = apiService.saveUser(profileBody, userType, firstName, lastName,
-                        emailId, mobileNumber, password, licenseNo, licenseValidUntil, licenseIssuedOn, alternateNumber, status, deviceToken);
-            }else{
-                reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileBack);
-                MultipartBody.Part backBody = MultipartBody.Part.createFormData("licenseBackImage", finalmediaFileBack.getName(), reqFile);
+            if (finalmediaFileFront == null || !finalmediaFileFront.isFile()) {
+                if (finalmediaFileBack == null || !finalmediaFileBack.isFile()) {
+                    call = apiService.saveUser(profileBody, userType, firstName, lastName,
+                            emailId, mobileNumber, password, licenseNo, licenseValidUntil, licenseIssuedOn, alternateNumber, status, deviceToken);
+                } else {
+                    reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileBack);
+                    MultipartBody.Part backBody = MultipartBody.Part.createFormData("licenseBackImage", finalmediaFileBack.getName(), reqFile);
 
-                call = apiService.saveUser(profileBody, backBody, userType, firstName, lastName,
-                        emailId, mobileNumber, password, licenseNo,
-                        licenseValidUntil, licenseIssuedOn, alternateNumber, status, deviceToken);
+                    call = apiService.saveUser(profileBody, backBody, userType, firstName, lastName,
+                            emailId, mobileNumber, password, licenseNo,
+                            licenseValidUntil, licenseIssuedOn, alternateNumber, status, deviceToken);
+                }
+            } else {
+                if (finalmediaFileBack == null || !finalmediaFileBack.isFile()) {
+                    reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileFront);
+                    MultipartBody.Part frontBody = MultipartBody.Part.createFormData("licenseFrontImage", finalmediaFileFront.getName(), reqFile);
+
+                    call = apiService.saveUser(profileBody, frontBody, userType, firstName, lastName,
+                            emailId, mobileNumber, password, licenseNo,
+                            licenseValidUntil, licenseIssuedOn, alternateNumber, status, deviceToken);
+
+                } else {
+                    reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileFront);
+                    MultipartBody.Part frontBody = MultipartBody.Part.createFormData("licenseFrontImage", finalmediaFileFront.getName(), reqFile);
+
+                    reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileBack);
+                    MultipartBody.Part backBody = MultipartBody.Part.createFormData("licenseBackImage", finalmediaFileBack.getName(), reqFile);
+
+                    call = apiService.saveUser(profileBody, frontBody, backBody, userType, firstName, lastName,
+                            emailId, mobileNumber, password, licenseNo,
+                            licenseValidUntil, licenseIssuedOn, alternateNumber, status, deviceToken);
+                }
             }
-        }else{
-            if(finalmediaFileBack == null || !finalmediaFileBack.isFile()){
-                reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileFront);
-                MultipartBody.Part frontBody = MultipartBody.Part.createFormData("licenseFrontImage", finalmediaFileFront.getName(), reqFile);
 
-                call = apiService.saveUser(profileBody, frontBody, userType, firstName, lastName,
-                        emailId, mobileNumber, password, licenseNo,
-                        licenseValidUntil, licenseIssuedOn, alternateNumber, status, deviceToken);
-
-            }else{
-                reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileFront);
-                MultipartBody.Part frontBody = MultipartBody.Part.createFormData("licenseFrontImage", finalmediaFileFront.getName(), reqFile);
-
-                reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileBack);
-                MultipartBody.Part backBody = MultipartBody.Part.createFormData("licenseBackImage", finalmediaFileBack.getName(), reqFile);
-
-                call = apiService.saveUser(profileBody, frontBody, backBody, userType, firstName, lastName,
-                        emailId, mobileNumber, password, licenseNo,
-                        licenseValidUntil, licenseIssuedOn, alternateNumber, status, deviceToken);
-            }
-        }
-
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
-                dialog.dismiss();
-                if (response.isSuccessful()) {
-                    Utils.saveUserMobileInstantResponse = response.body();
-                    Log.e("licenseFrontImage", "" + Utils.saveUserMobileInstantResponse.getLicenseFrontImage());
-                    Log.e("licenseBackImage", "" + Utils.saveUserMobileInstantResponse.getLicenseBackImage());
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.saveUserMobileInstantResponse = response.body();
+                        Log.e("licenseFrontImage", "" + Utils.saveUserMobileInstantResponse.getLicenseFrontImage());
+                        Log.e("licenseBackImage", "" + Utils.saveUserMobileInstantResponse.getLicenseBackImage());
 //                    Gson gson = new Gson();
 //                    String json = gson.toJson(Utils.saveUserMobileInstantResponse);
 //                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
@@ -571,29 +579,33 @@ public class DocumentUploadActivity extends AppCompatActivity {
 //                    editor.putString("LoginCredentials", json);
 //                    editor.commit();
 //                    Utils.verifyLogInUserMobileInstantResponse = Utils.saveUserMobileInstantResponse;
-                    insertDriverSession();
-                    showInfoDlg("Success..", "Successfully registered.", "OK", "success");
-                } else {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                        insertDriverSession();
+                        showInfoDlg("Success..", "Successfully registered.", "OK", "success");
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     Dialog dialog;
+
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
         dialog = new Dialog(DocumentUploadActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -658,8 +670,8 @@ public class DocumentUploadActivity extends AppCompatActivity {
     public String getPathFromURI(Uri contentUri) {
         Cursor mediaCursor = null;
         try {
-            String[] dataPath = { MediaStore.Images.Media.DATA };
-            mediaCursor = getContentResolver().query(contentUri,  dataPath, null, null, null);
+            String[] dataPath = {MediaStore.Images.Media.DATA};
+            mediaCursor = getContentResolver().query(contentUri, dataPath, null, null, null);
             int column_index = mediaCursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
             mediaCursor.moveToFirst();
             return mediaCursor.getString(column_index);
@@ -672,13 +684,17 @@ public class DocumentUploadActivity extends AppCompatActivity {
 
     /**
      * Receiving activity result method will be called after closing the camera
-     * */
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // if the result is capturing Image
         if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE_FRONT) {
             if (resultCode == RESULT_OK) {
-                new ImageCompressionAsyncTask("frontimageFile").execute(finalmediaFile.getAbsolutePath());
+                if (Utils.connectivity(DocumentUploadActivity.this)) {
+                    new ImageCompressionAsyncTask("frontimageFile").execute(finalmediaFile.getAbsolutePath());
+                } else {
+                    Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
             } else if (resultCode == RESULT_CANCELED) {
                 // user cancelled Image capture
                 Toast.makeText(getApplicationContext(),
@@ -691,9 +707,13 @@ public class DocumentUploadActivity extends AppCompatActivity {
                         .show();
             }
 
-        }else if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE_BACK) {
+        } else if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE_BACK) {
             if (resultCode == RESULT_OK) {
-                new ImageCompressionAsyncTask("backimageFile").execute(finalmediaFile.getAbsolutePath());
+                if (Utils.connectivity(DocumentUploadActivity.this)) {
+                    new ImageCompressionAsyncTask("backimageFile").execute(finalmediaFile.getAbsolutePath());
+                } else {
+                    Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
             } else if (resultCode == RESULT_CANCELED) {
                 // user cancelled Image capture
                 Toast.makeText(getApplicationContext(),
@@ -706,9 +726,13 @@ public class DocumentUploadActivity extends AppCompatActivity {
                         .show();
             }
 
-        }else if(requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE_PROFILE) {
+        } else if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE_PROFILE) {
             if (resultCode == RESULT_OK) {
-                new ImageCompressionAsyncTask("profileimageFile").execute(finalmediaFile.getAbsolutePath());
+                if (Utils.connectivity(DocumentUploadActivity.this)) {
+                    new ImageCompressionAsyncTask("profileimageFile").execute(finalmediaFile.getAbsolutePath());
+                } else {
+                    Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
             } else if (resultCode == RESULT_CANCELED) {
                 // user cancelled Image capture
                 Toast.makeText(getApplicationContext(),
@@ -845,7 +869,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
                 }
                 FileOutputStream out = null;
                 String filename = getFilename();
-                Log.e("filename",""+filename);
+                Log.e("filename", "" + filename);
                 try {
                     out = new FileOutputStream(filename);
                     scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, out);
@@ -884,17 +908,17 @@ public class DocumentUploadActivity extends AppCompatActivity {
             super.onPostExecute(result);
             if (pDialog.isShowing())
                 pDialog.dismiss();
-            if(result.equals("")){
+            if (result.equals("")) {
 
-            }else{
+            } else {
                 finalmediaFile = new File(result);
                 try {
-                    Log.e("fromGallery",""+fromGallery);
+                    Log.e("fromGallery", "" + fromGallery);
                     InputStream ims = new FileInputStream(finalmediaFile);
-                    if(fromGallery.equalsIgnoreCase("frontimageFile")) {
+                    if (fromGallery.equalsIgnoreCase("frontimageFile")) {
                         finalmediaFileFront = finalmediaFile;
                         uploadImgFront.setImageBitmap(BitmapFactory.decodeStream(ims));
-                    } else if(fromGallery.equalsIgnoreCase("profileimageFile")){
+                    } else if (fromGallery.equalsIgnoreCase("profileimageFile")) {
                         finalmediaFileProfile = finalmediaFile;
                         uploadProfilePic.setImageBitmap(BitmapFactory.decodeStream(ims));
                     } else {

@@ -5,8 +5,10 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Interpolator;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -14,6 +16,8 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,6 +31,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -47,6 +52,7 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -54,6 +60,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
+import com.trivectadigital.ziprydeuserapp.assist.MessageReceivedEvent;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCurrentCabs;
 import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
@@ -64,6 +71,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import de.greenrobot.event.EventBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -78,10 +86,10 @@ import retrofit2.Response;
  * create an instance of this fragment.
  */
 public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
-                                                                GoogleApiClient.ConnectionCallbacks,
-                                                                GoogleApiClient.OnConnectionFailedListener,
-                                                                ResultCallback<LocationSettingsResult>,
-                                                                LocationListener {
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        ResultCallback<LocationSettingsResult>,
+        LocationListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -174,11 +182,11 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                 ActivityCompat.requestPermissions(getActivity(), new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
             }
         } else {
-            LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE );
+            LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            if(statusOfGPS){
+            if (statusOfGPS) {
                 getGPSLocation();
-            }else{
+            } else {
                 //askSwitchOnGPS();
                 showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
@@ -196,11 +204,11 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
             @Override
             public void onClick(View v) {
                 //location; address;
-                if(location != null){
+                if (location != null) {
                     Intent intent = new Intent(getActivity(), FromToPlaceActivity.class);
-                    intent.putExtra("latitude",""+location.latitude);
-                    intent.putExtra("longitude",""+location.longitude);
-                    intent.putExtra("address",""+address);
+                    intent.putExtra("latitude", "" + location.latitude);
+                    intent.putExtra("longitude", "" + location.longitude);
+                    intent.putExtra("address", "" + address);
                     startActivity(intent);
                 }
             }
@@ -211,12 +219,12 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         gotoMyLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(crtLatLan != null){
+                if (crtLatLan != null) {
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLatLan));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLatLan,15));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLatLan, 15));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
-                }else{
+                } else {
                     showInfoDlg("Information", "Couldn't get the current location. Please wait..", "OK", "warning");
                 }
             }
@@ -288,30 +296,31 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
-                Log.e("onCameraIdle","onCameraIdle");
+                Log.e("onCameraIdle", "onCameraIdle");
                 LatLng location = mMap.getCameraPosition().target;
-                Log.e("latitude",""+location.latitude);
-                Log.e("longitude",""+location.longitude);
-                getNearByActiveDrivers(""+location.latitude, ""+location.longitude);
+                Log.e("latitude", "" + location.latitude);
+                Log.e("longitude", "" + location.longitude);
+                getNearByActiveDrivers("" + location.latitude, "" + location.longitude);
             }
         });
     }
 
+
     public void getGPSLocation() {
-        if(ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
             if (mLastLocation != null) {
-                Log.e("GPSLocation Latitude",""+String.valueOf(mLastLocation.getLatitude()));
-                Log.e("GPSLocation Longitude",""+String.valueOf(mLastLocation.getLongitude()));
-                if(mMap != null) {
+                Log.e("GPSLocation Latitude", "" + String.valueOf(mLastLocation.getLatitude()));
+                Log.e("GPSLocation Longitude", "" + String.valueOf(mLastLocation.getLongitude()));
+                if (mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
                     location = crtLocation;
                     Utils.startingLatLan = location;
                     address = getCompleteAddressString(location.latitude, location.longitude);
                     mMap.addMarker(new MarkerOptions().position(crtLocation).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromResource(R.drawable.currentlocationicon)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,17));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation, 17));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(17), 2000, null);
                     //marker.showInfoWindow();
@@ -325,6 +334,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onStart() {
         super.onStart();
+        EventBus.getDefault().register(this);
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
@@ -335,6 +345,14 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         super.onResume();
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
+        }
+        SharedPreferences prefs = getActivity().getSharedPreferences("BookingCredentials", getActivity().MODE_PRIVATE);
+        String bookingIdFinal = prefs.getString("bookingId", "");
+        if(!bookingIdFinal.equals("")) {
+            Intent ide = new Intent(getActivity(), DriverInfoBookingActivity.class);
+            ide.putExtra("bookingId", "" + bookingIdFinal);
+            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(ide);
         }
     }
 
@@ -351,6 +369,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
     }
 
     Dialog dialog;
+
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
         dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -359,25 +378,25 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         //dialog.setCanceledOnTouchOutside(true);
 
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
-        positiveBtn.setText(""+btnText);
+        positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("server")){
+        if (navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("server")) {
             newnegativeBtn.setVisibility(View.GONE);
-        }else{
+        } else {
             newnegativeBtn.setVisibility(View.VISIBLE);
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
-        dialogtitleText.setText(""+title);
+        dialogtitleText.setText("" + title);
         TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
-        dialogcontentText.setText(""+content);
+        dialogcontentText.setText("" + content);
 
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                if(navType.equalsIgnoreCase("gps")){
+                if (navType.equalsIgnoreCase("gps")) {
                     startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_CHECK_SETTINGS);
                 }
             }
@@ -399,30 +418,30 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(ActivityCompat.checkSelfPermission(getActivity(), permissions[0]) == PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(getActivity(), permissions[0]) == PackageManager.PERMISSION_GRANTED) {
             switch (requestCode) {
                 //Location
                 case 1:
-                    LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE );
+                    LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
                     boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                    if(statusOfGPS){
+                    if (statusOfGPS) {
                         getGPSLocation();
-                    }else{
+                    } else {
                         //askSwitchOnGPS();
                         showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
                     }
                     break;
             }
-            LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE );
+            LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            Log.e("statusOfGPS",""+statusOfGPS);
-            if(statusOfGPS){
+            Log.e("statusOfGPS", "" + statusOfGPS);
+            if (statusOfGPS) {
                 getGPSLocation();
-            }else{
+            } else {
                 //askSwitchOnGPS();
                 showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
-        }else{
+        } else {
             Toast.makeText(getActivity(), "Permission denied", Toast.LENGTH_SHORT).show();
         }
     }
@@ -431,14 +450,14 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if(ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
             if (mLastLocation != null) {
-                Log.e("Connected Latitude",""+String.valueOf(mLastLocation.getLatitude()));
-                Log.e("Connected Longitude",""+String.valueOf(mLastLocation.getLongitude()));
+                Log.e("Connected Latitude", "" + String.valueOf(mLastLocation.getLatitude()));
+                Log.e("Connected Longitude", "" + String.valueOf(mLastLocation.getLongitude()));
                 getNearByActiveDrivers(String.valueOf(mLastLocation.getLatitude()), String.valueOf(mLastLocation.getLongitude()));
-                if(mMap != null) {
+                if (mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
                     crtLatLan = crtLocation;
                     location = crtLocation;
@@ -446,7 +465,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                     address = getCompleteAddressString(location.latitude, location.longitude);
                     mMap.addMarker(new MarkerOptions().position(crtLocation).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromResource(R.drawable.currentlocationicon)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,17));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation, 17));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(17), 2000, null);
                     //marker.showInfoWindow();
@@ -492,28 +511,28 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CHECK_SETTINGS) {
-            LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE );
+            LocationManager manager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            if(statusOfGPS){
+            if (statusOfGPS) {
                 getGPSLocation();
-            }else{
+            } else {
                 //askSwitchOnGPS();
                 showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
-        }else if(requestCode == Utils.REQUEST_GET_PLACES_DETAILS){
+        } else if (requestCode == Utils.REQUEST_GET_PLACES_DETAILS) {
 //            if (resultCode == RESULT_OK) {
-            if(data != null){
+            if (data != null) {
                 String latitude = data.getStringExtra("latitude");
                 String longitude = data.getStringExtra("longitude");
                 String address = data.getStringExtra("address");
-                Log.e("RESULT_OK", "Lat : "+latitude+" Lng : "+longitude);
+                Log.e("RESULT_OK", "Lat : " + latitude + " Lng : " + longitude);
                 Utils.startingPlaceAddress = address;
-                if(mMap != null) {
+                if (mMap != null) {
                     mMap.clear();
                     crtLocation = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
                     mMap.addMarker(new MarkerOptions().position(crtLocation).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromResource(R.drawable.currentlocationicon)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,17));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation, 17));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(17), 2000, null);
                     //marker.showInfoWindow();
@@ -531,11 +550,11 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(getActivity(), "Enable Permissions", Toast.LENGTH_LONG).show();
         }
-        if(mGoogleApiClient.isConnected()) {
-            Log.e("mGoogleApiClient","Connected");
+        if (mGoogleApiClient.isConnected()) {
+            Log.e("mGoogleApiClient", "Connected");
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
-        }else{
-            Log.e("mGoogleApiClient","Not Connected");
+        } else {
+            Log.e("mGoogleApiClient", "Not Connected");
             //connectGoogleApiClient();
         }
     }
@@ -548,31 +567,31 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(getActivity(), "Enable Permissions", Toast.LENGTH_LONG).show();
         }
-        if(mGoogleApiClient.isConnected()) {
-            Log.e("mGoogleApiClient","Connected");
+        if (mGoogleApiClient.isConnected()) {
+            Log.e("mGoogleApiClient", "Connected");
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
-        }else{
-            Log.e("mGoogleApiClient","Not Connected");
+        } else {
+            Log.e("mGoogleApiClient", "Not Connected");
             connectGoogleApiClient();
         }
     }
 
     @Override
     public void onLocationChanged(Location locations) {
-        if(locations!=null) {
+        if (locations != null) {
             Log.e("LocationChanged", "Latitude : " + locations.getLatitude() + " , Longitude : " + locations.getLongitude());
             if (mLastLocation == null) {
                 mLastLocation = locations;
-                if(mMap != null) {
+                if (mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
-                    getNearByActiveDrivers(""+mLastLocation.getLatitude(), ""+mLastLocation.getLongitude());
+                    getNearByActiveDrivers("" + mLastLocation.getLatitude(), "" + mLastLocation.getLongitude());
                     crtLatLan = crtLocation;
                     location = crtLocation;
                     Utils.startingLatLan = location;
                     address = getCompleteAddressString(location.latitude, location.longitude);
                     mMap.addMarker(new MarkerOptions().position(crtLocation).anchor(0.5f, 0.5f).icon(BitmapDescriptorFactory.fromResource(R.drawable.currentlocationicon)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,17));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation, 17));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(17), 2000, null);
                     //marker.showInfoWindow();
@@ -594,6 +613,19 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         }
     }
 
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    public void onEventMainThread(MessageReceivedEvent messageReceivedEvent) {
+        Log.e("Thread message", "" + messageReceivedEvent.message);
+        Log.e("Thread title", "" + messageReceivedEvent.title);
+        Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
+        getNearByActiveDrivers(String.valueOf(mLastLocation.getLatitude()), String.valueOf(mLastLocation.getLongitude()));
+    }
+
     private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
         String strAdd = "";
         Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
@@ -602,10 +634,10 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
             if (addresses != null) {
                 Address returnedAddress = addresses.get(0);
                 StringBuilder strReturnedAddress = new StringBuilder("");
-                Log.e("Country CODE",""+returnedAddress.getCountryCode());
+                Log.e("Country CODE", "" + returnedAddress.getCountryCode());
                 Utils.countryCode = returnedAddress.getCountryCode();
-                Log.e("Country NAME",""+returnedAddress.getCountryName());
-                Log.e("Country Locality",""+returnedAddress.getLocality());
+                Log.e("Country NAME", "" + returnedAddress.getCountryName());
+                Log.e("Country Locality", "" + returnedAddress.getLocality());
                 for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
                     strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
                 }
@@ -621,62 +653,66 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         return strAdd;
     }
 
-    public void getNearByActiveDrivers(String latitude, String longitude){
-        Log.e("fromLatitude",""+latitude);
-        Log.e("fromLongitude",""+longitude);
-        SingleInstantParameters loginCredentials = new SingleInstantParameters();
-        loginCredentials.fromLatitude = latitude;
-        loginCredentials.fromLongitude = longitude;
+    public void getNearByActiveDrivers(String latitude, String longitude) {
+        if (Utils.connectivity(getActivity())) {
+            Log.e("fromLatitude", "" + latitude);
+            Log.e("fromLongitude", "" + longitude);
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.fromLatitude = latitude;
+            loginCredentials.fromLongitude = longitude;
 
-        final Dialog dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+            final Dialog dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<LinkedList<ListOfCurrentCabs>> call = apiService.getNearByActiveDrivers(loginCredentials);
-        call.enqueue(new Callback<LinkedList<ListOfCurrentCabs>>() {
-            @Override
-            public void onResponse(Call<LinkedList<ListOfCurrentCabs>> call, Response<LinkedList<ListOfCurrentCabs>> response) {
-                int statusCode = response.code();
-                Log.e("statusCode",""+statusCode);
-                Log.e("response.body",""+response.body());
-                Log.e("response.errorBody",""+response.errorBody());
-                Log.e("response.isSuccessful",""+response.isSuccessful());
-                dialog.dismiss();
-                if(response.isSuccessful()){
-                    Utils.getNearByActiveDriversInstantResponse = response.body();
-                    Log.e("size",""+Utils.getNearByActiveDriversInstantResponse.size());
-                    final List<Marker> markers = new LinkedList<Marker>();
-                    for(int i = 0; i < Utils.getNearByActiveDriversInstantResponse.size(); i++){
-                        String latitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLatitude();
-                        String longitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLongitude();
-                        Log.e("latitude longitude","latitude : "+latitude+" longitude : "+longitude);
-                        LatLng tempLatLong = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
-                        Marker marker = mMap.addMarker(new MarkerOptions().position(tempLatLong).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
-                        markers.add(marker);
-                    }
-                }else{
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+            Call<LinkedList<ListOfCurrentCabs>> call = apiService.getNearByActiveDrivers(loginCredentials);
+            call.enqueue(new Callback<LinkedList<ListOfCurrentCabs>>() {
+                @Override
+                public void onResponse(Call<LinkedList<ListOfCurrentCabs>> call, Response<LinkedList<ListOfCurrentCabs>> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.getNearByActiveDriversInstantResponse = response.body();
+                        Log.e("size", "" + Utils.getNearByActiveDriversInstantResponse.size());
+                        final List<Marker> markers = new LinkedList<Marker>();
+                        for (int i = 0; i < Utils.getNearByActiveDriversInstantResponse.size(); i++) {
+                            String latitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLatitude();
+                            String longitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLongitude();
+                            Log.e("latitude longitude", "latitude : " + latitude + " longitude : " + longitude);
+                            LatLng tempLatLong = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+                            Marker marker = mMap.addMarker(new MarkerOptions().position(tempLatLong).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
+                            markers.add(marker);
+                        }
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<LinkedList<ListOfCurrentCabs>> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<LinkedList<ListOfCurrentCabs>> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 }

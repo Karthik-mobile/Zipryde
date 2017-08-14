@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -63,11 +64,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.PlaceAutocompleteAdapter;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCurrentCabs;
+import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
 
 import org.json.JSONObject;
@@ -81,10 +84,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapReadyCallback,
-                                                                                GoogleApiClient.ConnectionCallbacks,
-                                                                                GoogleApiClient.OnConnectionFailedListener,
-                                                                                ResultCallback<LocationSettingsResult>,
-                                                                                LocationListener {
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        ResultCallback<LocationSettingsResult>,
+        LocationListener {
 
     private GoogleMap mMap;
 
@@ -146,11 +149,11 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
                 ActivityCompat.requestPermissions(SelectPlaceMapActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
             }
         } else {
-            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE );
+            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            if(statusOfGPS){
+            if (statusOfGPS) {
                 getGPSLocation();
-            }else{
+            } else {
                 //askSwitchOnGPS();
                 showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
             }
@@ -184,8 +187,8 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         AutocompleteFilter filter = new AutocompleteFilter.Builder().setCountry(Utils.countryCode).build();
         // Set up the adapter that will retrieve suggestions from the Places Geo Data API that cover
         // the entire world.
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, BOUNDS_GREATER_SYDNEY,
-                filter);
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, BOUNDS_GREATER_SYDNEY, filter);
+
         mAutocompleteView.setAdapter(mAdapter);
 
         final Intent intent = getIntent();
@@ -193,7 +196,7 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         latitude = intent.getStringExtra("latitude");
         longitude = intent.getStringExtra("longitude");
 
-        if(!address.equalsIgnoreCase("")){
+        if (!address.equalsIgnoreCase("")) {
             mAutocompleteView.setText(address);
             mAutocompleteView.setSelection(mAutocompleteView.getText().length());
             clearsearchImageView.setVisibility(View.VISIBLE);
@@ -215,9 +218,11 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
                     clearsearchImageView.setVisibility(View.VISIBLE);
                 }
             }
+
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
+
             @Override
             public void afterTextChanged(Editable s) {
 
@@ -228,14 +233,14 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
             @Override
             public void onClick(View v) {
                 LatLng location = mMap.getCameraPosition().target;
-                if(intent.hasExtra("fromPlace")){
+                if (intent.hasExtra("fromPlace")) {
                     Intent intent = new Intent(SelectPlaceMapActivity.this, FromToPlaceActivity.class);
-                    intent.putExtra("latitude",""+location.latitude);
-                    intent.putExtra("longitude",""+location.longitude);
-                    intent.putExtra("address",""+address);
+                    intent.putExtra("latitude", "" + location.latitude);
+                    intent.putExtra("longitude", "" + location.longitude);
+                    intent.putExtra("address", "" + address);
                     startActivity(intent);
                     finish();
-                }else{
+                } else {
                     Utils.endingPlaceAddress = address;
                     Utils.endingLatLan = new LatLng(location.latitude, location.longitude);
                     Intent intent = new Intent(SelectPlaceMapActivity.this, DirectionConfirmationActivity.class);
@@ -248,12 +253,12 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         gotoMyLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(crtLatLan != null){
+                if (crtLatLan != null) {
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLatLan));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLatLan,15));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLatLan, 15));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
                     mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
-                }else{
+                } else {
                     showInfoDlg("Information", "Couldn't get the current location. Please wait..", "OK", "warning");
                 }
             }
@@ -323,12 +328,12 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
 
             LatLng geoLatLng = place.getLatLng();
             Log.e(TAG, "Lat : " + geoLatLng.latitude + " Lng : " + geoLatLng.longitude);
-            String tempAddress = ""+place.getAddress();
+            String tempAddress = "" + place.getAddress();
             String address = "";
-            if(tempAddress.contains(place.getName())){
+            if (tempAddress.contains(place.getName())) {
                 address = tempAddress;
-            }else{
-                address = place.getName()+ "," + place.getAddress();
+            } else {
+                address = place.getName() + "," + place.getAddress();
             }
 //            String address = ""+place.getAddress();
 
@@ -346,7 +351,7 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
             mAutocompleteView.setText(address);
             crtLocation = new LatLng(geoLatLng.latitude, geoLatLng.longitude);
             mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation, 15));
             mMap.animateCamera(CameraUpdateFactory.zoomIn());
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
             mAutocompleteView.setSelection(mAutocompleteView.getText().length());
@@ -386,10 +391,10 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         //mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.location_48)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
 
-        if(!latitude.equalsIgnoreCase("") && !longitude.equalsIgnoreCase("")){
+        if (!latitude.equalsIgnoreCase("") && !longitude.equalsIgnoreCase("")) {
             crtLocation = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
             mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation,15));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation, 15));
             mMap.animateCamera(CameraUpdateFactory.zoomIn());
             mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
         }
@@ -397,7 +402,7 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
             public void onCameraMove() {
-                Log.e("onCameraMove","onCameraMove");
+                Log.e("onCameraMove", "onCameraMove");
                 mAutocompleteView.setText("Getting Address");
                 clearsearchImageView.setVisibility(View.GONE);
             }
@@ -406,25 +411,25 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
-                Log.e("onCameraIdle","onCameraIdle");
+                Log.e("onCameraIdle", "onCameraIdle");
                 LatLng location = mMap.getCameraPosition().target;
                 Utils.endingLatLan = location;
                 Utils.backchkendingLatLan = location;
-                Log.e("latitude",""+location.latitude);
-                Log.e("longitude",""+location.longitude);
+                Log.e("latitude", "" + location.latitude);
+                Log.e("longitude", "" + location.longitude);
                 address = getCompleteAddressString(location.latitude, location.longitude);
-                Log.e("address",""+address);
+                Log.e("address", "" + address);
                 mAutocompleteView.setText(address);
                 mAutocompleteView.setSelection(mAutocompleteView.getText().length());
                 clearsearchImageView.setVisibility(View.VISIBLE);
-                getNearByActiveDrivers(""+location.latitude, ""+location.longitude);
+                getNearByActiveDrivers("" + location.latitude, "" + location.longitude);
             }
         });
     }
 
-    public void getNearByActiveDrivers(String latitude, String longitude){
-        Log.e("fromLatitude",""+latitude);
-        Log.e("fromLongitude",""+longitude);
+    public void getNearByActiveDrivers(String latitude, String longitude) {
+        Log.e("fromLatitude", "" + latitude);
+        Log.e("fromLongitude", "" + longitude);
         SingleInstantParameters loginCredentials = new SingleInstantParameters();
         loginCredentials.fromLatitude = latitude;
         loginCredentials.fromLongitude = longitude;
@@ -444,33 +449,33 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
             @Override
             public void onResponse(Call<LinkedList<ListOfCurrentCabs>> call, Response<LinkedList<ListOfCurrentCabs>> response) {
                 int statusCode = response.code();
-                Log.e("statusCode",""+statusCode);
-                Log.e("response.body",""+response.body());
-                Log.e("response.errorBody",""+response.errorBody());
-                Log.e("response.isSuccessful",""+response.isSuccessful());
+                Log.e("statusCode", "" + statusCode);
+                Log.e("response.body", "" + response.body());
+                Log.e("response.errorBody", "" + response.errorBody());
+                Log.e("response.isSuccessful", "" + response.isSuccessful());
                 dialog.dismiss();
-                if(response.isSuccessful()){
+                if (response.isSuccessful()) {
                     Utils.getNearByActiveDriversInstantResponse = response.body();
-                    Log.e("size",""+Utils.getNearByActiveDriversInstantResponse.size());
+                    Log.e("size", "" + Utils.getNearByActiveDriversInstantResponse.size());
                     final List<Marker> markers = new LinkedList<Marker>();
-                    for(int i = 0; i < Utils.getNearByActiveDriversInstantResponse.size(); i++){
+                    for (int i = 0; i < Utils.getNearByActiveDriversInstantResponse.size(); i++) {
                         String latitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLatitude();
                         String longitude = Utils.getNearByActiveDriversInstantResponse.get(i).getLongitude();
                         String cabID = Utils.getNearByActiveDriversInstantResponse.get(i).getCabTypeId();
                         String userId = Utils.getNearByActiveDriversInstantResponse.get(i).getUserId();
-                        Log.e("cabID userId","userId : "+userId+" cabID : "+cabID);
-                        Log.e("latitude longitude","latitude : "+latitude+" longitude : "+longitude);
+                        Log.e("cabID userId", "userId : " + userId + " cabID : " + cabID);
+                        Log.e("latitude longitude", "latitude : " + latitude + " longitude : " + longitude);
                         LatLng tempLatLong = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
                         Marker marker = mMap.addMarker(new MarkerOptions().position(tempLatLong).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
-                        Log.e("marker contains",""+markers.contains(marker));
+                        Log.e("marker contains", "" + markers.contains(marker));
                         markers.add(marker);
                     }
-                }else{
+                } else {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "OK", "error");
+                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
                     } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                        Toast.makeText(SelectPlaceMapActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -480,23 +485,23 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                Toast.makeText(SelectPlaceMapActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
             }
         });
     }
 
     public void getGPSLocation() {
-        if(ActivityCompat.checkSelfPermission(SelectPlaceMapActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(SelectPlaceMapActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
             if (mLastLocation != null) {
-                Log.e("Latitude",""+String.valueOf(mLastLocation.getLatitude()));
-                Log.e("Longitude",""+String.valueOf(mLastLocation.getLongitude()));
+                Log.e("Latitude", "" + String.valueOf(mLastLocation.getLatitude()));
+                Log.e("Longitude", "" + String.valueOf(mLastLocation.getLongitude()));
 
-                if(mMap != null) {
+                if (mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
                     String address = getCompleteAddressString(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                    Log.e("address",""+address);
+                    Log.e("address", "" + address);
                 }
             }
             startLocationUpdates();
@@ -518,6 +523,10 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
+        SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = prefs.getString("LoginCredentials", "");
+        Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
     }
 
     public void askSwitchOnGPS() {
@@ -533,6 +542,7 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
     }
 
     Dialog dialog;
+
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
         dialog = new Dialog(SelectPlaceMapActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -541,25 +551,25 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         //dialog.setCanceledOnTouchOutside(true);
 
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
-        positiveBtn.setText(""+btnText);
+        positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("server")){
+        if (navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("server")) {
             newnegativeBtn.setVisibility(View.GONE);
-        }else{
+        } else {
             newnegativeBtn.setVisibility(View.VISIBLE);
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
-        dialogtitleText.setText(""+title);
+        dialogtitleText.setText("" + title);
         TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
-        dialogcontentText.setText(""+content);
+        dialogcontentText.setText("" + content);
 
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                if(navType.equalsIgnoreCase("gps")){
+                if (navType.equalsIgnoreCase("gps")) {
                     startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_CHECK_SETTINGS);
                 }
             }
@@ -581,30 +591,30 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(ActivityCompat.checkSelfPermission(SelectPlaceMapActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(SelectPlaceMapActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED) {
             switch (requestCode) {
                 //Location
                 case 1:
-                    LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE );
+                    LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                     boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                    if(statusOfGPS){
+                    if (statusOfGPS) {
                         getGPSLocation();
-                    }else{
+                    } else {
                         //askSwitchOnGPS();
                         showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
                     }
                     break;
             }
-            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE );
+            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            Log.e("statusOfGPS",""+statusOfGPS);
-            if(statusOfGPS){
+            Log.e("statusOfGPS", "" + statusOfGPS);
+            if (statusOfGPS) {
                 getGPSLocation();
-            }else{
+            } else {
                 //askSwitchOnGPS();
                 showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
             }
-        }else{
+        } else {
             Toast.makeText(SelectPlaceMapActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
         }
     }
@@ -613,22 +623,22 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if(ActivityCompat.checkSelfPermission(SelectPlaceMapActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(SelectPlaceMapActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
             if (mLastLocation != null) {
-                Log.e("onConnected Latitude",""+String.valueOf(mLastLocation.getLatitude()));
-                Log.e("onConnected Longitude",""+String.valueOf(mLastLocation.getLongitude()));
+                Log.e("onConnected Latitude", "" + String.valueOf(mLastLocation.getLatitude()));
+                Log.e("onConnected Longitude", "" + String.valueOf(mLastLocation.getLongitude()));
                 crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
                 crtLatLan = crtLocation;
-                if(mMap != null) {
+                if (mMap != null) {
                     String address = getCompleteAddressString(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                    Log.e("address",""+address);
-                    if(latitude.equalsIgnoreCase("") && longitude.equalsIgnoreCase("")){
-                        Log.e("onConnected Latitude",""+String.valueOf(crtLatLan.latitude));
-                        Log.e("onConnected Longitude",""+String.valueOf(crtLatLan.longitude));
+                    Log.e("address", "" + address);
+                    if (latitude.equalsIgnoreCase("") && longitude.equalsIgnoreCase("")) {
+                        Log.e("onConnected Latitude", "" + String.valueOf(crtLatLan.latitude));
+                        Log.e("onConnected Longitude", "" + String.valueOf(crtLatLan.longitude));
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLatLan));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLatLan,15));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLatLan, 15));
                         mMap.animateCamera(CameraUpdateFactory.zoomIn());
                         mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
                     }
@@ -674,20 +684,20 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CHECK_SETTINGS) {
-            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE );
+            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            if(statusOfGPS){
+            if (statusOfGPS) {
                 getGPSLocation();
-            }else{
+            } else {
                 //askSwitchOnGPS();
                 showInfoDlg("Information", "Please switch ON GPS to get you current location..", "OPEN", "gps");
             }
-        }else if(requestCode == Utils.REQUEST_GET_PLACES_DETAILS){
-            if(data != null){
+        } else if (requestCode == Utils.REQUEST_GET_PLACES_DETAILS) {
+            if (data != null) {
                 String latitude = data.getStringExtra("latitude");
                 String longitude = data.getStringExtra("longitude");
                 String address = data.getStringExtra("address");
-                Log.e("RESULT_OK", "Lat : "+latitude+" Lng : "+longitude);
+                Log.e("RESULT_OK", "Lat : " + latitude + " Lng : " + longitude);
             }
         }
     }
@@ -700,11 +710,11 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         if (ActivityCompat.checkSelfPermission(SelectPlaceMapActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(SelectPlaceMapActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(SelectPlaceMapActivity.this, "Enable Permissions", Toast.LENGTH_LONG).show();
         }
-        if(mGoogleApiClient.isConnected()) {
-            Log.e("mGoogleApiClient","Connected");
+        if (mGoogleApiClient.isConnected()) {
+            Log.e("mGoogleApiClient", "Connected");
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
-        }else{
-            Log.e("mGoogleApiClient","Not Connected");
+        } else {
+            Log.e("mGoogleApiClient", "Not Connected");
             //connectGoogleApiClient();
         }
     }
@@ -717,26 +727,26 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         if (ActivityCompat.checkSelfPermission(SelectPlaceMapActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(SelectPlaceMapActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(SelectPlaceMapActivity.this, "Enable Permissions", Toast.LENGTH_LONG).show();
         }
-        if(mGoogleApiClient.isConnected()) {
-            Log.e("mGoogleApiClient","Connected");
+        if (mGoogleApiClient.isConnected()) {
+            Log.e("mGoogleApiClient", "Connected");
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
-        }else{
-            Log.e("mGoogleApiClient","Not Connected");
+        } else {
+            Log.e("mGoogleApiClient", "Not Connected");
             connectGoogleApiClient();
         }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        if(location!=null) {
+        if (location != null) {
             Log.e("LocationChanged", "Latitude : " + location.getLatitude() + " , Longitude : " + location.getLongitude());
             if (mLastLocation == null) {
                 mLastLocation = location;
-                if(mMap != null) {
+                if (mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
                     crtLatLan = crtLocation;
                     String address = getCompleteAddressString(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                    Log.e("address",""+address);
+                    Log.e("address", "" + address);
                 }
             }
         }

@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydedriverapp.CashDisplyActivity;
@@ -123,79 +124,84 @@ public class CurrentRideAdapter extends BaseAdapter {
         holder.bookingDate.setText("" + dateTime);
         holder.bookingStarting.setText("" + pickupLocation);
         holder.bookingEnding.setText("" + dropLocation);
-        holder.bookingStatus.setText(""+bookingStatus);
+        holder.bookingStatus.setText("" + bookingStatus);
 
         holder.positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SingleInstantParameters loginCredentials = new SingleInstantParameters();
-                loginCredentials.driverId = ""+Utils.verifyLogInUserMobileInstantResponse.getUserId();
+                loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
                 loginCredentials.bookingId = currentRideDetails.getBookingId();
                 loginCredentials.driverStatus = "ACCEPTED";
                 Gson gson = new Gson();
                 String json = gson.toJson(loginCredentials);
-                Log.e("json",""+json);
-                updateBookingDriverStatus(loginCredentials);
+                Log.e("json", "" + json);
+                updateBookingDriverStatus(loginCredentials, position);
             }
         });
         holder.newnegativeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((AppCompatActivity)context).finish();
+                ((AppCompatActivity) context).finish();
             }
         });
 
         return view;
     }
 
-    public void updateBookingDriverStatus(final SingleInstantParameters loginCredentials){
-        final Dialog dialog = new Dialog(context, android.R.style.Theme_Dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.loadingimage_layout);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setCancelable(false);
-        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        dialog.show();
+    public void updateBookingDriverStatus(final SingleInstantParameters loginCredentials, final int position) {
+        if (Utils.connectivity(context)) {
+            final Dialog dialog = new Dialog(context, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
 
-        Call<SingleInstantResponse> call = apiService.updateBookingDriverStatus(loginCredentials);
-        call.enqueue(new Callback<SingleInstantResponse>() {
-            @Override
-            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                int statusCode = response.code();
-                Log.e("statusCode",""+statusCode);
-                Log.e("response.body",""+response.body());
-                Log.e("response.errorBody",""+response.errorBody());
-                Log.e("response.isSuccessful",""+response.isSuccessful());
-                dialog.dismiss();
-                if(response.isSuccessful()){
-                    Utils.updateBookingDriverStatusInstantResponse = response.body();
-                    Log.e("CustomerName",""+Utils.updateBookingDriverStatusInstantResponse.getCustomerName());
-                    Log.e("DistanceInMiles",""+Utils.updateBookingDriverStatusInstantResponse.getGeoLocationResponse().getDistanceInMiles());
-                    showInfoDlg("Success..", "Request Accepted Successfully.", "Ok", "success");
-                }else{
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", ""+jObjError.getString("message"), "Ok", "error");
-                    } catch (Exception e) {
-                        showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
+            Call<SingleInstantResponse> call = apiService.updateBookingDriverStatus(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.updateBookingDriverStatusInstantResponse = response.body();
+                        Log.e("CustomerName", "" + Utils.updateBookingDriverStatusInstantResponse.getCustomerName());
+                        Log.e("DistanceInMiles", "" + Utils.updateBookingDriverStatusInstantResponse.getGeoLocationResponse().getDistanceInMiles());
+                        showInfoDlg("Success..", "Request Accepted Successfully.", "Ok", "success", position);
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error", -1);
+                        } catch (Exception e) {
+                            Toast.makeText(context, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                // Log error here since request failed
-                Log.e("onFailure", t.toString());
-                dialog.dismiss();
-                showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "Ok", "server");
-            }
-        });
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(context, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(context, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 
     Dialog dialog;
-    private void showInfoDlg(String title, String content, String btnText, final String navType) {
+
+    private void showInfoDlg(String title, String content, String btnText, final String navType, final int position) {
         dialog = new Dialog(context, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -208,10 +214,10 @@ public class CurrentRideAdapter extends BaseAdapter {
         }
 
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
-        positiveBtn.setText(""+btnText);
+        positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("error")){
+        if (navType.equalsIgnoreCase("error")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -223,28 +229,28 @@ public class CurrentRideAdapter extends BaseAdapter {
                 @Override
                 public void run() {
                     dialog.dismiss();
-                    Intent ide = new Intent(context, HistoryActivity.class);
+                    Intent ide = new Intent(context, OnGoingBookingActivity.class);
+                    ide.putExtra("position", position);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     context.startActivity(ide);
-                    ((AppCompatActivity)context).finish();
                 }
             }, 1000);
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
-        dialogtitleText.setText(""+title);
+        dialogtitleText.setText("" + title);
         TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
-        dialogcontentText.setText(""+content);
+        dialogcontentText.setText("" + content);
 
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                if(navType.equalsIgnoreCase("error")){
+                if (navType.equalsIgnoreCase("error")) {
                     Intent ide = new Intent(context, RideActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     context.startActivity(ide);
-                    ((AppCompatActivity)context).finish();
+                    ((AppCompatActivity) context).finish();
                 }
             }
         });

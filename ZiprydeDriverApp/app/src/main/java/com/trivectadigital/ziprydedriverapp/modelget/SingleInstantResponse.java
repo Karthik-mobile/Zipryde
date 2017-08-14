@@ -43,6 +43,8 @@ public class SingleInstantResponse {
     private String customerId;
     @SerializedName("customerName")
     private String customerName;
+    @SerializedName("customerMobileNumber")
+    private String customerMobileNumber;
     @SerializedName("driverId")
     private String driverId;
     @SerializedName("from")
@@ -55,8 +57,12 @@ public class SingleInstantResponse {
     private String offeredPrice;
     @SerializedName("bookingStatus")
     private String bookingStatus;
+    @SerializedName("bookingStatusCode")
+    private String bookingStatusCode;
     @SerializedName("driverStatus")
     private String driverStatus;
+    @SerializedName("driverStatusCode")
+    private String driverStatusCode;
     @SerializedName("noOfPassengers")
     private String noOfPassengers;
     @SerializedName("geoLocationResponse")
@@ -67,6 +73,30 @@ public class SingleInstantResponse {
 
     @SerializedName("count")
     private String count;
+
+    public String getCustomerMobileNumber() {
+        return customerMobileNumber;
+    }
+
+    public void setCustomerMobileNumber(String customerMobileNumber) {
+        this.customerMobileNumber = customerMobileNumber;
+    }
+
+    public String getBookingStatusCode() {
+        return bookingStatusCode;
+    }
+
+    public void setBookingStatusCode(String bookingStatusCode) {
+        this.bookingStatusCode = bookingStatusCode;
+    }
+
+    public String getDriverStatusCode() {
+        return driverStatusCode;
+    }
+
+    public void setDriverStatusCode(String driverStatusCode) {
+        this.driverStatusCode = driverStatusCode;
+    }
 
     public String getCount() {
         return count;

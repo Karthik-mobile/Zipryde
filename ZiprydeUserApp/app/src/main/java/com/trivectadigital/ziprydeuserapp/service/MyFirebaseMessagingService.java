@@ -95,7 +95,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //            Log.e(TAG, "imageUrl: " + imageUrl);
 //            Log.e(TAG, "timestamp: " + timestamp);
 
-
+            NotificationUtils.clearNotifications(getApplicationContext());
             if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
 //                // app is in foreground, broadcast the push message
                 EventBus.getDefault().post(new MessageReceivedEvent(message, title));
@@ -104,8 +104,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
                 notificationUtils.playNotificationSound();
             } else {
+                if(!title.equals("DRIVER_LOGOUT")){
 //                // app is in background, show the notification in notification tray
-                Intent resultIntent = new Intent(getApplicationContext(), DriverInfoBookingActivity.class);
+                    Intent resultIntent = new Intent(getApplicationContext(), DriverInfoBookingActivity.class);
 //                resultIntent.putExtra("message", message);
 //
 //                // check for image attachment
@@ -119,6 +120,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //                    // image is present, show notification with image
 //                    showNotificationMessageWithBigImage(getApplicationContext(), title, message, timestamp, resultIntent, imageUrl);
 //                }
+                }
             }
 //        } catch (JSONException e) {
 //            Log.e(TAG, "Json Exception: " + e.getMessage());

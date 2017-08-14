@@ -17,6 +17,8 @@ public class ListOfBooking {
     private String customerId;
     @SerializedName("customerName")
     private String customerName;
+    @SerializedName("customerMobileNumber")
+    private String customerMobileNumber;
     @SerializedName("from")
     private String from;
     @SerializedName("to")
@@ -27,6 +29,8 @@ public class ListOfBooking {
     private String offeredPrice;
     @SerializedName("bookingStatus")
     private String bookingStatus;
+    @SerializedName("bookingStatusCode")
+    private String bookingStatusCode;
     @SerializedName("noOfPassengers")
     private String noOfPassengers;
     @SerializedName("geoLocationResponse")
@@ -37,10 +41,36 @@ public class ListOfBooking {
     private String bookingDateTime;
     @SerializedName("driverStatus")
     private String driverStatus;
+    @SerializedName("driverStatusCode")
+    private String driverStatusCode;
     @SerializedName("driverName")
     private String driverName;
     @SerializedName("driverId")
     private String driverId;
+
+    public String getCustomerMobileNumber() {
+        return customerMobileNumber;
+    }
+
+    public void setCustomerMobileNumber(String customerMobileNumber) {
+        this.customerMobileNumber = customerMobileNumber;
+    }
+
+    public String getBookingStatusCode() {
+        return bookingStatusCode;
+    }
+
+    public void setBookingStatusCode(String bookingStatusCode) {
+        this.bookingStatusCode = bookingStatusCode;
+    }
+
+    public String getDriverStatusCode() {
+        return driverStatusCode;
+    }
+
+    public void setDriverStatusCode(String driverStatusCode) {
+        this.driverStatusCode = driverStatusCode;
+    }
 
     public String getBookingId() {
         return bookingId;

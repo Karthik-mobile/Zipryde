@@ -15,7 +15,6 @@ import android.widget.TextView;
 import com.trivectadigital.ziprydedriverapp.assist.CommissionAdapter;
 import com.trivectadigital.ziprydedriverapp.assist.CommissionDetails;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
-import com.trivectadigital.ziprydedriverapp.service.MyFirebaseMessagingService;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

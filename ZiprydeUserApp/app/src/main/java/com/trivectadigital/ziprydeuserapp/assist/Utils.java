@@ -1,5 +1,10 @@
 package com.trivectadigital.ziprydeuserapp.assist;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.util.Log;
+
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfBooking;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCarTypes;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCurrentCabs;
@@ -17,7 +22,7 @@ import java.util.regex.Pattern;
 public class Utils {
 
     public static String countryCode = "";
-    public static String defaultIP = "54.213.246.198:8080";
+    public static String defaultIP = "52.10.57.172:8080";
     public static final Pattern IP_ADDRESS
             = Pattern.compile(
             "((25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\\.(25[0-5]|2[0-4]"
@@ -53,6 +58,8 @@ public class Utils {
     public static String parsedDistance = "";
     public static String parsedDuration = "";
 
+    public static String cabparsedDuration = "";
+
     // global topic to receive app wide push notifications
     public static final String TOPIC_GLOBAL = "global";
 
@@ -65,4 +72,29 @@ public class Utils {
     public static final int NOTIFICATION_ID_BIG_IMAGE = 101;
 
     public static final String SHARED_PREF = "ah_firebase";
+
+    // Check Network Availability
+    public static boolean connectivity(Context c) {
+        ConnectivityManager connec = (ConnectivityManager) c
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
+        try {
+            NetworkInfo wifi = connec
+                    .getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+            NetworkInfo mobile = connec
+                    .getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+
+            if (wifi.isConnected() || mobile.isConnected())
+                return true;
+            else if (wifi.isConnected() && mobile.isConnected())
+                return true;
+            else
+                return false;
+
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            Log.d("ConStatus", "No Active Connection");
+            return false;
+        }
+    }
 }

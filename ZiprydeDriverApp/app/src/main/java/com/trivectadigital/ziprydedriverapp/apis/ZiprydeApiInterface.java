@@ -53,6 +53,9 @@ public interface ZiprydeApiInterface {
     @POST("zipryde/updatePasswordByUserAndType")
     Call<SingleInstantResponse> updatePasswordByUserAndType(@Body SingleInstantParameters parameters);
 
+    @POST("zipryde/getBookingByBookingId")
+    Call<SingleInstantResponse> getBookingByBookingId(@Body SingleInstantParameters parameters);
+
     @GET("zipryde/getAllNYOPList")
     Call<LinkedList<ListOfPercentage>> getAllNYOPList();
 

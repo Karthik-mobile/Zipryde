@@ -51,9 +51,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 
 public class SplashActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-                                                                    GoogleApiClient.OnConnectionFailedListener,
-                                                                    ResultCallback<LocationSettingsResult>,
-                                                                    LocationListener {
+        GoogleApiClient.OnConnectionFailedListener,
+        ResultCallback<LocationSettingsResult>,
+        LocationListener {
 
     private final Handler mHideHandler = new Handler();
 
@@ -95,76 +95,77 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
+
+        mContentView = findViewById(R.id.fullscreen_content);
+        delayedHide(100);
+
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getBaseContext());
         // Showing status
-        if(status != ConnectionResult.SUCCESS){
+        if (status != ConnectionResult.SUCCESS) {
             int requestCode = 10;
             Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this, requestCode);
             dialog.show();
-        }else{
+        } else {
+            if (Utils.connectivity(SplashActivity.this)) {
+                mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
 
-            mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
+                        // checking for type intent filter
+                        if (intent.getAction().equals(Utils.REGISTRATION_COMPLETE)) {
+                            // gcm successfully registered
+                            // now subscribe to `global` topic to receive app wide notifications
+                            FirebaseMessaging.getInstance().subscribeToTopic(Utils.TOPIC_GLOBAL);
 
-                    // checking for type intent filter
-                    if (intent.getAction().equals(Utils.REGISTRATION_COMPLETE)) {
-                        // gcm successfully registered
-                        // now subscribe to `global` topic to receive app wide notifications
-                        FirebaseMessaging.getInstance().subscribeToTopic(Utils.TOPIC_GLOBAL);
+                            displayFirebaseRegId();
 
-                        displayFirebaseRegId();
+                        }
+                    }
+                };
 
+                displayFirebaseRegId();
+
+                mGoogleApiClient = new GoogleApiClient.Builder(SplashActivity.this)
+                        .addConnectionCallbacks(this)
+                        .addOnConnectionFailedListener(this)
+                        .addApi(LocationServices.API)
+                        .build();
+
+                SharedPreferences prefs = getSharedPreferences("URLCredentials", MODE_PRIVATE);
+                String url = prefs.getString("url", null);
+                if (url != null) {
+                    Utils.defaultIP = url;
+                }
+
+                if (ContextCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // Should we show an explanation?
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                        //This is called if user has denied the permission before
+                        //In this case I am just asking the permission again
+                        ActivityCompat.requestPermissions(SplashActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
+
+                    } else {
+                        ActivityCompat.requestPermissions(SplashActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
+                    }
+                } else {
+                    LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                    boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                    if (statusOfGPS) {
+                        Utils.gpsLocationService = new GPSLocationService(SplashActivity.this);
+                        getGPSLocation();
+                        gotoNextActivity();
+                    } else {
+                        //askSwitchOnGPS();
+                        showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
                     }
                 }
-            };
-
-            displayFirebaseRegId();
-
-
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.hide();
-            }
-
-            mContentView = findViewById(R.id.fullscreen_content);
-            delayedHide(100);
-
-            mGoogleApiClient = new GoogleApiClient.Builder(SplashActivity.this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-
-            SharedPreferences prefs = getSharedPreferences("URLCredentials", MODE_PRIVATE);
-            String url = prefs.getString("url", null);
-            if(url != null){
-                Utils.defaultIP = url;
-            }
-
-            if (ContextCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    //This is called if user has denied the permission before
-                    //In this case I am just asking the permission again
-                    ActivityCompat.requestPermissions(SplashActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
-
-                } else {
-                    ActivityCompat.requestPermissions(SplashActivity.this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION);
-                }
             } else {
-                LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE );
-                boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                if(statusOfGPS){
-                    Utils.gpsLocationService = new GPSLocationService(SplashActivity.this);
-                    getGPSLocation();
-                    gotoNextActivity();
-                }else{
-                    //askSwitchOnGPS();
-                    showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
-                }
+                Toast.makeText(SplashActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
             }
-
         }
     }
 
@@ -176,26 +177,33 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
                 Utils.fromSplash = true;
                 SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
                 String phoneno = prefs.getString("phoneNumber", null);
-                Log.e("phoneno",""+phoneno);
+                Log.e("phoneno", "" + phoneno);
                 if (phoneno != null) {
-                    phoneno = prefs.getString("phoneNumber", "");//"No name defined" is the default value.
-                    String password = prefs.getString("password", ""); //0 is the default value.
+                    phoneno = prefs.getString("phoneNumber", "");
+                    String password = prefs.getString("password", "");
                     Gson gson = new Gson();
                     String json = prefs.getString("LoginCredentials", "");
                     Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
-                    Log.e("FirstName",""+Utils.verifyLogInUserMobileInstantResponse.getFirstName());
+                    Log.e("FirstName", "" + Utils.verifyLogInUserMobileInstantResponse.getFirstName());
                     Intent ide;
-                    Log.e("Utils.fromNotification",""+Utils.fromNotification);
-                    if(Utils.fromNotification){
+                    Log.e("Utils.fromNotification", "" + Utils.fromNotification);
+                    if (Utils.fromNotification) {
                         Utils.fromNotification = false;
                         ide = new Intent(SplashActivity.this, RideActivity.class);
-                    }else{
-                        ide = new Intent(SplashActivity.this, NewDashBoardActivity.class);
+                    } else {
+                        prefs = getSharedPreferences("BookingCredentials", MODE_PRIVATE);
+                        String bookingIdFinal = prefs.getString("bookingID", "");
+                        if(bookingIdFinal.equals("")){
+                            ide = new Intent(SplashActivity.this, NewDashBoardActivity.class);
+                        }else{
+                            ide = new Intent(SplashActivity.this, OnGoingBookingActivity.class);
+                            ide.putExtra("bookingIdFinal","bookingIdFinal");
+                        }
                     }
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
                     finish();
-                }else{
+                } else {
                     Intent ide = new Intent(SplashActivity.this, LoginActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
@@ -215,6 +223,7 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
     }
 
     Dialog dialog;
+
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
         dialog = new Dialog(SplashActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -223,25 +232,25 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
         //dialog.setCanceledOnTouchOutside(true);
 
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
-        positiveBtn.setText(""+btnText);
+        positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning")){
+        if (navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning")) {
             newnegativeBtn.setVisibility(View.GONE);
-        }else{
+        } else {
             newnegativeBtn.setVisibility(View.VISIBLE);
         }
 
         TextView dialogtitleText = (TextView) dialog.findViewById(R.id.dialogtitleText);
-        dialogtitleText.setText(""+title);
+        dialogtitleText.setText("" + title);
         TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
-        dialogcontentText.setText(""+content);
+        dialogcontentText.setText("" + content);
 
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
-                if(navType.equalsIgnoreCase("gps")){
+                if (navType.equalsIgnoreCase("gps")) {
                     startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_CHECK_SETTINGS);
                 }
             }
@@ -261,12 +270,12 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
     }
 
     public void getGPSLocation() {
-        if(ActivityCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
             if (mLastLocation != null) {
-                Log.e("GPSLocation Latitude",""+String.valueOf(mLastLocation.getLatitude()));
-                Log.e("GPSLocation Longitude",""+String.valueOf(mLastLocation.getLongitude()));
+                Log.e("GPSLocation Latitude", "" + String.valueOf(mLastLocation.getLatitude()));
+                Log.e("GPSLocation Longitude", "" + String.valueOf(mLastLocation.getLongitude()));
             }
             //startLocationUpdates();
         }
@@ -303,23 +312,23 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(ActivityCompat.checkSelfPermission(SplashActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(SplashActivity.this, permissions[0]) == PackageManager.PERMISSION_GRANTED) {
             switch (requestCode) {
                 //Location
                 case 1:
-                    LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE );
+                    LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                     boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                    if(statusOfGPS){
+                    if (statusOfGPS) {
                         Utils.gpsLocationService = new GPSLocationService(SplashActivity.this);
                         getGPSLocation();
                         gotoNextActivity();
-                    }else{
+                    } else {
                         //askSwitchOnGPS();
                         showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
                     }
                     break;
             }
-        }else{
+        } else {
             Toast.makeText(SplashActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
         }
     }
@@ -328,10 +337,10 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if(ActivityCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ActivityCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
                     mGoogleApiClient);
-            if(mLastLocation!=null) {
+            if (mLastLocation != null) {
                 Log.e("onConnected", "Latitude : " + mLastLocation.getLatitude() + " , Longitude : " + mLastLocation.getLongitude());
             }
         }
@@ -374,9 +383,9 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CHECK_SETTINGS) {
-            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE );
+            LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             boolean statusOfGPS = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            if(statusOfGPS){
+            if (statusOfGPS) {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -385,7 +394,7 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
                 }, 5000);
                 getGPSLocation();
                 gotoNextActivity();
-            }else{
+            } else {
                 //askSwitchOnGPS();
                 showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
             }
@@ -400,11 +409,11 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
         if (ActivityCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(SplashActivity.this, "Enable Permissions", Toast.LENGTH_LONG).show();
         }
-        if(mGoogleApiClient.isConnected()) {
-            Log.e("mGoogleApiClient","Connected");
+        if (mGoogleApiClient.isConnected()) {
+            Log.e("mGoogleApiClient", "Connected");
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
-        }else{
-            Log.e("mGoogleApiClient","Not Connected");
+        } else {
+            Log.e("mGoogleApiClient", "Not Connected");
             //connectGoogleApiClient();
         }
     }
@@ -417,18 +426,18 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
         if (ActivityCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(SplashActivity.this, "Enable Permissions", Toast.LENGTH_LONG).show();
         }
-        if(mGoogleApiClient.isConnected()) {
-            Log.e("mGoogleApiClient","Connected");
+        if (mGoogleApiClient.isConnected()) {
+            Log.e("mGoogleApiClient", "Connected");
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
-        }else{
-            Log.e("mGoogleApiClient","Not Connected");
+        } else {
+            Log.e("mGoogleApiClient", "Not Connected");
             connectGoogleApiClient();
         }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        if(location!=null) {
+        if (location != null) {
             Log.e("LocationChanged", "Latitude : " + location.getLatitude() + " , Longitude : " + location.getLongitude());
         }
     }
@@ -445,6 +454,7 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
             mGoogleApiClient.disconnect();
         }
     }// Fetches reg id from shared preferences
+
     // and displays on the screen
     private void displayFirebaseRegId() {
         SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_PREF, 0);

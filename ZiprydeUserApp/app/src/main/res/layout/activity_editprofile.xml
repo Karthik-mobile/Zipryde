@@ -188,6 +188,8 @@
                         android:layout_weight="8"
                         android:paddingLeft="5dp"
                         android:paddingRight="5dp"
+                        android:editable="false"
+                        android:focusableInTouchMode="false"
                         android:text="**********" />
 
                 </LinearLayout>
