@@ -9,6 +9,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Interpolator;
+import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -16,6 +18,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,6 +30,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -48,6 +52,7 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -214,7 +219,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                 editor.putString("bookingID", bookingIdFinal);
                 editor.commit();
-            }else{
+            } else {
                 SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                 editor.putString("bookingID", "");
                 editor.commit();
@@ -238,7 +243,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                 editor.putString("bookingID", bookingIdFinal);
                 editor.commit();
-            }else{
+            } else {
                 SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                 editor.putString("bookingID", "");
                 editor.commit();
@@ -380,6 +385,11 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                             Log.d("url", "" + url);
                             FetchUrl FetchUrl = new FetchUrl();
                             FetchUrl.execute(url);
+                            if(mMap != null) {
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(driverlatlan, 18));
+                                mMap.animateCamera(CameraUpdateFactory.zoomIn());
+                                mMap.animateCamera(CameraUpdateFactory.zoomTo(18), 2000, null);
+                            }
                         }
                     } else {
                         if (fromLatLng != null && toLatLng != null) {
@@ -466,11 +476,16 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
     Runnable finalizer;
 
     public void updateDriverLocationinMap() {
-        if (driverMarker != null)
-            driverMarker.remove();
-        LatLng driverLatLng = new LatLng(Utils.gpsLocationService.getLatitude(), Utils.gpsLocationService.getLongitude());
-        driverMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(driverLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
-
+        if (driverMarker != null) {
+            LatLng perLatLng = driverMarker.getPosition();
+            LatLng driverLatLng = new LatLng(Utils.gpsLocationService.getLatitude(), Utils.gpsLocationService.getLongitude());
+            float toRotation = bearingBetweenLocations(perLatLng, driverLatLng);
+            rotateMarker(driverMarker, toRotation);
+            animateMarker(driverLatLng, false);
+        }else {
+            LatLng driverLatLng = new LatLng(Utils.gpsLocationService.getLatitude(), Utils.gpsLocationService.getLongitude());
+            driverMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(driverLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
+        }
         finalizer = new Runnable() {
             public void run() {
                 Log.e("bookingStatusFinal", "" + bookingStatusFinal);
@@ -482,6 +497,96 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             }
         };
         handler.postDelayed(finalizer, 10000);
+    }
+
+    private float bearingBetweenLocations(LatLng latLng1,LatLng latLng2) {
+
+        double PI = 3.14159;
+        double lat1 = latLng1.latitude * PI / 180;
+        double long1 = latLng1.longitude * PI / 180;
+        double lat2 = latLng2.latitude * PI / 180;
+        double long2 = latLng2.longitude * PI / 180;
+
+        double dLon = (long2 - long1);
+
+        double y = Math.sin(dLon) * Math.cos(lat2);
+        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+                * Math.cos(lat2) * Math.cos(dLon);
+
+        double brng = Math.atan2(y, x);
+
+        brng = Math.toDegrees(brng);
+        brng = (brng + 360) % 360;
+
+        return Float.parseFloat(""+brng);
+    }
+
+    boolean isMarkerRotating;
+
+    private void rotateMarker(final Marker marker, final float toRotation) {
+        if(!isMarkerRotating) {
+            final Handler handler = new Handler();
+            final long start = SystemClock.uptimeMillis();
+            final float startRotation = marker.getRotation();
+            final long duration = 1000;
+
+            final LinearInterpolator interpolator = new LinearInterpolator();
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    isMarkerRotating = true;
+
+                    long elapsed = SystemClock.uptimeMillis() - start;
+                    float t = interpolator.getInterpolation((float) elapsed / duration);
+
+                    float rot = t * toRotation + (1 - t) * startRotation;
+
+                    marker.setRotation(-rot > 180 ? rot / 2 : rot);
+                    if (t < 1.0) {
+                        // Post again 16ms later.
+                        handler.postDelayed(this, 16);
+                    } else {
+                        isMarkerRotating = false;
+                    }
+                }
+            });
+        }
+    }
+
+    public void animateMarker(final LatLng toPosition,final boolean hideMarke) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        Projection proj = mMap.getProjection();
+        Point startPoint = proj.toScreenLocation(driverMarker.getPosition());
+        final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+        final long duration = 5000;
+
+        final LinearInterpolator interpolator = new LinearInterpolator();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed
+                        / duration);
+                double lng = t * toPosition.longitude + (1 - t)
+                        * startLatLng.longitude;
+                double lat = t * toPosition.latitude + (1 - t)
+                        * startLatLng.latitude;
+                driverMarker.setPosition(new LatLng(lat, lng));
+
+                if (t < 1.0) {
+                    handler.postDelayed(this, 16);
+                } else {
+                    if (hideMarke) {
+                        driverMarker.setVisible(false);
+                    } else {
+                        driverMarker.setVisible(true);
+                    }
+                }
+            }
+        });
     }
 
     public void getBookingByBookingId(SingleInstantParameters loginCredentials, final int count) {
@@ -591,9 +696,9 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                             Marker marker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(fromLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.startpoint)));
                             markers.add(marker);
                             marker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(toLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(fromLatLng, 15));
+                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(fromLatLng, 18));
                             mMap.animateCamera(CameraUpdateFactory.zoomIn());
-                            mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                            mMap.animateCamera(CameraUpdateFactory.zoomTo(18), 2000, null);
                         }
                     } else {
                         dialog.dismiss();
@@ -895,23 +1000,23 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
 
         markers = new LinkedList<Marker>();
-        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-            @Override
-            public void onMapLoaded() {
-                if (markers.size() > 0) {
-                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                    for (Marker marker : markers) {
-                        builder.include(marker.getPosition());
-                    }
-                    LatLngBounds bounds = builder.build();
-                    int padding = 100; // offset from edges of the map in pixels
-                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 5);
-                    mMap.moveCamera(cu);
-                    mMap.animateCamera(cu);
-                    mMap.animateCamera(CameraUpdateFactory.zoomTo(10), 1000, null);
-                }
-            }
-        });
+//        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+//            @Override
+//            public void onMapLoaded() {
+//                if (markers.size() > 0) {
+//                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+//                    for (Marker marker : markers) {
+//                        builder.include(marker.getPosition());
+//                    }
+//                    LatLngBounds bounds = builder.build();
+//                    int padding = 100; // offset from edges of the map in pixels
+//                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 5);
+//                    mMap.moveCamera(cu);
+//                    mMap.animateCamera(cu);
+//                    mMap.animateCamera(CameraUpdateFactory.zoomTo(10), 1000, null);
+//                }
+//            }
+//        });
 
         mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
@@ -940,6 +1045,10 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             Marker marker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(fromLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.startpoint)));
             markers.add(marker);
             marker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(toLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(fromLatLng));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(fromLatLng, 18));
+            mMap.animateCamera(CameraUpdateFactory.zoomIn());
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(18), 2000, null);
 //            markers.add(marker);
         }
 
@@ -989,13 +1098,14 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         if (mGoogleApiClient != null) {
             mGoogleApiClient.connect();
         }
-
-
     }
 
     @Override
     public void onBackPressed() {
         if (bookingStatusFinal.equals("COMPLETED") || bookingStatusFinal.equals("CANCELLED")) {
+            Intent ide = new Intent(OnGoingBookingActivity.this, NewDashBoardActivity.class);
+            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(ide);
             finish();
         }
     }
@@ -1077,6 +1187,9 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                         toaddress = Utils.requestBookingResponse.getTo();
                         bookingStatusFinal = Utils.requestBookingResponse.getBookingStatusCode();
                     }
+                    SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+                    editor.putString("bookingID", "");
+                    editor.commit();
                     Intent ide = new Intent(OnGoingBookingActivity.this, CashDisplyActivity.class);
                     ide.putExtra("bookingId", "" + bookingId);
                     ide.putExtra("suggestedPrice", "" + suggestedPrice);
@@ -1285,9 +1398,9 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
                     Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.micro_car_48)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation, 15));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation, 18));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
-                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(18), 2000, null);
                     //marker.showInfoWindow();
                     markers.add(marker);
                     double meters = 500;

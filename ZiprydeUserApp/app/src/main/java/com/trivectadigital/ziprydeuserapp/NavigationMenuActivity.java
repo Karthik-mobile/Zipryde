@@ -89,6 +89,9 @@ public class NavigationMenuActivity extends AppCompatActivity
         aboutLayout.setOnClickListener(this);
         LinearLayout logoutLayout = (LinearLayout) headerview.findViewById(R.id.logoutLayout);
         logoutLayout.setOnClickListener(this);
+        LinearLayout helpLayout = (LinearLayout) headerview.findViewById(R.id.helpLayout);
+        helpLayout.setOnClickListener(this);
+
         TextView editProfile = (TextView) headerview.findViewById(R.id.editProfile);
         editProfile.setOnClickListener(this);
         TextView buildNumber = (TextView) headerview.findViewById(R.id.buildNumber);
@@ -119,77 +122,37 @@ public class NavigationMenuActivity extends AppCompatActivity
             showBookingFragment();
         }
 
-        if(intent.hasExtra("fromLogin")){
-            Log.e("UserId", "" + Utils.verifyLogInUserMobileInstantResponse.getUserId());
-            SingleInstantParameters loginCredentials = new SingleInstantParameters();
-            loginCredentials.customerId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
-            getBookingByUserId(loginCredentials);
-        }
-
         menuImgBlack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showHideNavigationMenu();
             }
         });
-    }
 
-    public void getBookingByUserId(SingleInstantParameters loginCredentials) {
-        if (Utils.connectivity(NavigationMenuActivity.this)) {
-            final Dialog dialog = new Dialog(NavigationMenuActivity.this, android.R.style.Theme_Dialog);
+        SharedPreferences prefs = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE);
+        String disclaimer = prefs.getString("disclaimer", "");
+        if(disclaimer.equals("")) {
+            final Dialog dialog = new Dialog(this, android.R.style.Theme_Dialog);
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            dialog.setContentView(R.layout.loadingimage_layout);
-            dialog.setCanceledOnTouchOutside(false);
+            dialog.setContentView(R.layout.dialog_userdisclaimer_scrollbar);
             dialog.setCancelable(false);
-            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            dialog.show();
 
-            Call<LinkedList<ListOfBooking>> call = apiService.getBookingByUserId(loginCredentials);
-            call.enqueue(new Callback<LinkedList<ListOfBooking>>() {
+            Button acceptBtn = (Button) dialog.findViewById(R.id.acceptBtn);
+            acceptBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onResponse(Call<LinkedList<ListOfBooking>> call, Response<LinkedList<ListOfBooking>> response) {
-                    int statusCode = response.code();
-                    Log.e("statusCode", "" + statusCode);
-                    Log.e("response.body", "" + response.body());
-                    Log.e("response.errorBody", "" + response.errorBody());
-                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                public void onClick(View v) {
+                    SharedPreferences.Editor editor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                    editor.putString("disclaimer", "accept");
+                    editor.commit();
                     dialog.dismiss();
-                    if (response.isSuccessful()) {
-                        Utils.getBookingByUserIdResponse = response.body();
-                        Log.e("size", "" + Utils.getBookingByUserIdResponse.size());
-                        if(Utils.getBookingByUserIdResponse.size() > 0){
-                            Log.e("BookingId", "" + Utils.getBookingByUserIdResponse.get(0).getBookingId());
-                            String bookingStatus = Utils.getBookingByUserIdResponse.get(0).getBookingStatusCode();
-                            if (!bookingStatus.equals("CANCELLED") && !bookingStatus.equals("COMPLETED")) {
-                                Intent ide = new Intent(NavigationMenuActivity.this, DriverInfoBookingActivity.class);
-                                ide.putExtra("bookingId",""+Utils.getBookingByUserIdResponse.get(0).getBookingId());
-                                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(ide);
-                                finish();
-                            }
-                        }
-                    } else {
-                        try {
-                            JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
-                        } catch (Exception e) {
-                            Toast.makeText(NavigationMenuActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<LinkedList<ListOfBooking>> call, Throwable t) {
-                    // Log error here since request failed
-                    Log.e("onFailure", t.toString());
-                    dialog.dismiss();
-                    Toast.makeText(NavigationMenuActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
-        } else {
-            Toast.makeText(NavigationMenuActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
         }
     }
 
@@ -232,6 +195,25 @@ public class NavigationMenuActivity extends AppCompatActivity
         } else {
             drawer.openDrawer(GravityCompat.START);
         }
+    }
+
+    public void showHelpFragment() {
+        // Creating a fragment object
+        HelpFragment sFragment = new HelpFragment();
+        // Creating a Bundle object
+        Bundle data = new Bundle();
+        // Setting the index of the currently selected item of mDrawerList
+//            data.putInt("position", position);
+        // Setting the position to the fragment
+        sFragment.setArguments(data);
+        // Getting reference to the FragmentManager
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        // Creating a fragment transaction
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        // Adding a fragment to the fragment transaction
+        ft.replace(R.id.content_frame, sFragment);
+        // Committing the transaction
+        ft.commit();
     }
 
     public void showHistoryFragment() {
@@ -284,6 +266,11 @@ public class NavigationMenuActivity extends AppCompatActivity
             case R.id.aboutLayout:
                 //titleText.setText("About");
                 showHideNavigationMenu();
+                break;
+            case R.id.helpLayout:
+                titleText.setText("Help");
+                showHideNavigationMenu();
+                showHelpFragment();
                 break;
             case R.id.logoutLayout:
                 //showHideNavigationMenu();

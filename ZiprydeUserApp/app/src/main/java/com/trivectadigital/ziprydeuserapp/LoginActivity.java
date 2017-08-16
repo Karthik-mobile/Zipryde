@@ -208,11 +208,20 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     dialog.dismiss();
-                    Intent ide = new Intent(LoginActivity.this, NavigationMenuActivity.class);
-                    ide.putExtra("fromLogin","fromLogin");
-                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(ide);
-                    finish();
+                    String bookingId = Utils.verifyLogInUserMobileInstantResponse.getBookingId();
+                    if(bookingId.equals("0")) {
+                        Intent ide = new Intent(LoginActivity.this, NavigationMenuActivity.class);
+                        ide.putExtra("fromLogin", "fromLogin");
+                        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(ide);
+                        finish();
+                    }else{
+                        Intent ide = new Intent(LoginActivity.this, DriverInfoBookingActivity.class);
+                        ide.putExtra("bookingId",""+bookingId);
+                        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(ide);
+                        finish();
+                    }
                 }
             }, 1000);
         }

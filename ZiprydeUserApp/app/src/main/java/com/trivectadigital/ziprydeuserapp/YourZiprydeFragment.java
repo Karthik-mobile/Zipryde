@@ -119,6 +119,7 @@ public class YourZiprydeFragment extends Fragment {
                         ide.putExtra("position", position);
                         ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(ide);
+                        getActivity().finish();
                     }
                 } else {
                     if (bookingStatus.equals("CANCELLED")) {

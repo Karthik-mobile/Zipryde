@@ -205,11 +205,13 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
             public void onClick(View v) {
                 //location; address;
                 if (location != null) {
-                    Intent intent = new Intent(getActivity(), FromToPlaceActivity.class);
-                    intent.putExtra("latitude", "" + location.latitude);
-                    intent.putExtra("longitude", "" + location.longitude);
-                    intent.putExtra("address", "" + address);
-                    startActivity(intent);
+                    if(!address.trim().equals("")){
+                        Intent intent = new Intent(getActivity(), FromToPlaceActivity.class);
+                        intent.putExtra("latitude", "" + location.latitude);
+                        intent.putExtra("longitude", "" + location.longitude);
+                        intent.putExtra("address", "" + address);
+                        startActivity(intent);
+                    }
                 }
             }
         });

@@ -213,7 +213,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:background="@color/colorAccent"
-        android:text="CASH COLLECTED"
+        android:text="PAYMENT RECEIVED"
         android:textColor="@color/secondaryText"
         android:textSize="18dp" />
 

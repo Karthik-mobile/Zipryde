@@ -132,6 +132,31 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/helpLayout"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/ic_action_help" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="30dp"
+            android:text="Help"
+            android:textColor="@color/primaryText"
+            android:textSize="15dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/aboutLayout"
         android:layout_width="match_parent"
         android:layout_height="55dp"

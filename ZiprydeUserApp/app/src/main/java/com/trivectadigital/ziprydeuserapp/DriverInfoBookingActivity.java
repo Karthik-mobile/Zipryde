@@ -8,11 +8,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +25,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -33,6 +36,7 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -674,15 +678,19 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                         Utils.getGeoLocationByDriverIdResponse = response.body();
                         Log.e("Latitude", "" + Utils.getGeoLocationByDriverIdResponse.getLatitude());
                         Log.e("Longitude", "" + Utils.getGeoLocationByDriverIdResponse.getLongitude());
-
+                        LatLng driverLatLng;
                         if (Utils.getGeoLocationByDriverIdResponse.getLatitude() != null && Utils.getGeoLocationByDriverIdResponse.getLongitude() != null) {
-                            LatLng driverLatLng = new LatLng(Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLatitude()), Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLongitude()));
-
-                            if (driverMarker != null)
-                                driverMarker.remove();
-
-                            driverMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(driverLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
-
+                            if (driverMarker != null) {
+//                                driverMarker.remove();
+                                LatLng perLatLng = driverMarker.getPosition();
+                                driverLatLng = new LatLng(Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLatitude()), Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLongitude()));
+                                float toRotation = bearingBetweenLocations(perLatLng, driverLatLng);
+                                rotateMarker(driverMarker, toRotation);
+                                animateMarker(driverLatLng, false);
+                            }else{
+                                driverLatLng = new LatLng(Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLatitude()), Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLongitude()));
+                                driverMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(driverLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
+                            }
                             finalizer = new Runnable() {
                                 public void run() {
                                     Log.e("bookingStatusFinal", "" + bookingStatusFinal);
@@ -742,6 +750,96 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         } else {
             Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
         }
+    }
+
+
+    private float bearingBetweenLocations(LatLng latLng1,LatLng latLng2) {
+
+        double PI = 3.14159;
+        double lat1 = latLng1.latitude * PI / 180;
+        double long1 = latLng1.longitude * PI / 180;
+        double lat2 = latLng2.latitude * PI / 180;
+        double long2 = latLng2.longitude * PI / 180;
+
+        double dLon = (long2 - long1);
+
+        double y = Math.sin(dLon) * Math.cos(lat2);
+        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+                * Math.cos(lat2) * Math.cos(dLon);
+
+        double brng = Math.atan2(y, x);
+
+        brng = Math.toDegrees(brng);
+        brng = (brng + 360) % 360;
+
+        return Float.parseFloat(""+brng);
+    }
+
+    boolean isMarkerRotating;
+
+    private void rotateMarker(final Marker marker, final float toRotation) {
+        if(!isMarkerRotating) {
+            final Handler handler = new Handler();
+            final long start = SystemClock.uptimeMillis();
+            final float startRotation = marker.getRotation();
+            final long duration = 1000;
+
+            final LinearInterpolator interpolator = new LinearInterpolator();
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    isMarkerRotating = true;
+                    long elapsed = SystemClock.uptimeMillis() - start;
+                    float t = interpolator.getInterpolation((float) elapsed / duration);
+
+                    float rot = t * toRotation + (1 - t) * startRotation;
+
+                    marker.setRotation(-rot > 180 ? rot / 2 : rot);
+                    if (t < 1.0) {
+                        // Post again 16ms later.
+                        handler.postDelayed(this, 16);
+                    } else {
+                        isMarkerRotating = false;
+                    }
+                }
+            });
+        }
+    }
+
+    public void animateMarker(final LatLng toPosition,final boolean hideMarke) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        Projection proj = mMap.getProjection();
+        Point startPoint = proj.toScreenLocation(driverMarker.getPosition());
+        final LatLng startLatLng = proj.fromScreenLocation(startPoint);
+        final long duration = 5000;
+
+        final LinearInterpolator interpolator = new LinearInterpolator();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed
+                        / duration);
+                double lng = t * toPosition.longitude + (1 - t)
+                        * startLatLng.longitude;
+                double lat = t * toPosition.latitude + (1 - t)
+                        * startLatLng.latitude;
+                driverMarker.setPosition(new LatLng(lat, lng));
+
+                if (t < 1.0) {
+                    handler.postDelayed(this, 16);
+                } else {
+                    if (hideMarke) {
+                        driverMarker.setVisible(false);
+                    } else {
+                        driverMarker.setVisible(true);
+                    }
+                }
+            }
+        });
     }
 
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
@@ -826,24 +924,24 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         mapReady = true;
 
         markers = new LinkedList<Marker>();
-        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-            @Override
-            public void onMapLoaded() {
-                //markers.add(endingMarker);
-                if (markers.size() > 0) {
-                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                    for (Marker marker : markers) {
-                        builder.include(marker.getPosition());
-                    }
-                    LatLngBounds bounds = builder.build();
-                    int padding = 0; // offset from edges of the map in pixels
-                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-                    mMap.moveCamera(cu);
-                    mMap.animateCamera(cu);
-                    mMap.animateCamera(CameraUpdateFactory.zoomTo(8), 1000, null);
-                }
-            }
-        });
+//        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+//            @Override
+//            public void onMapLoaded() {
+//                //markers.add(endingMarker);
+//                if (markers.size() > 0) {
+//                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+//                    for (Marker marker : markers) {
+//                        builder.include(marker.getPosition());
+//                    }
+//                    LatLngBounds bounds = builder.build();
+//                    int padding = 0; // offset from edges of the map in pixels
+//                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+//                    mMap.moveCamera(cu);
+//                    mMap.animateCamera(cu);
+//                    mMap.animateCamera(CameraUpdateFactory.zoomTo(8), 1000, null);
+//                }
+//            }
+//        });
 
         if (position != -1) {
             ListOfBooking listOfBooking = Utils.getBookingByUserIdResponse.get(position);
@@ -860,9 +958,9 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             markers.add(startingMarker);
             endingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(dest).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
             endingMarker.setTag("ending");
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 15));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 18));
             mMap.animateCamera(CameraUpdateFactory.zoomIn());
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(18), 2000, null);
         } else {
             // Booked
             if (Utils.requestBookingResponse != null) {
@@ -880,9 +978,9 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     markers.add(startingMarker);
                     endingMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(dest).icon(BitmapDescriptorFactory.fromResource(R.drawable.endpoint)));
                     endingMarker.setTag("ending");
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 15));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 18));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());
-                    mMap.animateCamera(CameraUpdateFactory.zoomTo(15), 2000, null);
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(18), 2000, null);
                 }
             }
         }

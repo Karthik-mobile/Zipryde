@@ -246,8 +246,8 @@
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="75dp"
-                    android:layout_height="75dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:src="@drawable/rideicon" />
 
                 <TextView
@@ -271,8 +271,8 @@
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="75dp"
-                    android:layout_height="75dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:src="@drawable/historyicon" />
 
                 <TextView
@@ -304,8 +304,8 @@
                 android:orientation="vertical">
 
                 <ImageView
-                    android:layout_width="75dp"
-                    android:layout_height="75dp"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
                     android:src="@drawable/notificationicon" />
 
                 <TextView
@@ -319,6 +319,40 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/helpLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:src="@drawable/helpicon" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Help"
+                    android:textColor="@color/whiteColor"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
                 android:id="@+id/logoutLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -326,6 +360,32 @@
                 android:layout_marginBottom="10dp"
                 android:layout_weight="1"
                 android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:padding="10dp"
+                    android:src="@drawable/logouticon" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Log Out"
+                    android:textColor="@color/whiteColor"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:visibility="invisible"
                 android:orientation="vertical">
 
                 <ImageView

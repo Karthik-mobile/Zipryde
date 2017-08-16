@@ -51,7 +51,6 @@ public class CashDisplyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cash_disply);
 
-
         SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
         Gson gson = new Gson();
         String json = prefs.getString("LoginCredentials", "");

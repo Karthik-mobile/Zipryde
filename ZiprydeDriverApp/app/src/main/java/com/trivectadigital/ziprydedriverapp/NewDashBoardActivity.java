@@ -42,7 +42,7 @@ import retrofit2.Response;
 
 public class NewDashBoardActivity extends AppCompatActivity {
 
-    LinearLayout rideLayout, historyLayout, notificationLayout, logoutLayout;
+    LinearLayout rideLayout, historyLayout, notificationLayout, logoutLayout, helpLayout;
 
     RelativeLayout onofflineLay;
 
@@ -58,7 +58,6 @@ public class NewDashBoardActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_dash_board);
-
 
         SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
         Gson gson = new Gson();
@@ -123,6 +122,16 @@ public class NewDashBoardActivity extends AppCompatActivity {
             }
         });
 
+        helpLayout = (LinearLayout) findViewById(R.id.helpLayout);
+        helpLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent ide = new Intent(NewDashBoardActivity.this, HelpActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
+            }
+        });
+
         onofflineLay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,6 +145,32 @@ public class NewDashBoardActivity extends AppCompatActivity {
 
         TextView nameProfile = (TextView) findViewById(R.id.driverText);
         nameProfile.setText(Utils.verifyLogInUserMobileInstantResponse.getFirstName() + " " + Utils.verifyLogInUserMobileInstantResponse.getLastName());
+
+        prefs = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE);
+        String disclaimer = prefs.getString("disclaimer", "");
+        if(disclaimer.equals("")) {
+            final Dialog dialog = new Dialog(this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.dialog_userdisclaimer_scrollbar);
+            dialog.setCancelable(false);
+
+            Button acceptBtn = (Button) dialog.findViewById(R.id.acceptBtn);
+            acceptBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SharedPreferences.Editor editor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                    editor.putString("disclaimer", "accept");
+                    editor.commit();
+                    dialog.dismiss();
+                }
+            });
+
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
+        }
     }
 
     @Override
@@ -161,13 +196,6 @@ public class NewDashBoardActivity extends AppCompatActivity {
         EventBus.getDefault().unregister(this);
         super.onStop();
     }
-
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        Log.e("Pause","Pause");
-//        finish();
-//    }
 
     public void onEventMainThread(MessageReceivedEvent messageReceivedEvent) {
         Log.e("onEventMainThread", "" + messageReceivedEvent.message);
@@ -261,17 +289,6 @@ public class NewDashBoardActivity extends AppCompatActivity {
                         Utils.getBookingCountByDateInstantResponse = response.body();
                         String count = Utils.getBookingCountByDateInstantResponse.getCount();
                         rideCountText.setText(count);
-
-                        if(getIntent().hasExtra("fromLogin")){
-                            Log.e("UserId", "UserId " + Utils.verifyLogInUserMobileInstantResponse.getUserId());
-                            SingleInstantParameters loginCredentials = new SingleInstantParameters();
-                            loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
-                            Gson gson = new Gson();
-                            String json = gson.toJson(loginCredentials);
-                            Log.e("json", "getBookingByDriverId " + json);
-                            getBookingByDriverId(loginCredentials);
-                        }
-
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -284,65 +301,6 @@ public class NewDashBoardActivity extends AppCompatActivity {
 
                 @Override
                 public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                    // Log error here since request failed
-                    Log.e("onFailure", t.toString());
-                    dialog.dismiss();
-                    Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
-                }
-            });
-        } else {
-            Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    public void getBookingByDriverId(SingleInstantParameters loginCredentials) {
-        if (Utils.connectivity(NewDashBoardActivity.this)) {
-            final Dialog dialog = new Dialog(NewDashBoardActivity.this, android.R.style.Theme_Dialog);
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            dialog.setContentView(R.layout.loadingimage_layout);
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.setCancelable(false);
-            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            dialog.show();
-
-            Call<LinkedList<ListOfBooking>> call = apiService.getBookingByDriverId(loginCredentials);
-            call.enqueue(new Callback<LinkedList<ListOfBooking>>() {
-                @Override
-                public void onResponse(Call<LinkedList<ListOfBooking>> call, Response<LinkedList<ListOfBooking>> response) {
-                    int statusCode = response.code();
-                    Log.e("statusCode", "" + statusCode);
-                    Log.e("response.body", "" + response.body());
-                    Log.e("response.errorBody", "" + response.errorBody());
-                    Log.e("response.isSuccessful", "" + response.isSuccessful());
-                    dialog.dismiss();
-                    if (response.isSuccessful()) {
-                        Utils.getBookingByDriverIdInstantResponse = response.body();
-                        Log.e("size", "" + Utils.getBookingByDriverIdInstantResponse.size());
-                        if(Utils.getBookingByDriverIdInstantResponse.size() > 0){
-                            Log.e("BookingId", "" + Utils.getBookingByDriverIdInstantResponse.get(0).getBookingId());
-                            Log.e("BookingStatusCode", "" + Utils.getBookingByDriverIdInstantResponse.get(0).getBookingStatusCode());
-                            SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
-                            editor.putString("bookingID", Utils.getBookingByDriverIdInstantResponse.get(0).getBookingId());
-                            editor.commit();
-                            Intent ide = new Intent(NewDashBoardActivity.this, OnGoingBookingActivity.class);
-                            ide.putExtra("bookingIdFinal","bookingIdFinal");
-                            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(ide);
-                        }
-                    } else {
-                        try {
-                            JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
-                        } catch (Exception e) {
-                            Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<LinkedList<ListOfBooking>> call, Throwable t) {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();

@@ -190,6 +190,7 @@ public class LoginActivity extends AppCompatActivity {
                         Utils.verifyLogInUserMobileInstantResponse = response.body();
                         Gson gson = new Gson();
                         String json = gson.toJson(Utils.verifyLogInUserMobileInstantResponse);
+                        Log.e("json", "" + json);
                         SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
                         editor.putString("phoneNumber", phoneno);
                         editor.putString("password", password);
@@ -250,11 +251,23 @@ public class LoginActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     dialog.dismiss();
-                    Intent ide = new Intent(LoginActivity.this, NewDashBoardActivity.class);
-                    ide.putExtra("fromLogin","fromLogin");
-                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(ide);
-                    finish();
+                    String bookingId = Utils.verifyLogInUserMobileInstantResponse.getBookingId();
+                    if(bookingId.equals("0")) {
+                        Intent ide = new Intent(LoginActivity.this, NewDashBoardActivity.class);
+                        ide.putExtra("fromLogin", "fromLogin");
+                        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(ide);
+                        finish();
+                    }else{
+                        SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+                        editor.putString("bookingID", bookingId);
+                        editor.commit();
+                        Intent ide = new Intent(LoginActivity.this, OnGoingBookingActivity.class);
+                        ide.putExtra("bookingIdFinal","bookingIdFinal");
+                        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(ide);
+                        finish();
+                    }
                 }
             }, 1000);
         }
