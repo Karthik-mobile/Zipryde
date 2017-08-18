@@ -30,7 +30,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -164,7 +163,7 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
                     }
                 }
             } else {
-                Toast.makeText(SplashActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                showInfoDlg("Information", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "network");
             }
         }
     }
@@ -229,13 +228,13 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.infodialog_layout);
-        //dialog.setCanceledOnTouchOutside(true);
-
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning")) {
+        if (navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("network")) {
             newnegativeBtn.setVisibility(View.GONE);
         } else {
             newnegativeBtn.setVisibility(View.VISIBLE);
@@ -252,6 +251,8 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
                 dialog.dismiss();
                 if (navType.equalsIgnoreCase("gps")) {
                     startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_CHECK_SETTINGS);
+                }else if (navType.equalsIgnoreCase("network")) {
+                    finish();
                 }
             }
         });
@@ -328,8 +329,6 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
                     }
                     break;
             }
-        } else {
-            Toast.makeText(SplashActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -407,7 +406,6 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
         locationRequest.setInterval(UPDATE_INTERVAL);
         locationRequest.setFastestInterval(FASTEST_INTERVAL);
         if (ActivityCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(SplashActivity.this, "Enable Permissions", Toast.LENGTH_LONG).show();
         }
         if (mGoogleApiClient.isConnected()) {
             Log.e("mGoogleApiClient", "Connected");
@@ -424,7 +422,6 @@ public class SplashActivity extends AppCompatActivity implements GoogleApiClient
         }
 
         if (ActivityCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(SplashActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(SplashActivity.this, "Enable Permissions", Toast.LENGTH_LONG).show();
         }
         if (mGoogleApiClient.isConnected()) {
             Log.e("mGoogleApiClient", "Connected");

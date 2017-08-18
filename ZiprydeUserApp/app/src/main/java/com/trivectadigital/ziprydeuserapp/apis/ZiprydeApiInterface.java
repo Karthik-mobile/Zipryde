@@ -68,4 +68,7 @@ public interface ZiprydeApiInterface {
 
     @POST("updateBookingStatus")
     Call<SingleInstantResponse> updateBookingStatus(@Body SingleInstantParameters parameters);
+
+    @POST("saveLostItem")
+    Call<SingleInstantResponse> saveLostItem(@Body SingleInstantParameters parameters);
 }

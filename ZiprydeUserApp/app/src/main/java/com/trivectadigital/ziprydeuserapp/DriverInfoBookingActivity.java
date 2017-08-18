@@ -27,6 +27,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -86,7 +87,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     CircleImageView user_view;
 
-    LinearLayout cancelBookingLay, getDirections;
+    LinearLayout cancelBookingLay, getDirections, reportLay;
 
     String bookingStatusFinal = "";
     String bookingIdFinal = "";
@@ -117,6 +118,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
         cancelBookingLay = (LinearLayout) findViewById(R.id.cancelBookingLay);
         getDirections = (LinearLayout) findViewById(R.id.getDirections);
+        reportLay = (LinearLayout) findViewById(R.id.reportLay);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -201,8 +203,92 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                 }
             }
         });
+
+        reportLay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                inputDialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
+                inputDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                inputDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                inputDialog.setContentView(R.layout.inputdialog_layout);
+                inputDialog.setCanceledOnTouchOutside(true);
+
+                final EditText nameEdit = (EditText) inputDialog.findViewById(R.id.nameEdit);
+                Button addNameBtn = (Button) inputDialog.findViewById(R.id.addNameBtn);
+
+                addNameBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String userName = nameEdit.getText().toString();
+                        if (!userName.isEmpty()) {
+                            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                            loginCredentials.bookingId = "" + bookingIdFinal;
+                            loginCredentials.comments = "" + userName;
+                            Gson gson = new Gson();
+                            String json = gson.toJson(loginCredentials);
+                            Log.e("json", "" + json);
+                            saveLostItem(loginCredentials);
+                        }
+                    }
+                });
+
+                inputDialog.setCanceledOnTouchOutside(false);
+                inputDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                inputDialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                inputDialog.show();
+            }
+        });
     }
 
+    private void saveLostItem(SingleInstantParameters loginCredentials) {
+        if (Utils.connectivity(DriverInfoBookingActivity.this)) {
+            final Dialog dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
+
+            Call<SingleInstantResponse> call = apiService.saveLostItem(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        inputDialog.dismiss();
+                        showInfoDlg("Success..", "Your query has been successfully submitted.", "Ok", "success");
+                    } else {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                        } catch (Exception e) {
+                            Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    Dialog inputDialog;
     LatLng origin = Utils.startingLatLan;
     LatLng dest = Utils.endingLatLan;
 
@@ -272,6 +358,25 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                 loginCredentials.userId = "" + listOfBooking.getDriverId();
                 getGeoLocationByDriverId(loginCredentials);
             }
+
+            if (bookingStatusFinal.equals("PAID")) {
+                reportLay.setVisibility(View.VISIBLE);
+            } else {
+                reportLay.setVisibility(View.GONE);
+            }
+
+            if (bookingStatusFinal.equals("COMPLETED")) {
+                Intent ide = new Intent(DriverInfoBookingActivity.this, CashDisplyActivity.class);
+                ide.putExtra("bookingId", "" + bookingIdFinal);
+                ide.putExtra("suggestedPrice", "" + listOfBooking.getSuggestedPrice());
+                ide.putExtra("offeredPrice", "" + listOfBooking.getOfferedPrice());
+                ide.putExtra("distanceInMiles", "" + listOfBooking.getGeoLocationResponse().getDistanceInMiles());
+                ide.putExtra("fromaddress", "" + listOfBooking.getFrom());
+                ide.putExtra("toaddress", "" + listOfBooking.getTo());
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
+                finish();
+            }
         } else {
             bookingIdFinal = Utils.requestBookingResponse.getBookingId();
             driverNameText.setText(Utils.requestBookingResponse.getDriverName());
@@ -315,9 +420,28 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                 loginCredentials.userId = "" + Utils.requestBookingResponse.getDriverId();
                 getGeoLocationByDriverId(loginCredentials);
             }
+
+            if (bookingStatusFinal.equals("PAID")) {
+                reportLay.setVisibility(View.VISIBLE);
+            } else {
+                reportLay.setVisibility(View.GONE);
+            }
+
+            if (bookingStatusFinal.equals("COMPLETED")) {
+                Intent ide = new Intent(DriverInfoBookingActivity.this, CashDisplyActivity.class);
+                ide.putExtra("bookingId", "" + bookingIdFinal);
+                ide.putExtra("suggestedPrice", "" + Utils.requestBookingResponse.getSuggestedPrice());
+                ide.putExtra("offeredPrice", "" + Utils.requestBookingResponse.getOfferedPrice());
+                ide.putExtra("distanceInMiles", "" + Utils.requestBookingResponse.getGeoLocationResponse().getDistanceInMiles());
+                ide.putExtra("fromaddress", "" + Utils.requestBookingResponse.getFrom());
+                ide.putExtra("toaddress", "" + Utils.requestBookingResponse.getTo());
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
+                finish();
+            }
         }
 
-        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("COMPLETED")) {
+        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID")) {
             SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
             editor.putString("bookingId", bookingIdFinal);
             editor.commit();
@@ -344,13 +468,20 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         Log.e("Thread message", "" + messageReceivedEvent.message);
         Log.e("Thread title", "" + messageReceivedEvent.title);
         Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
-        if(!messageReceivedEvent.title.equals("BOOKING_PAYMENT_SUCCESS")) {
+        if (!messageReceivedEvent.title.equals("BOOKING_PAYMENT_SUCCESS")) {
             SingleInstantParameters loginCredentials = new SingleInstantParameters();
             loginCredentials.bookingId = "" + bookingIdFinal;
             getBookingByBookingId(loginCredentials);
-        }else {
+        } else {
             onBackPressed();
         }
+    }
+
+    boolean isOnPause = false;
+    @Override
+    protected void onPause() {
+        super.onPause();
+        isOnPause = true;
     }
 
     @Override
@@ -360,6 +491,15 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         Gson gson = new Gson();
         String json = prefs.getString("LoginCredentials", "");
         Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
+
+        if(isOnPause){
+            isOnPause = false;
+            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID")) {
+                SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                loginCredentials.bookingId = "" + bookingIdFinal;
+                getBookingByBookingId(loginCredentials);
+            }
+        }
     }
 
     public void getBookingByBookingId(SingleInstantParameters loginCredentials) {
@@ -433,7 +573,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                             showInfoDlg("Booking Cancelled", "Requested booking has been cancelled. Try after sometime", "Done", "requestCancelled");
                         }
 
-                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("COMPLETED")) {
+                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID")) {
                             SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                             editor.putString("bookingId", bookingIdFinal);
                             editor.commit();
@@ -441,6 +581,19 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                             SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                             editor.putString("bookingId", "");
                             editor.commit();
+                        }
+
+                        if (bookingStatusFinal.equals("COMPLETED")) {
+                            Intent ide = new Intent(DriverInfoBookingActivity.this, CashDisplyActivity.class);
+                            ide.putExtra("bookingId", "" + bookingIdFinal);
+                            ide.putExtra("suggestedPrice", "" + Utils.requestBookingResponse.getSuggestedPrice());
+                            ide.putExtra("offeredPrice", "" + Utils.requestBookingResponse.getOfferedPrice());
+                            ide.putExtra("distanceInMiles", "" + Utils.requestBookingResponse.getGeoLocationResponse().getDistanceInMiles());
+                            ide.putExtra("fromaddress", "" + Utils.requestBookingResponse.getFrom());
+                            ide.putExtra("toaddress", "" + Utils.requestBookingResponse.getTo());
+                            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(ide);
+                            finish();
                         }
 
                     } else {
@@ -551,7 +704,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                             getGeoLocationByDriverId(loginCredentials);
                         }
 
-                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("COMPLETED")) {
+                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID")) {
                             SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                             editor.putString("bookingId", bookingIdFinal);
                             editor.commit();
@@ -559,6 +712,25 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                             SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                             editor.putString("bookingId", "");
                             editor.commit();
+                        }
+
+                        if (bookingStatusFinal.equals("COMPLETED")) {
+                            Intent ide = new Intent(DriverInfoBookingActivity.this, CashDisplyActivity.class);
+                            ide.putExtra("bookingId", "" + bookingIdFinal);
+                            ide.putExtra("suggestedPrice", "" + Utils.requestBookingResponse.getSuggestedPrice());
+                            ide.putExtra("offeredPrice", "" + Utils.requestBookingResponse.getOfferedPrice());
+                            ide.putExtra("distanceInMiles", "" + Utils.requestBookingResponse.getGeoLocationResponse().getDistanceInMiles());
+                            ide.putExtra("fromaddress", "" + Utils.requestBookingResponse.getFrom());
+                            ide.putExtra("toaddress", "" + Utils.requestBookingResponse.getTo());
+                            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(ide);
+                            finish();
+                        }
+
+                        if (bookingStatusFinal.equals("PAID")) {
+                            reportLay.setVisibility(View.VISIBLE);
+                        } else {
+                            reportLay.setVisibility(View.GONE);
                         }
 
                     } else {
@@ -584,7 +756,6 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
         }
     }
-
 
     private void updateBookingStatus(SingleInstantParameters loginCredentials) {
         if (Utils.connectivity(DriverInfoBookingActivity.this)) {
@@ -641,7 +812,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     @Override
     public void onBackPressed() {
-        if (bookingStatusFinal.equals("COMPLETED") || bookingStatusFinal.equals("CANCELLED")) {
+        if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED")) {
             if (handler != null && finalizer != null) {
                 handler.removeCallbacks(finalizer);
             }
@@ -687,7 +858,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                                 float toRotation = bearingBetweenLocations(perLatLng, driverLatLng);
                                 rotateMarker(driverMarker, toRotation);
                                 animateMarker(driverLatLng, false);
-                            }else{
+                            } else {
                                 driverLatLng = new LatLng(Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLatitude()), Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLongitude()));
                                 driverMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(driverLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
                             }
@@ -753,7 +924,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
     }
 
 
-    private float bearingBetweenLocations(LatLng latLng1,LatLng latLng2) {
+    private float bearingBetweenLocations(LatLng latLng1, LatLng latLng2) {
 
         double PI = 3.14159;
         double lat1 = latLng1.latitude * PI / 180;
@@ -772,13 +943,13 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         brng = Math.toDegrees(brng);
         brng = (brng + 360) % 360;
 
-        return Float.parseFloat(""+brng);
+        return Float.parseFloat("" + brng);
     }
 
     boolean isMarkerRotating;
 
     private void rotateMarker(final Marker marker, final float toRotation) {
-        if(!isMarkerRotating) {
+        if (!isMarkerRotating) {
             final Handler handler = new Handler();
             final long start = SystemClock.uptimeMillis();
             final float startRotation = marker.getRotation();
@@ -807,7 +978,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         }
     }
 
-    public void animateMarker(final LatLng toPosition,final boolean hideMarke) {
+    public void animateMarker(final LatLng toPosition, final boolean hideMarke) {
         final Handler handler = new Handler();
         final long start = SystemClock.uptimeMillis();
         Projection proj = mMap.getProjection();
@@ -1161,10 +1332,10 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
             // Drawing polyline in the Google Map for the i-th route
             if (lineOptions != null) {
-                if(displayType.equalsIgnoreCase("")) {
+                if (displayType.equalsIgnoreCase("")) {
                     polyline = mMap.addPolyline(lineOptions);
                 }
-                if(!displayType.equalsIgnoreCase("")) {
+                if (!displayType.equalsIgnoreCase("")) {
                     driverArrivingTime.setText(Utils.parsedDuration);
                 }
             } else {

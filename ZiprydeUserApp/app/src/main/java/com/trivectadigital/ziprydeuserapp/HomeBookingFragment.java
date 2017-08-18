@@ -15,6 +15,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -58,6 +59,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.MessageReceivedEvent;
@@ -65,8 +67,16 @@ import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfCurrentCabs;
 import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -211,6 +221,11 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                         intent.putExtra("longitude", "" + location.longitude);
                         intent.putExtra("address", "" + address);
                         startActivity(intent);
+                    }else{
+                        String url = "http://maps.googleapis.com/maps/api/geocode/json?latlng="+location.latitude+","+location.longitude+"&sensor=true";
+                        Log.e("url","url : "+url);
+                        FetchUrl FetchUrl = new FetchUrl();
+                        FetchUrl.execute(url);
                     }
                 }
             }
@@ -240,6 +255,118 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         });
 
         return view;
+    }
+
+    /**
+     * A method to download json data from url
+     */
+    private String downloadUrl(String strUrl) throws IOException {
+        String data = "";
+        InputStream iStream = null;
+        HttpURLConnection urlConnection = null;
+        try {
+            URL url = new URL(strUrl);
+
+            // Creating an http connection to communicate with url
+            urlConnection = (HttpURLConnection) url.openConnection();
+
+            // Connecting to url
+            urlConnection.connect();
+
+            // Reading data from url
+            iStream = urlConnection.getInputStream();
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
+
+            StringBuffer sb = new StringBuffer();
+
+            String line = "";
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+
+            data = sb.toString();
+            Log.d("downloadUrl", data.toString());
+            br.close();
+
+        } catch (Exception e) {
+            Log.d("Exception", e.toString());
+        } finally {
+            iStream.close();
+            urlConnection.disconnect();
+        }
+        return data;
+    }
+
+    // Fetches data from url passed
+    private class FetchUrl extends AsyncTask<String, Void, String> {
+
+        String displayType = "";
+
+        public FetchUrl(String displayType) {
+            this.displayType = displayType;
+        }
+
+        public FetchUrl() {
+            this.displayType = "";
+        }
+
+        @Override
+        protected String doInBackground(String... url) {
+
+            // For storing data from web service
+            String data = "";
+
+            try {
+                // Fetching the data from web service
+                data = downloadUrl(url[0]);
+                Log.d("Background Task data", data.toString());
+            } catch (Exception e) {
+                Log.d("Background Task", e.toString());
+            }
+            return data;
+        }
+
+        @Override
+        protected void onPostExecute(final String result) {
+            super.onPostExecute(result);
+
+            try {
+                if(!result.equalsIgnoreCase("")){
+                    JSONObject jsonObject = new JSONObject(result);
+                    JSONArray jsonArray = jsonObject.getJSONArray("results");
+                    if(jsonArray.length() > 0){
+                        JSONObject addressComponentsObject = jsonArray.getJSONObject(0);
+                        String formattedAddress = addressComponentsObject.getString("formatted_address");
+                        Log.e("formattedAddress","formattedAddress : "+formattedAddress);
+                        JSONArray addressComponentsArray = addressComponentsObject.getJSONArray("address_components");
+                        String countryCode = "";
+                        for(int i = 0; i < addressComponentsArray.length(); i++){
+                            JSONObject componentsObject = addressComponentsArray.getJSONObject(i);
+                            JSONArray typesArray = componentsObject.getJSONArray("types");
+                            if(typesArray.length() > 0){
+                                for(int j = 0; j < typesArray.length(); j++){
+                                    String types = typesArray.getString(j);
+                                    Log.e("types","types : "+types);
+                                    if(types.equalsIgnoreCase("country")){
+                                        countryCode = componentsObject.getString("short_name");
+                                    }
+                                }
+                            }
+                        }
+                        Log.e("countryCode","countryCode : "+countryCode);
+                        Utils.countryCode = countryCode;
+                        Intent intent = new Intent(getActivity(), FromToPlaceActivity.class);
+                        intent.putExtra("latitude", "" + location.latitude);
+                        intent.putExtra("longitude", "" + location.longitude);
+                        intent.putExtra("address", "" + formattedAddress);
+                        startActivity(intent);
+                    }
+                }
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -641,7 +768,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                 Log.e("Country NAME", "" + returnedAddress.getCountryName());
                 Log.e("Country Locality", "" + returnedAddress.getLocality());
                 for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
-                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
+                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append(", ");
                 }
                 strAdd = strReturnedAddress.toString();
                 Log.e("loction address", "" + strReturnedAddress.toString());
@@ -657,11 +784,15 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
 
     public void getNearByActiveDrivers(String latitude, String longitude) {
         if (Utils.connectivity(getActivity())) {
+            Log.e("getNearByActiveDrivers", "getNearByActiveDrivers");
             Log.e("fromLatitude", "" + latitude);
             Log.e("fromLongitude", "" + longitude);
             SingleInstantParameters loginCredentials = new SingleInstantParameters();
             loginCredentials.fromLatitude = latitude;
             loginCredentials.fromLongitude = longitude;
+            Gson gson = new Gson();
+            String json = gson.toJson(loginCredentials);
+            Log.e("json", "" + json);
 
             final Dialog dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));

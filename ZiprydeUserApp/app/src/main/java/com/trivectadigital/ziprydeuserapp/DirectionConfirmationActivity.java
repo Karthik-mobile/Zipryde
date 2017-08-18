@@ -84,19 +84,6 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
     int REQUEST_CHECK_SETTINGS = 100;
     static final Integer LOCATION = 0x1;
 
-    private AppCompatTextView searchPlace, searchPlaceDestination;
-
-    TextView microText, microInfoText, miniText, miniInfoText, sedanText, sedanInfoText, amountText1, amountText2, amountText3, amountText4, carTypeText;
-
-    ImageView micro_circle_small, micro_circle_big;
-    ImageView mini_circle_small, mini_circle_big;
-    ImageView suv_circle_small, suv_circle_big;
-    ImageView micro_car_small, micro_car_big;
-    ImageView mini_car_small, mini_car_big;
-    ImageView suv_car_small, suv_car_big;
-
-    LinearLayout fairBooking, carTypeLay, fairDetailsLay;
-
     boolean fairDetailsVisible = false;
 
     ZiprydeApiInterface apiService;
@@ -119,34 +106,10 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
 
         apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
 
-        final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        LayoutInflater mInflater = LayoutInflater.from(this);
-        View mCustomView = mInflater.inflate(R.layout.actionbar_titleback, null);
-        toolbar.setContentInsetsAbsolute(0, 0);
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        toolbar.addView(mCustomView, layoutParams);
-        TextView titleText = (TextView) mCustomView.findViewById(R.id.titleText);
-        titleText.setText("ZIPRYDE");
-        ImageView backImg = (ImageView) mCustomView.findViewById(R.id.backImg);
-        backImg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
-        searchPlace = (AppCompatTextView) findViewById(R.id.searchPlace);
-        searchPlace.setText("" + Utils.startingPlaceAddress);
-        searchPlaceDestination = (AppCompatTextView) findViewById(R.id.searchPlaceDestination);
-        searchPlaceDestination.setText("" + Utils.endingPlaceAddress);
 
         microLaySmall = (LinearLayout) findViewById(R.id.microLaySmall);
         microLayBig = (LinearLayout) findViewById(R.id.microLayBig);
@@ -185,122 +148,6 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         getFareDetailsBtn = (Button) findViewById(R.id.getFareDetailsBtn);
         requestPickupBtn = (Button) findViewById(R.id.requestPickupBtn);
         noofSeatsSpinner = (Spinner) findViewById(R.id.noofSeatsSpinner);
-
-        fairBooking = (LinearLayout) findViewById(R.id.fairBooking);
-        carTypeLay = (LinearLayout) findViewById(R.id.carTypeLay);
-        fairDetailsLay = (LinearLayout) findViewById(R.id.fairDetailsLay);
-
-        micro_circle_small = (ImageView) findViewById(R.id.micro_circle_small);
-        micro_circle_big = (ImageView) findViewById(R.id.micro_circle_big);
-
-        mini_circle_small = (ImageView) findViewById(R.id.mini_circle_small);
-        mini_circle_big = (ImageView) findViewById(R.id.mini_circle_big);
-
-        suv_circle_small = (ImageView) findViewById(R.id.suv_circle_small);
-        suv_circle_big = (ImageView) findViewById(R.id.suv_circle_big);
-
-        micro_car_small = (ImageView) findViewById(R.id.micro_car_small);
-        micro_car_big = (ImageView) findViewById(R.id.micro_car_big);
-
-        mini_car_small = (ImageView) findViewById(R.id.mini_car_small);
-        mini_car_big = (ImageView) findViewById(R.id.mini_car_big);
-
-        suv_car_small = (ImageView) findViewById(R.id.suv_car_small);
-        suv_car_big = (ImageView) findViewById(R.id.suv_car_big);
-
-        microText = (TextView) findViewById(R.id.microText);
-        microInfoText = (TextView) findViewById(R.id.microInfoText);
-        miniText = (TextView) findViewById(R.id.miniText);
-        miniInfoText = (TextView) findViewById(R.id.miniInfoText);
-        sedanText = (TextView) findViewById(R.id.sedanText);
-        sedanInfoText = (TextView) findViewById(R.id.sedanInfoText);
-
-        amountText1 = (TextView) findViewById(R.id.amountText1);
-        amountText2 = (TextView) findViewById(R.id.amountText2);
-        amountText3 = (TextView) findViewById(R.id.amountText3);
-        amountText4 = (TextView) findViewById(R.id.amountText4);
-
-        carTypeText = (TextView) findViewById(R.id.carTypeText);
-
-        fairBooking.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                dialog.setContentView(R.layout.noofpassenger_layout);
-
-                TextView passenger1 = (TextView) dialog.findViewById(R.id.passenger1);
-                TextView passenger2 = (TextView) dialog.findViewById(R.id.passenger2);
-                TextView passenger3 = (TextView) dialog.findViewById(R.id.passenger3);
-                TextView passenger4 = (TextView) dialog.findViewById(R.id.passenger4);
-
-                dialog.setCanceledOnTouchOutside(false);
-                dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                dialog.show();
-
-                passenger1.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                        sendPassengerInformation(1);
-                    }
-                });
-                passenger2.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                        sendPassengerInformation(2);
-                    }
-                });
-
-                passenger3.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                        sendPassengerInformation(3);
-                    }
-                });
-                passenger4.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialog.dismiss();
-                        sendPassengerInformation(4);
-                    }
-                });
-
-            }
-        });
-
-        amountText1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeTextBgColorToOrange(amountText1, amountText2, amountText3, amountText4);
-            }
-        });
-
-        amountText2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeTextBgColorToOrange(amountText2, amountText1, amountText3, amountText4);
-            }
-        });
-
-        amountText3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeTextBgColorToOrange(amountText3, amountText2, amountText1, amountText4);
-            }
-        });
-
-        amountText4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                changeTextBgColorToOrange(amountText4, amountText1, amountText2, amountText3);
-            }
-        });
 
         LinearLayout reqBooking = (LinearLayout) findViewById(R.id.reqBooking);
         requestPickupBtn.setOnClickListener(new View.OnClickListener() {
@@ -505,8 +352,6 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 textAmount3.setTextColor(getResources().getColor(R.color.whiteColor));
             }
         });
-
-        getAllCabTypes();
     }
 
     Handler handler = new Handler();
@@ -736,22 +581,6 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         }
     }
 
-    public void sendPassengerInformation(int count) {
-        SingleInstantParameters singleInstantParameters = new SingleInstantParameters();
-        singleInstantParameters.cabTypeId = selectedCarType;
-        String km = Utils.parsedDistance.split(" ")[0].trim();
-        String kmtomile = "" + (Double.parseDouble(km.replaceAll(",", "")) * 0.6214);
-        Log.e("kmtomile", "" + kmtomile);
-        Log.e("selectedCarType", "" + selectedCarType);
-        Log.e("count", "" + count);
-        singleInstantParameters.distanceInMiles = kmtomile;
-        singleInstantParameters.noOfPassengers = count;
-        getFairEstimateDetails(singleInstantParameters);
-        fairDetailsVisible = true;
-        carTypeLay.setVisibility(View.GONE);
-        fairDetailsLay.setVisibility(View.VISIBLE);
-    }
-
     private void getAllCabTypes() {
         if (Utils.connectivity(DirectionConfirmationActivity.this)) {
             final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
@@ -779,7 +608,6 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         Log.e("Size", "" + Utils.getAllCabTypesInstantResponse.size());
                         selectedCarType = 2;
                         selectedCarModel = "Mini";
-                        carTypeText.setText(selectedCarModel);
                         for (int i = 0; i < Utils.getAllCabTypesInstantResponse.size(); i++) {
                             Log.e("CARTYPE", "" + Utils.getAllCabTypesInstantResponse.get(i).getType());
                             if (i == 0) {
@@ -806,7 +634,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         noofSeatsSpinner.setAdapter(adapter);
                         noofSeatsSpinner.setSelection(0, true);
-                        //showInfoDlg("Success..", "Successfully registered.", "OK", "success");
+                        getNearByActiveDrivers("" + Utils.startingLatLan.latitude, "" + Utils.startingLatLan.longitude);
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -929,20 +757,13 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         }
     }
 
-    private void changeTextBgColorToOrange(TextView amountText1, TextView amountText2, TextView amountText3, TextView amountText4) {
-        amountText1.setBackgroundResource(R.color.colorPrimary);
-
-        amountText2.setBackgroundColor(Color.parseColor("#F4F8F9"));
-        amountText3.setBackgroundColor(Color.parseColor("#F4F8F9"));
-        amountText4.setBackgroundColor(Color.parseColor("#F4F8F9"));
-    }
-
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
         final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.infodialog_layout);
-        //dialog.setCanceledOnTouchOutside(true);
+        dialog.setCanceledOnTouchOutside(false);
+        dialog.setCancelable(false);
 
         Button positiveBtn = (Button) dialog.findViewById(R.id.positiveBtn);
         positiveBtn.setText("" + btnText);
@@ -1007,44 +828,12 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         dialog.show();
     }
 
-    public void changeCircleSmalltoBig(ImageView imageView1, ImageView imageView2, ImageView imageView3, ImageView imageView4, ImageView imageView5, ImageView imageView6) {
-        imageView1.setVisibility(View.GONE);
-        imageView2.setVisibility(View.GONE);
-        imageView3.setVisibility(View.GONE);
-        imageView4.setVisibility(View.GONE);
-        imageView5.setVisibility(View.GONE);
-        imageView6.setVisibility(View.GONE);
-    }
-
-    public void changeCircleBigtoSmall(ImageView imageView1, ImageView imageView2, ImageView imageView3, ImageView imageView4, ImageView imageView5, ImageView imageView6) {
-        imageView1.setVisibility(View.VISIBLE);
-        imageView2.setVisibility(View.VISIBLE);
-        imageView3.setVisibility(View.VISIBLE);
-        imageView4.setVisibility(View.VISIBLE);
-        imageView5.setVisibility(View.VISIBLE);
-        imageView6.setVisibility(View.VISIBLE);
-    }
-
-    public void changeTextColorToBlack(TextView textView1, TextView textView2, TextView textView3, TextView textView4) {
-        textView1.setTextColor(getResources().getColor(R.color.primaryText));
-        textView2.setTextColor(getResources().getColor(R.color.primaryText));
-        textView3.setTextColor(getResources().getColor(R.color.black_overlay));
-        textView4.setTextColor(getResources().getColor(R.color.black_overlay));
-    }
-
-    public void changeTextColorToOrange(TextView textView1, TextView textView2) {
-        textView1.setTextColor(getResources().getColor(R.color.colorPrimary));
-        textView2.setTextColor(getResources().getColor(R.color.primaryText));
-    }
-
     @Override
     public void onBackPressed() {
         if (fairDetailsVisible) {
             fairDetailsVisible = false;
             vehicleTypeLay.setVisibility(View.VISIBLE);
             requestTypeLay.setVisibility(View.GONE);
-//            carTypeLay.setVisibility(View.VISIBLE);
-//            fairDetailsLay.setVisibility(View.GONE);
         } else {
             finish();
         }
@@ -1342,7 +1131,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             // Drawing polyline in the Google Map for the i-th route
             if (lineOptions != null) {
                 mMap.addPolyline(lineOptions);
-                getNearByActiveDrivers("" + Utils.startingLatLan.latitude, "" + Utils.startingLatLan.longitude);
+                getAllCabTypes();
             } else {
                 Log.d("onPostExecute", "without Polylines drawn");
             }

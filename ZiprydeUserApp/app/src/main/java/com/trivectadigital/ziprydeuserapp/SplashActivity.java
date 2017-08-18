@@ -31,7 +31,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -138,7 +137,7 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
                     }
                 }
             } else {
-                Toast.makeText(SplashActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                showInfoDlg("Information", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "network");
             }
         }
     }
@@ -204,7 +203,7 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
         positiveBtn.setText(""+btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if(navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning")){
+        if(navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("network")){
             newnegativeBtn.setVisibility(View.GONE);
         }else{
             newnegativeBtn.setVisibility(View.VISIBLE);
@@ -221,6 +220,8 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
                 dialog.dismiss();
                 if(navType.equalsIgnoreCase("gps")){
                     startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_CHECK_SETTINGS);
+                }else if(navType.equalsIgnoreCase("network")) {
+                    finish();
                 }
             }
         });
@@ -255,8 +256,6 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
                     }
                     break;
             }
-        }else{
-            Toast.makeText(SplashActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -132,6 +132,8 @@ public class NewDashBoardActivity extends AppCompatActivity {
             }
         });
 
+        updateDriverStatus(1);
+        isOnline = true;
         onofflineLay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -180,8 +182,8 @@ public class NewDashBoardActivity extends AppCompatActivity {
         Gson gson = new Gson();
         String json = prefs.getString("LoginCredentials", "");
         Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
-        updateDriverStatus(1);
-        isOnline = true;
+//        updateDriverStatus(1);
+//        isOnline = true;
         getRevenueByDateAndDriverId();
     }
 

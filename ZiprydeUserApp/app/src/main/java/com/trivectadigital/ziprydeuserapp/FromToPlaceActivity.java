@@ -113,7 +113,7 @@ public class FromToPlaceActivity extends AppCompatActivity implements GoogleApiC
 
         // Set up the adapter that will retrieve suggestions from the Places Geo Data API that cover
         // the entire world.
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, BOUNDS_GREATER_SYDNEY, filter);
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, null, null);
 
         autocomplete_placesdest.setAdapter(mAdapter);
 
