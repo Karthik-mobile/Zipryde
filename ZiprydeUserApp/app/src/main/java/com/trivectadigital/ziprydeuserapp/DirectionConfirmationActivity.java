@@ -1,23 +1,16 @@
 package com.trivectadigital.ziprydeuserapp;
 
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.AppCompatTextView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -26,12 +19,21 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
@@ -45,19 +47,7 @@ import com.trivectadigital.ziprydeuserapp.modelget.ListOfFairEstimate;
 import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydeuserapp.modelpost.GeoLocationRequest;
 import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -390,6 +380,9 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         }
 
         if (!messageReceivedEvent.title.equals("BOOKING_CANCELLED")) {
+            //snack.bar
+
+            Toast.makeText(this, messageReceivedEvent.message, Toast.LENGTH_SHORT).show();
             SingleInstantParameters loginCredentials = new SingleInstantParameters();
             loginCredentials.bookingId = "" + Utils.requestBookingResponse.getBookingId();
             getBookingByBookingId(loginCredentials, 1);

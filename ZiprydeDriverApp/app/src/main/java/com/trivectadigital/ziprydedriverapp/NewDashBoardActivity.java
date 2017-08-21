@@ -1,20 +1,27 @@
 package com.trivectadigital.ziprydedriverapp;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
-import android.support.v7.app.AppCompatActivity;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,8 +31,6 @@ import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydedriverapp.assist.MessageReceivedEvent;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
-import com.trivectadigital.ziprydedriverapp.assist.ZiprydeHistoryAdapter;
-import com.trivectadigital.ziprydedriverapp.modelget.ListOfBooking;
 import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydedriverapp.modelpost.SingleInstantParameters;
 
@@ -33,7 +38,6 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.LinkedList;
 
 import de.greenrobot.event.EventBus;
 import retrofit2.Call;
@@ -42,7 +46,7 @@ import retrofit2.Response;
 
 public class NewDashBoardActivity extends AppCompatActivity {
 
-    LinearLayout rideLayout, historyLayout, notificationLayout, logoutLayout, helpLayout;
+    LinearLayout rideLayout, historyLayout, notificationLayout, logoutLayout, helpLayout,paymentSetupLayout;
 
     RelativeLayout onofflineLay;
 
@@ -53,6 +57,8 @@ public class NewDashBoardActivity extends AppCompatActivity {
     TextView driverInfoText, revenueText, rideCountText, dateText, buildNumber;
 
     ZiprydeApiInterface apiService;
+
+    PopupWindow paymentPopwindow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,18 +138,15 @@ public class NewDashBoardActivity extends AppCompatActivity {
             }
         });
 
-        updateDriverStatus(1);
-        isOnline = true;
-        onofflineLay.setOnClickListener(new View.OnClickListener() {
+        paymentSetupLayout = (LinearLayout) findViewById(R.id.paymentLayout);
+        paymentSetupLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isOnline) {
-                    updateDriverStatus(1);
-                } else {
-                    updateDriverStatus(0);
-                }
+                onShowPopup(v);
             }
         });
+
+
 
         TextView nameProfile = (TextView) findViewById(R.id.driverText);
         nameProfile.setText(Utils.verifyLogInUserMobileInstantResponse.getFirstName() + " " + Utils.verifyLogInUserMobileInstantResponse.getLastName());
@@ -165,6 +168,19 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     editor.putString("disclaimer", "accept");
                     editor.commit();
                     dialog.dismiss();
+
+                    updateDriverStatus(1);
+                    isOnline = true;
+                    onofflineLay.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (isOnline) {
+                                updateDriverStatus(1);
+                            } else {
+                                updateDriverStatus(0);
+                            }
+                        }
+                    });
                 }
             });
 
@@ -172,6 +188,20 @@ public class NewDashBoardActivity extends AppCompatActivity {
             dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
+        }else{
+
+            updateDriverStatus(1);
+            isOnline = true;
+            onofflineLay.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (isOnline) {
+                        updateDriverStatus(1);
+                    } else {
+                        updateDriverStatus(0);
+                    }
+                }
+            });
         }
     }
 
@@ -435,6 +465,9 @@ public class NewDashBoardActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dialog.dismiss();
                 if (navType.equalsIgnoreCase("logout")) {
+                    SharedPreferences.Editor editor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                    editor.putString("disclaimer", "");
+                    editor.commit();
                     updateDriverStatus();
                 }
             }
@@ -520,5 +553,65 @@ public class NewDashBoardActivity extends AppCompatActivity {
     public void onBackPressed() {
         Utils.gpsLocationService.stopUsingGPS();
         super.onBackPressed();
+    }
+
+    // call this method when required to show popup
+    public void onShowPopup(View v){
+
+        LayoutInflater layoutInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        // inflate the custom popup layout
+        final View inflatedView = layoutInflater.inflate(R.layout.paymentsetup_popup_layout, null,false);
+        // find the ListView in the popup layout
+
+
+        // get device size
+        Display display = getWindowManager().getDefaultDisplay();
+        final Point size = new Point();
+        display.getSize(size);
+       // mDeviceHeight = size.y;
+
+
+        // fill the data to the list items
+       // setSimpleList(listView);
+
+
+        Button paypalBtn = (Button) inflatedView.findViewById(R.id.paypalBtn);
+        paypalBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.com/us/home"));
+                startActivity(browserIntent);
+
+
+
+            }
+        });
+
+        Button cashAppBtn = (Button) inflatedView.findViewById(R.id.cashBtn);
+        cashAppBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cash.me/app/WTXRWNB"));
+                startActivity(browserIntent);
+
+
+
+            }
+        });
+
+
+
+        // set height depends on the device size
+        paymentPopwindow = new PopupWindow(inflatedView, size.x - 50,size.y - 400, true );
+        // set a background drawable with rounders corners
+        paymentPopwindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.paymentsetup_popup_shape));
+        // make it focusable to show the keyboard to enter in `EditText`
+        paymentPopwindow.setFocusable(true);
+        // make it outside touchable to dismiss the popup window
+        paymentPopwindow.setOutsideTouchable(true);
+
+        // show the popup at bottom of the screen and set some margin at bottom ie,
+        paymentPopwindow.showAtLocation(v, Gravity.BOTTOM, 0,100);
     }
 }

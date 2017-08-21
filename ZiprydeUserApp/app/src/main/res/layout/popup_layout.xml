@@ -1,0 +1,35 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:gravity="center"
+        android:layout_marginTop="10dp"
+        android:padding="@dimen/fab_margin"
+        >
+
+        <Button
+            android:id="@+id/cashBtn"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginLeft="25dp"
+            android:layout_marginRight="25dp"
+            android:layout_marginBottom="10dp"
+            android:alpha="0.5"
+            android:background="@color/colorAccent"
+            android:text="CASH"
+            android:textColor="@color/secondaryText"
+            android:textSize="14dp" />
+    </LinearLayout>
+
+
+
+
+
+</RelativeLayout>

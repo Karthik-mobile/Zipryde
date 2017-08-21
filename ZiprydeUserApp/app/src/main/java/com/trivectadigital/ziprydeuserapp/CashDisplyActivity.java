@@ -3,8 +3,6 @@ package com.trivectadigital.ziprydeuserapp;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -12,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -180,6 +177,9 @@ public class CashDisplyActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
         editor.putString("bookingId", "");
         editor.commit();
+
+        Toast.makeText(this, messageReceivedEvent.message, Toast.LENGTH_SHORT).show();
+
         Intent ide = new Intent(CashDisplyActivity.this, NavigationMenuActivity.class);
         ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(ide);

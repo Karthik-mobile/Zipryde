@@ -7,41 +7,30 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
-import com.trivectadigital.ziprydeuserapp.assist.ZiprydeHistoryAdapter;
-import com.trivectadigital.ziprydeuserapp.modelget.ListOfBooking;
 import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
-import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
-
-import org.json.JSONObject;
-
-import java.util.LinkedList;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class NavigationMenuActivity extends AppCompatActivity
                                                 implements View.OnClickListener {
@@ -50,6 +39,7 @@ public class NavigationMenuActivity extends AppCompatActivity
     Toolbar toolbar;
     ImageView menuImgBlack;
     ZiprydeApiInterface apiService;
+    LinearLayout pgsetupLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +81,18 @@ public class NavigationMenuActivity extends AppCompatActivity
         logoutLayout.setOnClickListener(this);
         LinearLayout helpLayout = (LinearLayout) headerview.findViewById(R.id.helpLayout);
         helpLayout.setOnClickListener(this);
+
+        LinearLayout psLayout = (LinearLayout) headerview.findViewById(R.id.paymentSetupLayout);
+        psLayout.setOnClickListener(this);
+
+        pgsetupLayout = (LinearLayout) headerview.findViewById(R.id.pgsetupLayout);
+        //pgsetupLayout.setOnClickListener(this);
+
+
+        LinearLayout paypalLayout = (LinearLayout) headerview.findViewById(R.id.paypalLayout);
+        paypalLayout.setOnClickListener(this);
+        LinearLayout cashappLayout = (LinearLayout) headerview.findViewById(R.id.cashAppLayout);
+        cashappLayout.setOnClickListener(this);
 
         TextView editProfile = (TextView) headerview.findViewById(R.id.editProfile);
         editProfile.setOnClickListener(this);
@@ -154,6 +156,8 @@ public class NavigationMenuActivity extends AppCompatActivity
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
         }
+
+
     }
 
     public void showBookingFragment() {
@@ -281,6 +285,27 @@ public class NavigationMenuActivity extends AppCompatActivity
                 ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(ide);
                 break;
+            case R.id.paymentSetupLayout: {
+
+                if(pgsetupLayout.getVisibility() == View.VISIBLE) {
+                    pgsetupLayout.setVisibility(View.GONE);
+                }else{
+
+                    pgsetupLayout.setVisibility(View.VISIBLE);
+                }
+            }
+                break;
+            case R.id.paypalLayout: {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.com/us/home"));
+                startActivity(browserIntent);
+            }
+                break;
+            case R.id.cashAppLayout: {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cash.me/app/WTXRWNB"));
+                startActivity(browserIntent);
+            }
+
+                break;
         }
     }
 
@@ -320,6 +345,9 @@ public class NavigationMenuActivity extends AppCompatActivity
                     editor.remove("phoneNumber");
                     editor.remove("password");
                     editor.commit();
+                    SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                    editor.putString("disclaimer", "");
+                    deditor.commit();
                     Intent ide = new Intent(NavigationMenuActivity.this, LoginActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
