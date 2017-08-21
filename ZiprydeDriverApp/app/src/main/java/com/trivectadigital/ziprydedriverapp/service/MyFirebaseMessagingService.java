@@ -8,7 +8,6 @@ import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.trivectadigital.ziprydedriverapp.NewDashBoardActivity;
 import com.trivectadigital.ziprydedriverapp.R;
 import com.trivectadigital.ziprydedriverapp.RideActivity;
 import com.trivectadigital.ziprydedriverapp.assist.MessageReceivedEvent;
@@ -16,7 +15,6 @@ import com.trivectadigital.ziprydedriverapp.assist.NotificationUtils;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -145,6 +143,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //                NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
 //                notificationUtils.playNotificationSound();
         } else {
+            EventBus.getDefault().post(new MessageReceivedEvent(message));
 //                // app is in background, show the notification in notification tray
         Intent resultIntent = new Intent(getApplicationContext(), RideActivity.class);
 //        Utils.fromNotification = true;

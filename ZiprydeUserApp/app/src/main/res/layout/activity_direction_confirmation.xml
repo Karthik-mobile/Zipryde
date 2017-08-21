@@ -127,7 +127,7 @@
                 android:id="@+id/priceUpdateText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Fair Price"
+                android:text="Fare Price"
                 android:textColor="@color/appBackground" />
 
         </LinearLayout>

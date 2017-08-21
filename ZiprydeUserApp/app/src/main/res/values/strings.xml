@@ -2,7 +2,7 @@
     <string name="app_name">ZipRyde</string>
     <string name="signup">Sign Up</string>
     <string name="loginup">Login</string>
-    <string name="title_activity_navigation_menu">ZIPRYDE</string>
+
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -22,6 +22,166 @@
         AIzaSyBqwOXCatvgb_ZaA77-A3pmgj3Klid5Y7Q
     </string>
 
+    <!-- General strings-->
+    <string name="firstname">First Name</string>
+    <string name="lastname">Last Name</string>
+    <string name="email">E-Mail</string>
+    <string name="mobileno">Mobile Number</string>
+    <string name="enterotp">Enter OTP</string>
+    <string name="password">Password</string>
+    <string name="newpassword">New Password</string>
+    <string name="confirmpassword">Confirm Password</string>
+    <string name="change">CHANGE</string>
+    <string name="offer">Offer</string>
+    <string name="currencysymbol">$</string>
+    <string name="gps_start">Starts Here</string>
+    <string name="gps_end">Ends Here</string>
+    <string name="distanceunit">mi</string>
+    <string name="disclaimer">Disclaimer</string>
+
+
+    <!-- Button name -->
+    <string name="btn_ok">OK</string>
+    <string name="btn_resend">Resend</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="btn_close">Close</string>
+    <string name="btn_submit">Submit</string>
+    <string name="btn_yes">Yes</string>
+    <string name="btn_no">No</string>
+    <string name="btn_open">Open</string>
+    <string name="btn_done">DONE</string>
+    <string name="btn_accept">Accept</string>
+
+
+
+    <!-- Login screen -->
+    <string name="signin">Sign In</string>
+    <string name="forgetpwd">Forget Password?</string>
+    <string name="registerasnew">Register As New</string>
+
+    <!-- Signup screen -->
+    <string name="alreadyhaveaccount">Already have an Account?</string>
+    <string name="signup_validmobileno">Please enter valid Mobile Number</string>
+    <string name="signup_fname">Please enter the First Name</string>
+    <string name="signup_lname">Please enter the Last Name</string>
+    <string name="signup_emailid">Please enter the Email Id</string>
+    <string name="signup_validemailid">Please enter the Email Id in a valid format</string>
+    <string name="signup_pwd">Please enter the Password</string>
+    <string name="signup_confimrpwd">Please enter the Confirm Password</string>
+    <string name="signup_pwdnotmatch">Password and Confirm Password are not matching</string>
+
+
+    <!-- Verify Pin Screen-->
+    <string name="verifypin_pleaseentercode">Please enter code sent to</string>
+    <string name="verifypin_yourmobileno">your Mobile Number</string>
+    <string name="btn_resendcode">Resend Code</string>
+    <string name="btn_changeno">Change Number</string>
+
+    <!-- Forgot password screen-->
+    <string name="forgotpassword_entercode">Please enter code</string>
+    <string name="forgotpassword_code">CODE</string>
+    <string name="forgotpassword_verify">VERIFY</string>
+    <string name="forgotpassword_generateotp">Generate OTP</string>
+    <string name="forgotpassword_entermobileno">Please enter Mobile number</string>
+    <string name="forgotpassword_generate">GENERATE</string>
+
+
+    <!-- Home Map Screen -->
+
+    <string name="homemap_whereto">Where to?</string>
+    <string name="homemap_selectpickup">Select Pickup Location</string>
+
+    <!-- Navigation Menu -->
+    <string name="title_activity_navigation_menu">ZIPRYDE</string>
+    <string name="navimenu_bookride">Book ZipRyde</string>
+    <string name="navimenu_yourride">Your ZipRydes</string>
+    <string name="navimenu_help">Help</string>
+    <string name="navimenu_payemntsetup">Payment Setup</string>
+    <string name="navimenu_paypal">Paypal</string>
+    <string name="navimenu_cashapp">Cash App</string>
+    <string name="navimenu_logout">Log Out</string>
+
+
+    <!-- From-To selection screen-->
+    <string name="fromto_fromlocation">Enter place to search</string>
+    <string name="fromto_droplocaiton">Enter the drop location</string>
+
+
+
+    <!-- Cash Display  screen -->
+
+    <string name="cashdisplay_totalfair">Total Fare</string>
+    <string name="cashdisplay_totaldist">Total Distance</string>
+    <string name="cashdisplay_total">Total</string>
+    <string name="cashdisplay_paybyusing">Pay by using</string>
+    <string name="cashdisplay_cash">Cash</string>
+    <string name="cashdisplay_cc">Credit Card</string>
+    <string name="cashdisplay_dc">Debit Card</string>
+    <string name="cashdisplay_nb">Netbanking</string>
+
+
+    <!-- Direction Confirmation Screen -->
+    <string name="directionconf_notavailable">Not Available</string>
+    <string name="directionconf_defaultseats">Seats 1\-4</string>
+    <string name="directionconf_defaultseats2">Seats 1\-7</string>
+
+    <string name="directionconf_noservice">The service is not available for the selected route</string>
+
+    <string name="directionconf_getzipfare">GET ZIP FARE</string>
+    <string name="directionconf_cabtype1">Micro</string>
+    <string name="directionconf_cabtype2">Sedan</string>
+    <string name="directionconf_cabtype3">SUV</string>
+    <string name="directionconf_selectvehicle">Select vehicle type</string>
+    <string name="directionconf_zipmenow">ZIP ME NOW</string>
+    <string name="directionconf_selectseats">Select Your Seats</string>
+    <string name="directionconf_nameyourprice">Name your own price</string>
+    <string name="directionconf_suggprice">Suggested price</string>
+    <string name="directionconf_fareprice">Fare Price</string>
+    <string name="directionconf_zipnotavailable">ZipRyde is currently unavailable in the vicinity of the pickup location.</string>
+
+
+    <!-- Driver Tracking Page-->
+    <string name="driverinfo_call">Call</string>
+    <string name="driverinfo_zipstatus">ZipRyde Status</string>
+
+
+
+
+
+
+
+
+    <!-- User dialog Messages titles -->
+    <string name="warning">Warning</string>
+    <string name="success">Success</string>
+    <string name="failure">Failure</string>
+    <string name="information">Information</string>
+    <string name="error">Error</string>
+    <string name="bookingsuccess">Booking Successful</string>
+
+
+    <!-- User Information-->
+
+    <string name="usermsg_locationturnon">Please turn ON location services in your device.</string>
+    <string name="usermsg_successfullogin">Successfully logged in</string>
+    <string name="usermsg_wanttologout">Are you sure you want to Log Out?</string>
+    <string name="usermsg_successfullyregistered"> Successfully Registered</string>
+    <string name="usermsg_bookingcancelled">This booking has been cancelled. Please try to re-book your ZipRyde</string>
+    <string name="usermsg_waitdriveraccept">Please wait till the driver accepts your request</string>
+    <string name="usermsg_ziprydecancelled">Your ZipRyde has been cancelled.</string>
+    <string name="usermsg_querysubmit">Your query has been successfully submitted</string>
+    <string name="usermsg_permissiondenied">Permission denied</string>
+    <string name="usermsg_bookingsuccessfull_waitdriver">Your Booking request has been submitted successfully\. Please wait till driver accepts\.\.\.</string>
+    <string name="usermsg_driveraccepted">Your Booking request has been accepted by driver\.\.\.</string>
+    <string name="usermsg_nodriveravailable">available \/ Driver Not accepted the request. Try after sometime</string>
+
+    <!-- Error Messages -->
+
+    <string name="errmsg_network_noconnection">Either there is no network connectivity or server is not available\.\. Please try again later\.\.</string>
+    <string name="errmsg_nolocationfound">Couldn\'t get the current location. Please wait\.\.\.</string>
+    <string name="errmsg_googleapi">Could not connect to Google API Client</string>
+
+
     <string-array name="sedan_micro_array">
         <item>1</item>
         <item>2</item>
@@ -40,5 +200,6 @@
     </string-array>
 
     <string name="disclaimer_text"> This Application provided by ANI Technologies Private Limited. \n These terms and conditions ("User Terms") apply to Your visit to and use, of the Site whether through a computer or a mobile phone, the Service and the Application, as well as to all information, recommendations and or services provided to You on or through the Site, the Service and the Application. This document is an electronic record in terms of Information Technology Act, 2000 and rules thereunder as applicable and the provisions pertaining to electronic records in various statutes as amended by the Information Technology Act, 2000. This electronic record is generated by a computer system and does not require any physical or digital signatures. By clicking on the "I ACCEPT" button, You are consenting to be bound by these User Terms. PLEASE ENSURE THAT YOU READ AND UNDERSTAND ALL THESE USER TERMS BEFORE YOU USE THE SITE. If You do not accept any of the User Terms, then please do not use the Site or avail any of the services being provided therein. YOUR AGREEMENT TO THESE USER TERMS SHALL OPERATE AS A BINDING AGREEMENT BETWEEN YOU AND OLA IN RESPECT OF THE USE AND SERVICES OF THE SITE. \n Your acceptance of the User Terms shall be deemed to include your acceptance of the privacy policy available at https://www.olacabs.com/info/faqs#privacyPolicy. \n By accepting these User Terms, you also allow Ola to send you promotional emails and SMS alerts from time to time. \n IT IS HEREBY EXPRESSLY CLARIFIED THAT THESE USER TERMS WILL NOT APPLY TO A CUSTOMER TAKING ‘OLA CORPORATE RIDES’ I.E., FOR CUSTOMERS WHO ARE EMPLOYEES OF CORPORATE ENTITIES WITH WHOM OLA HAS A DIRECT ARRANGEMENT. </string>
+
 
 </resources>

@@ -103,7 +103,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 } else if (emailadd.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Email Id", "OK", "info");
                 } else if (!Patterns.EMAIL_ADDRESS.matcher(emailadd).matches()) {
-                    showInfoDlg("Information", "Please enter the Proper Email Id", "OK", "info");
+                    showInfoDlg("Information", "Please enter the Email Id in a valid format", "OK", "info");
                 } else if (password.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Password", "OK", "info");
                 } else if (confirmpassword.isEmpty()) {

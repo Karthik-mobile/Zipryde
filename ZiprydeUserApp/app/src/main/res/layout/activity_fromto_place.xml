@@ -84,7 +84,7 @@
                             android:focusableInTouchMode="false"
                             android:hint="Enter place to search"
                             android:paddingLeft="10dp"
-                            android:singleLine="true" />
+                            android:maxLines="1" />
 
                         <ImageView
                             android:id="@+id/clearsearchImageView"
@@ -118,7 +118,7 @@
                             android:focusableInTouchMode="true"
                             android:hint="Enter the drop location"
                             android:paddingLeft="10dp"
-                            android:singleLine="true" />
+                            android:maxLines="1" />
 
                         <ImageView
                             android:id="@+id/clearsearchImageViewdest"

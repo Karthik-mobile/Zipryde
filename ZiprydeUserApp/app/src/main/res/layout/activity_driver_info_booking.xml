@@ -183,7 +183,8 @@
                 android:gravity="center"
                 android:text="Booking"
                 android:textColor="@color/black_overlay"
-                android:textSize="9dp" />
+                android:textSize="9dp"
+                android:visibility="gone"/>
 
             <ImageView
                 android:id="@+id/imgNext"

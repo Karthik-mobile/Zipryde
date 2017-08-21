@@ -436,7 +436,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
                             showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
                         } catch (Exception e) {
-                            Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                            Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -446,11 +446,11 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     requestdialog.dismiss();
-                    Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            Toast.makeText(this,getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -504,7 +504,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
                             showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
                         } catch (Exception e) {
-                            showInfoDlg("Error..", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "server");
+                            showInfoDlg("Error..", getString(R.string.errmsg_network_noconnection), "OK", "server");
                         }
                     }
                 }
@@ -514,11 +514,11 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -556,7 +556,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
                             showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
                         } catch (Exception e) {
-                            Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                            Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -566,11 +566,11 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -633,7 +633,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
                             showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
                         } catch (Exception e) {
-                            Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                            Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -643,11 +643,11 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -689,19 +689,19 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                                     Log.e("getPrice", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(0).getPrice());
                                     double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(0).getPrice());
                                     Log.e("price 11", "" + price);
-                                    textAmount1.setText("$" + new DecimalFormat("##.#").format(price));
+                                    textAmount1.setText(getString(R.string.currencysymbol)+ new DecimalFormat("##.#").format(price));
                                     textAmount1.setTag("" + price);
                                     requestPickupBtn.setTag(textAmount1.getTag().toString().trim());
-                                    basePrice.setText("$" + new DecimalFormat("##.#").format(price));
+                                    basePrice.setText(getString(R.string.currencysymbol) + new DecimalFormat("##.#").format(price));
                                     basePrice.setTag("" + price);
-                                    priceUpdateText.setText("$" + new DecimalFormat("##.#").format(price));
+                                    priceUpdateText.setText(getString(R.string.currencysymbol) + new DecimalFormat("##.#").format(price));
                                 }
 
                                 if (Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.size() > 1) {
                                     Log.e("getPrice", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(1).getPrice());
                                     double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(1).getPrice());
                                     Log.e("price 22", "" + price);
-                                    textAmount2.setText("$" + new DecimalFormat("##.#").format(price));
+                                    textAmount2.setText(getString(R.string.currencysymbol) + new DecimalFormat("##.#").format(price));
                                     textAmount2.setTag("" + price);
                                 }
 
@@ -709,7 +709,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                                     Log.e("getPrice", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(2).getPrice());
                                     double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(2).getPrice());
                                     Log.e("price 33", "" + price);
-                                    textAmount3.setText("$" + new DecimalFormat("##.#").format(price));
+                                    textAmount3.setText(getString(R.string.currencysymbol) + new DecimalFormat("##.#").format(price));
                                     textAmount3.setTag("" + price);
                                 }
 
@@ -717,7 +717,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                                     Log.e("getPrice", "" + Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(3).getPrice());
                                     double price = Double.parseDouble(Utils.getAllNYOPByCabTypeAndDistanceInstantResponse.get(3).getPrice());
                                     Log.e("price 44", "" + price);
-                                    textAmount4.setText("$" + new DecimalFormat("##.#").format(price));
+                                    textAmount4.setText(getString(R.string.currencysymbol)+ new DecimalFormat("##.#").format(price));
                                     textAmount4.setTag("" + price);
                                 }
                             } else {
@@ -732,7 +732,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                             showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
                         } catch (Exception e) {
                             e.printStackTrace();
-                            Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                            Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -742,11 +742,11 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -867,7 +867,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             // Start downloading json data from Google Directions API
             FetchUrl.execute(url);
         } else {
-            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
 
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
@@ -1188,7 +1188,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                                                 FetchUrl FetchUrl = new FetchUrl("micro");
                                                 FetchUrl.execute(url);
                                             } else {
-                                                Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                                                Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                                             }
                                         }
                                         getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(0).getCabTypeId());
@@ -1214,7 +1214,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                                                 FetchUrl FetchUrl = new FetchUrl("sedan");
                                                 FetchUrl.execute(url);
                                             } else {
-                                                Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                                                Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                                             }
                                         }
                                         getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(1).getCabTypeId());
@@ -1240,7 +1240,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                                                 FetchUrl FetchUrl = new FetchUrl("suv");
                                                 FetchUrl.execute(url);
                                             } else {
-                                                Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                                                Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                                             }
                                         }
                                         getFareDetailsBtn.setTag(Utils.getAllCabTypesInstantResponse.get(2).getCabTypeId());
@@ -1273,7 +1273,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
                             showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
                         } catch (Exception e) {
-                            Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                            Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -1283,11 +1283,11 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DirectionConfirmationActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
     }
 
