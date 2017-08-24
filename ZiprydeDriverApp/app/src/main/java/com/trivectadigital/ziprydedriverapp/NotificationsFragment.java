@@ -251,7 +251,7 @@ public class NotificationsFragment extends Fragment {
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("server")) {
+        if (navType.equalsIgnoreCase("server") || (navType.equalsIgnoreCase("logout"))) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -263,9 +263,25 @@ public class NotificationsFragment extends Fragment {
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 dialog.dismiss();
+
+                if(navType.equalsIgnoreCase("logout")){
+                    SharedPreferences.Editor editor = getActivity().getSharedPreferences("LoginCredentials", getActivity().MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
+                    SharedPreferences.Editor deditor = getActivity().getSharedPreferences("DisclaimerCredentials", getActivity().MODE_PRIVATE).edit();
+                    deditor.putString("disclaimer", "");
+                    deditor.commit();
+                    Intent ide = new Intent(getActivity(), LoginActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    // finish();
+                }
             }
         });
+
 
         newnegativeBtn.setOnClickListener(new View.OnClickListener() {
             @Override

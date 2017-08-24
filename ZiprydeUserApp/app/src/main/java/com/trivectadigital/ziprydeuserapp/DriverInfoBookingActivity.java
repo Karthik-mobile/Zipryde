@@ -271,7 +271,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -619,7 +619,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                         dialog.dismiss();
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -767,7 +767,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                         dialog.dismiss();
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -827,7 +827,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -965,7 +965,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());

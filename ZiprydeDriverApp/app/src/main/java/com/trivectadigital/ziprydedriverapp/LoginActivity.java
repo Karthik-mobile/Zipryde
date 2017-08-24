@@ -149,7 +149,7 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
                     }else{
-                        insertDriverSession();
+
                         showInfoDlg("Success..", "Successfully logged in.", "OK", "success");
                     }
                 }
@@ -201,12 +201,13 @@ public class LoginActivity extends AppCompatActivity {
                         editor.putString("password", password);
                         editor.putString("LoginCredentials", json);
                         editor.commit();
+                        insertDriverSession();
 
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
 
-                            if(response.code() == 409){
+                            if(response.code() == Utils.NETOWRKERR_OVERRIDE_LOGIN){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -260,6 +261,10 @@ public class LoginActivity extends AppCompatActivity {
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
         if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("error") | navType.equalsIgnoreCase("logout"))   {
             newnegativeBtn.setVisibility(View.GONE);
+        }
+
+        if(navType.equalsIgnoreCase("forcelogin")) {
+            newnegativeBtn.setText(getString(R.string.btn_no));
         }
 
         if (navType.equalsIgnoreCase("success")) {

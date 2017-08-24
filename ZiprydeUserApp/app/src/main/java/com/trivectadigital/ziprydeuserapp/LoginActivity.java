@@ -163,7 +163,7 @@ public class LoginActivity extends AppCompatActivity {
 
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
 
-                            if(response.code() == 409){
+                            if(response.code() == Utils.NETOWRKERR_OVERRIDE_LOGIN){
 
 
                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -219,6 +219,10 @@ public class LoginActivity extends AppCompatActivity {
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
         if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("error") || navType.equalsIgnoreCase("server")) {
             newnegativeBtn.setVisibility(View.GONE);
+        }
+
+        if(navType.equalsIgnoreCase("forcelogin")) {
+            newnegativeBtn.setText(getString(R.string.btn_no));
         }
 
         if (navType.equalsIgnoreCase("success")) {

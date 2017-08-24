@@ -79,6 +79,9 @@ public class Utils {
     public static final int NOTIFICATION_ID = 100;
     public static final int NOTIFICATION_ID_BIG_IMAGE = 101;
 
+    public static final int NETOWRKERR_OVERRIDE_LOGIN = 409;
+    public static final int NETWORKERR_SESSIONTOKEN_EXPIRED= 405;
+
     public static final String SHARED_PREF = "ah_firebase";
     public static final String SHARED_NOTIFI = "notification";
 
@@ -113,14 +116,14 @@ public class Utils {
         Calendar calendar = Calendar.getInstance();
         TimeZone zone = calendar.getTimeZone();
         SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
-        //sdf.setTimeZone(zone);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date sysDate = new Date();
         try {
             sysDate = sdf.parse(utcTime);
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        SimpleDateFormat sdf1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm");
+        SimpleDateFormat sdf1 = new SimpleDateFormat("EEE, d MMM yyyy hh:mm a");
         sdf1.setTimeZone(zone);
         String systemTime = sdf1.format(sysDate);
 

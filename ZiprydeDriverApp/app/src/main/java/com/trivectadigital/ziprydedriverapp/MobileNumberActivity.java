@@ -2,11 +2,12 @@ package com.trivectadigital.ziprydedriverapp;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,7 +23,6 @@ import android.widget.Toast;
 
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
-import com.trivectadigital.ziprydedriverapp.assist.GPSLocationService;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
 import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydedriverapp.modelpost.SingleInstantParameters;
@@ -137,7 +137,9 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(MobileNumberActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                   // Toast.makeText(MobileNumberActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+
                 }
             });
         } else {
@@ -163,7 +165,7 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server")) {
+        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server") ||navType.equalsIgnoreCase("logout") ) {
             newnegativeBtn.setVisibility(View.GONE);
         } else {
             newnegativeBtn.setVisibility(View.VISIBLE);
@@ -177,7 +179,23 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
                 dialog.dismiss();
+
+                if(navType.equalsIgnoreCase("logout")){
+                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
+                    SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                    deditor.putString("disclaimer", "");
+                    deditor.commit();
+                    Intent ide = new Intent(MobileNumberActivity.this, LoginActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    // finish();
+                }
             }
         });
 

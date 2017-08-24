@@ -84,7 +84,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
     LinearLayout microLaySmall, microLayBig, suvLayBig, suvLaySmall, sedanLaySmall, sedanLayBig, vehicleTypeLay, requestTypeLay, noCabsLay;
     TextView microTextSmall, microTextBig, sedanTextSmall, sedanTextBig, suvTextSmall, suvTextBig, textSeatCapacity;
     ImageView imgNext;
-    Button getFareDetailsBtn, requestPickupBtn;
+    Button getFareDetailsBtn, requestPickupBtn,requestPickupLaterBtn;
     Spinner noofSeatsSpinner;
     TextView textAmount1, textAmount2, textAmount3, textAmount4, basePrice, priceUpdateText, noCabsText;
     TextView microTimeTextSmall, microTimeTextBig, sedanTimeTextSmall, sedanTimeTextBig, suvTimeTextSmall, suvTimeTextBig;
@@ -141,6 +141,57 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
 
         LinearLayout reqBooking = (LinearLayout) findViewById(R.id.reqBooking);
         requestPickupBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                selectedCarType = Integer.parseInt(getFareDetailsBtn.getTag().toString().trim());
+                SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                Log.e("selectedCarType", "" + selectedCarType);
+                loginCredentials.cabTypeId = selectedCarType;
+                Log.e("customerId", "" + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+                loginCredentials.customerId = Utils.verifyLogInUserMobileInstantResponse.getUserId();
+                Log.e("from", "" + Utils.startingPlaceAddress);
+                loginCredentials.from = Utils.startingPlaceAddress;
+                Log.e("to", "" + Utils.endingPlaceAddress);
+                loginCredentials.to = Utils.endingPlaceAddress;
+                Log.e("suggestedPrice", "" + basePrice.getTag().toString().trim());
+                loginCredentials.suggestedPrice = basePrice.getTag().toString().trim();
+                Log.e("offeredPrice", "" + requestPickupBtn.getTag().toString().trim());
+                loginCredentials.offeredPrice = requestPickupBtn.getTag().toString().trim();
+                Log.e("noOfPassengers", "" + noofSeatsSpinner.getSelectedItem().toString().trim());
+                loginCredentials.noOfPassengers = Integer.parseInt(noofSeatsSpinner.getSelectedItem().toString().trim());
+
+                String km = Utils.parsedDistance.split(" ")[0].trim();
+                String kmtomile = "" + (Double.parseDouble(km.replaceAll(",", "")) * 0.6214);
+                GeoLocationRequest bookingObjects = new GeoLocationRequest();
+                Log.e("fromLatitude", "" + Utils.startingLatLan.latitude);
+                bookingObjects.fromLatitude = "" + new DecimalFormat("##.######").format(Utils.startingLatLan.latitude);
+                Log.e("fromLongitude", "" + Utils.startingLatLan.longitude);
+                bookingObjects.fromLongitude = "" + new DecimalFormat("##.######").format(Utils.startingLatLan.longitude);
+                Log.e("toLatitude", "" + Utils.endingLatLan.latitude);
+                bookingObjects.toLatitude = "" + new DecimalFormat("##.######").format(Utils.endingLatLan.latitude);
+                Log.e("toLongitude", "" + Utils.endingLatLan.longitude);
+                bookingObjects.toLongitude = "" + new DecimalFormat("##.######").format(Utils.endingLatLan.longitude);
+                Log.e("kmtomile", "" + kmtomile);
+                bookingObjects.distanceInMiles = "" + kmtomile;
+
+                loginCredentials.geoLocationRequest = bookingObjects;
+
+                Gson gson = new Gson();
+                String json = gson.toJson(loginCredentials);
+                Log.e("json", "" + json);
+                callRequestBooking(loginCredentials);
+            }
+        });
+
+
+        //Scheduled Trip
+
+
+        requestPickupLaterBtn = (Button) findViewById(R.id.requestPickupBtn);
+        //noofSeatsSpinner = (Spinner) findViewById(R.id.noofSeatsSpinner);
+
+        //LinearLayout reqBooking = (LinearLayout) findViewById(R.id.reqBooking);
+        requestPickupLaterBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 selectedCarType = Integer.parseInt(getFareDetailsBtn.getTag().toString().trim());
@@ -434,7 +485,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         requestdialog.dismiss();
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -513,7 +564,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         dialog.dismiss();
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -576,7 +627,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -664,7 +715,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -773,7 +824,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -1339,7 +1390,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());

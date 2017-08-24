@@ -104,7 +104,7 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
         final ListOfBooking ziprydeHistoryDetails = ziprydeHistoryDetailsList.get(position);
 
 //        String ziprydeBookingCarType = ziprydeHistoryDetails.getZiprydeBookingCarType();
-        String ziprydeBookingDateTime = ziprydeHistoryDetails.getBookingDateTime();
+        String ziprydeBookingDateTime =  Utils.UTCtoSysTime(ziprydeHistoryDetails.getBookingDateTime());//ziprydeHistoryDetails.getBookingDateTime();
         String ziprydeBookingCRN = ziprydeHistoryDetails.getCrnNumber();
         String ziprydeBookingStarting = ziprydeHistoryDetails.getFrom();
         String ziprydeBookingEnding = ziprydeHistoryDetails.getTo();

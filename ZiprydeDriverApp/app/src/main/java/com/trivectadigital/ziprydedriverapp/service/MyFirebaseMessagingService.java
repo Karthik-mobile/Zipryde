@@ -131,6 +131,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //            Log.e(TAG, "timestamp: " + timestamp);
 
         NotificationUtils.clearNotifications(getApplicationContext());
+
+
         if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
             EventBus.getDefault().post(new MessageReceivedEvent(message));
 //        }
@@ -142,6 +144,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //                // play notification sound
                 NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
                 notificationUtils.playNotificationSound();
+
             Intent resultIntent = new Intent(getApplicationContext(), RideActivity.class);
             Calendar c = Calendar.getInstance();
             System.out.println("Current time => " + c.getTime());
@@ -158,6 +161,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //
 //                // check for image attachment
 //                if (TextUtils.isEmpty(imageUrl)) {
+            NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
+            notificationUtils.playNotificationSound();
+
         Calendar c = Calendar.getInstance();
         System.out.println("Current time => " + c.getTime());
         SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss a");

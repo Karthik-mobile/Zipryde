@@ -3,6 +3,7 @@ package com.trivectadigital.ziprydedriverapp.assist;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.trivectadigital.ziprydedriverapp.LoginActivity;
 import com.trivectadigital.ziprydedriverapp.OnGoingBookingActivity;
 import com.trivectadigital.ziprydedriverapp.R;
 import com.trivectadigital.ziprydedriverapp.RideActivity;
@@ -112,9 +114,10 @@ public class CurrentRideAdapter extends BaseAdapter {
         Calendar calendar = Calendar.getInstance();
         TimeZone zone = calendar.getTimeZone();
         SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         try {
             Date dat = sdf.parse(dateTime);
-            sdf = new SimpleDateFormat("EEE MMM dd HH:mm");
+            sdf = new SimpleDateFormat("EEE MMM dd hh:mm a");
             sdf.setTimeZone(zone);
             dateTime = sdf.format(dat);
         } catch (ParseException ex) {
@@ -180,7 +183,17 @@ public class CurrentRideAdapter extends BaseAdapter {
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error", -1);
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(context.getString(R.string.error), "" + jObjError.getString("message"), context.getString(R.string.btn_ok), "logout",position);
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error",position);
+                            }
                         } catch (Exception e) {
                             Toast.makeText(context, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
@@ -192,7 +205,8 @@ public class CurrentRideAdapter extends BaseAdapter {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(context, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                   // Toast.makeText(context, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(context.getString(R.string.error), "" + context.getString(R.string.errmsg_sessionexpired), context.getString(R.string.btn_ok), "logout",position);
                 }
             });
         } else {
@@ -252,6 +266,18 @@ public class CurrentRideAdapter extends BaseAdapter {
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     context.startActivity(ide);
                     ((AppCompatActivity) context).finish();
+                }else if(navType.equalsIgnoreCase("logout")){
+                    SharedPreferences.Editor editor = context.getSharedPreferences("LoginCredentials", context.MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
+                    SharedPreferences.Editor deditor = context.getSharedPreferences("DisclaimerCredentials", context.MODE_PRIVATE).edit();
+                    deditor.putString("disclaimer", "");
+                    deditor.commit();
+                    Intent ide = new Intent(context, LoginActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    context.startActivity(ide);
+                    // finish();
                 }
             }
         });

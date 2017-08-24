@@ -13,15 +13,46 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp">
 
+        <LinearLayout
+            android:id="@+id/logoutLayouttop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="2dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_alignParentLeft="true"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:src="@drawable/ic_exit_to_app_white_24dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Log Out"
+                android:textColor="@color/whiteColor"
+                android:textSize="9dp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
         <TextView
             android:id="@+id/buildNumber"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#6d90c7"
             android:textSize="18dp"
+            android:text="V2.4"
             android:layout_marginLeft="10dp"
-            android:layout_alignParentLeft="true"
-            android:textStyle="bold" />
+            android:layout_alignRight="@+id/logoutLayouttop"
+            android:textStyle="bold"
+            android:visibility="visible"/>
 
         <RelativeLayout
             android:id="@+id/onofflineLay"

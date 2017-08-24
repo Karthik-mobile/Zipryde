@@ -363,7 +363,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -481,7 +481,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
                     if (!response.isSuccessful()) {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());

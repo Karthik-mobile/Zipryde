@@ -506,8 +506,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("server")
-                || navType.equalsIgnoreCase("logout")) {
+        if (navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("server")|| navType.equalsIgnoreCase("logout")) {
             newnegativeBtn.setVisibility(View.GONE);
         } else {
             newnegativeBtn.setVisibility(View.VISIBLE);
@@ -535,7 +534,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                     Intent ide = new Intent(getActivity(), LoginActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
-                   // finish();
+                   //finish();
                 }
             }
         });
@@ -786,7 +785,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e("loction address", "Canont get Address!");
+            Log.e("loction address", "Cannot get Address!");
         }
         return strAdd;
     }
@@ -844,7 +843,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                            // Toast.makeText(getActivity(), "reached here"+response.toString(), Toast.LENGTH_LONG).show();
 
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());

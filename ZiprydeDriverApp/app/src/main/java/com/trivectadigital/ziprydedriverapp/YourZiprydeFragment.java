@@ -170,7 +170,7 @@ public class YourZiprydeFragment extends Fragment {
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());

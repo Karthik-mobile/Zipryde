@@ -278,7 +278,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -300,7 +300,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    showInfoDlg(getString(R.string.error), "" + "Your session is expired. Please re-login!", getString(R.string.btn_ok), "logout");
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "forcelogout");
                    // Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
@@ -338,7 +338,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -360,7 +360,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "forcelogout");
                    // Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
@@ -403,7 +403,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     if (!response.isSuccessful()) {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -469,7 +469,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        if (response.code() == 408) {
+                        if (response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED) {
 
 
                             // JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -490,7 +490,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
             public void onFailure(Call<Void> call, Throwable t) {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
-                showInfoDlg(getString(R.string.error), "" + "Your session is expired. Please re-login!", getString(R.string.btn_ok), "logout");
+                showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "forcelogout");
             }
         });
     }
@@ -507,7 +507,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("forcelogout")) {
+        if (navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("forcelogout") ) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -601,7 +601,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     if (!response.isSuccessful()) {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            if(response.code() == 408){
+                            if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
 
 
                                 // JSONObject jObjError = new JSONObject(response.errorBody().string());

@@ -129,6 +129,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //
 //                // check for image attachment
 //                if (TextUtils.isEmpty(imageUrl)) {
+                    NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
+                    notificationUtils.playNotificationSound();
+
                     Calendar c = Calendar.getInstance();
                     System.out.println("Current time => "+c.getTime());
                     SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss a");

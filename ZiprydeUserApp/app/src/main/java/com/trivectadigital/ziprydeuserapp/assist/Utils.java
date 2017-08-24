@@ -12,7 +12,12 @@ import com.trivectadigital.ziprydeuserapp.modelget.ListOfFairEstimate;
 import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 /**
@@ -70,6 +75,8 @@ public class Utils {
     // id to handle the notification in the notification tray
     public static final int NOTIFICATION_ID = 100;
     public static final int NOTIFICATION_ID_BIG_IMAGE = 101;
+    public static final int NETOWRKERR_OVERRIDE_LOGIN = 409;
+    public static final int NETWORKERR_SESSIONTOKEN_EXPIRED= 405;
 
     public static final String SHARED_PREF = "ah_firebase";
 
@@ -96,5 +103,26 @@ public class Utils {
             Log.d("ConStatus", "No Active Connection");
             return false;
         }
+    }
+
+    public static String UTCtoSysTime(String utcTime){
+
+
+        Calendar calendar = Calendar.getInstance();
+        TimeZone zone = calendar.getTimeZone();
+        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date sysDate = new Date();
+        try {
+            sysDate = sdf.parse(utcTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        SimpleDateFormat sdf1 = new SimpleDateFormat("EEE, d MMM yyyy hh:mm a");
+        sdf1.setTimeZone(zone);
+        String systemTime = sdf1.format(sysDate);
+
+
+        return systemTime;
     }
 }
