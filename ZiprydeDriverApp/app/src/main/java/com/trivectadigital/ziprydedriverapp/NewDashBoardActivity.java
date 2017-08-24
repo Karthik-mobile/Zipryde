@@ -46,7 +46,7 @@ import retrofit2.Response;
 
 public class NewDashBoardActivity extends AppCompatActivity {
 
-    LinearLayout rideLayout, historyLayout, notificationLayout, logoutLayout, helpLayout,paymentSetupLayout;
+    LinearLayout rideLayout, historyLayout, notificationLayout, logoutLayout, helpLayout,paymentSetupLayout, rideLaterLayout;
 
     RelativeLayout onofflineLay;
 
@@ -133,6 +133,17 @@ public class NewDashBoardActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent ide = new Intent(NewDashBoardActivity.this, HelpActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
+            }
+        });
+
+        rideLaterLayout = (LinearLayout) findViewById(R.id.rideLaterLayout);
+        rideLaterLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent ide = new Intent(NewDashBoardActivity.this, scheduleZiprydeActivity.class);
+                ide.putExtra("schedule", 1);
                 ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(ide);
             }

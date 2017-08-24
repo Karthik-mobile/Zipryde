@@ -1,6 +1,8 @@
 package com.trivectadigital.ziprydeuserapp;
 
+import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -17,10 +19,12 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -57,10 +61,15 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import de.greenrobot.event.EventBus;
 import retrofit2.Call;
@@ -89,6 +98,9 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
     TextView textAmount1, textAmount2, textAmount3, textAmount4, basePrice, priceUpdateText, noCabsText;
     TextView microTimeTextSmall, microTimeTextBig, sedanTimeTextSmall, sedanTimeTextBig, suvTimeTextSmall, suvTimeTextBig;
 
+
+    public Date userSelDate;
+    DatePickerDialog schedulePickupTime;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -187,50 +199,59 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         //Scheduled Trip
 
 
-        requestPickupLaterBtn = (Button) findViewById(R.id.requestPickupBtn);
+        requestPickupLaterBtn = (Button) findViewById(R.id.requestPickupLaterBtn);
         //noofSeatsSpinner = (Spinner) findViewById(R.id.noofSeatsSpinner);
 
         //LinearLayout reqBooking = (LinearLayout) findViewById(R.id.reqBooking);
         requestPickupLaterBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectedCarType = Integer.parseInt(getFareDetailsBtn.getTag().toString().trim());
-                SingleInstantParameters loginCredentials = new SingleInstantParameters();
-                Log.e("selectedCarType", "" + selectedCarType);
-                loginCredentials.cabTypeId = selectedCarType;
-                Log.e("customerId", "" + Utils.verifyLogInUserMobileInstantResponse.getUserId());
-                loginCredentials.customerId = Utils.verifyLogInUserMobileInstantResponse.getUserId();
-                Log.e("from", "" + Utils.startingPlaceAddress);
-                loginCredentials.from = Utils.startingPlaceAddress;
-                Log.e("to", "" + Utils.endingPlaceAddress);
-                loginCredentials.to = Utils.endingPlaceAddress;
-                Log.e("suggestedPrice", "" + basePrice.getTag().toString().trim());
-                loginCredentials.suggestedPrice = basePrice.getTag().toString().trim();
-                Log.e("offeredPrice", "" + requestPickupBtn.getTag().toString().trim());
-                loginCredentials.offeredPrice = requestPickupBtn.getTag().toString().trim();
-                Log.e("noOfPassengers", "" + noofSeatsSpinner.getSelectedItem().toString().trim());
-                loginCredentials.noOfPassengers = Integer.parseInt(noofSeatsSpinner.getSelectedItem().toString().trim());
 
-                String km = Utils.parsedDistance.split(" ")[0].trim();
-                String kmtomile = "" + (Double.parseDouble(km.replaceAll(",", "")) * 0.6214);
-                GeoLocationRequest bookingObjects = new GeoLocationRequest();
-                Log.e("fromLatitude", "" + Utils.startingLatLan.latitude);
-                bookingObjects.fromLatitude = "" + new DecimalFormat("##.######").format(Utils.startingLatLan.latitude);
-                Log.e("fromLongitude", "" + Utils.startingLatLan.longitude);
-                bookingObjects.fromLongitude = "" + new DecimalFormat("##.######").format(Utils.startingLatLan.longitude);
-                Log.e("toLatitude", "" + Utils.endingLatLan.latitude);
-                bookingObjects.toLatitude = "" + new DecimalFormat("##.######").format(Utils.endingLatLan.latitude);
-                Log.e("toLongitude", "" + Utils.endingLatLan.longitude);
-                bookingObjects.toLongitude = "" + new DecimalFormat("##.######").format(Utils.endingLatLan.longitude);
-                Log.e("kmtomile", "" + kmtomile);
-                bookingObjects.distanceInMiles = "" + kmtomile;
+                //Call the Date Picker
 
-                loginCredentials.geoLocationRequest = bookingObjects;
+                schedulePickupTime.show();
 
-                Gson gson = new Gson();
-                String json = gson.toJson(loginCredentials);
-                Log.e("json", "" + json);
-                callRequestBooking(loginCredentials);
+//                //Show the date and time pick up window with one hour ahead of the current time.
+//                selectedCarType = Integer.parseInt(getFareDetailsBtn.getTag().toString().trim());
+//                SingleInstantParameters loginCredentials = new SingleInstantParameters();
+//                Log.e("selectedCarType", "" + selectedCarType);
+//                loginCredentials.cabTypeId = selectedCarType;
+//                Log.e("customerId", "" + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+//                loginCredentials.customerId = Utils.verifyLogInUserMobileInstantResponse.getUserId();
+//                Log.e("from", "" + Utils.startingPlaceAddress);
+//                loginCredentials.from = Utils.startingPlaceAddress;
+//                Log.e("to", "" + Utils.endingPlaceAddress);
+//                loginCredentials.to = Utils.endingPlaceAddress;
+//                Log.e("suggestedPrice", "" + basePrice.getTag().toString().trim());
+//                loginCredentials.suggestedPrice = basePrice.getTag().toString().trim();
+//                Log.e("offeredPrice", "" + requestPickupBtn.getTag().toString().trim());
+//                loginCredentials.offeredPrice = requestPickupBtn.getTag().toString().trim();
+//                Log.e("noOfPassengers", "" + noofSeatsSpinner.getSelectedItem().toString().trim());
+//                loginCredentials.noOfPassengers = Integer.parseInt(noofSeatsSpinner.getSelectedItem().toString().trim());
+//
+//                //Get the date and time.
+//                loginCredentials.bookingDateTime = "08-24-2017 21:30:00";
+//
+//                String km = Utils.parsedDistance.split(" ")[0].trim();
+//                String kmtomile = "" + (Double.parseDouble(km.replaceAll(",", "")) * 0.6214);
+//                GeoLocationRequest bookingObjects = new GeoLocationRequest();
+//                Log.e("fromLatitude", "" + Utils.startingLatLan.latitude);
+//                bookingObjects.fromLatitude = "" + new DecimalFormat("##.######").format(Utils.startingLatLan.latitude);
+//                Log.e("fromLongitude", "" + Utils.startingLatLan.longitude);
+//                bookingObjects.fromLongitude = "" + new DecimalFormat("##.######").format(Utils.startingLatLan.longitude);
+//                Log.e("toLatitude", "" + Utils.endingLatLan.latitude);
+//                bookingObjects.toLatitude = "" + new DecimalFormat("##.######").format(Utils.endingLatLan.latitude);
+//                Log.e("toLongitude", "" + Utils.endingLatLan.longitude);
+//                bookingObjects.toLongitude = "" + new DecimalFormat("##.######").format(Utils.endingLatLan.longitude);
+//                Log.e("kmtomile", "" + kmtomile);
+//                bookingObjects.distanceInMiles = "" + kmtomile;
+//
+//                loginCredentials.geoLocationRequest = bookingObjects;
+//
+//                Gson gson = new Gson();
+//                String json = gson.toJson(loginCredentials);
+//                Log.e("json", "" + json);
+//                callRequestBooking(loginCredentials);
             }
         });
 
@@ -393,6 +414,24 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 textAmount3.setTextColor(getResources().getColor(R.color.whiteColor));
             }
         });
+
+        //Create the datepikcer to select the date from current date
+
+        Calendar newCalendar  = Calendar.getInstance();
+        //TimeZone zone = .getTimeZone();
+        schedulePickupTime = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                Calendar newDate = Calendar.getInstance();
+                newDate.set(year, monthOfYear, dayOfMonth);
+                // activitydate.setText(dateFormatter.format(newDate.getTime()));
+                userSelDate = newDate.getTime();
+
+                //Call the Timer Picker Dialog
+
+                showTimePicker();
+            }
+
+        }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
     }
 
     Handler handler = new Handler();
@@ -441,6 +480,85 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
     }
 
     Dialog requestdialog;
+
+
+    public void showTimePicker(){
+
+        Calendar mcurrentTime = Calendar.getInstance();
+        int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY) + 1;
+        int minute = mcurrentTime.get(Calendar.MINUTE);
+        TimePickerDialog mTimePicker;
+        mTimePicker = new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                // eReminderTime.setText( selectedHour + ":" + selectedMinute);
+
+                //Form the DateTime with UTC TimeZone and call the Booking Serivce.
+
+                Calendar pickupDT = Calendar.getInstance();
+                pickupDT.setTimeZone(TimeZone.getTimeZone("UTC"));
+                pickupDT.setTime(userSelDate);
+
+                pickupDT.set(Calendar.HOUR_OF_DAY, selectedHour);
+                pickupDT.set(Calendar.MINUTE, selectedMinute);
+                pickupDT.set(Calendar.SECOND, 0);
+
+                SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss", Locale.ENGLISH);
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                String  selTime = sdf.format(pickupDT.getTime());
+                submitScheduleZipBook(selTime);
+            }
+        }, hour, minute, true);//Yes 24 hour time
+        mTimePicker.setTitle("Select Time");
+        mTimePicker.show();
+    }
+
+    public void submitScheduleZipBook(String schedulePickupTime){
+
+        //Show the date and time pick up window with one hour ahead of the current time.
+        selectedCarType = Integer.parseInt(getFareDetailsBtn.getTag().toString().trim());
+        SingleInstantParameters loginCredentials = new SingleInstantParameters();
+        Log.e("selectedCarType", "" + selectedCarType);
+        loginCredentials.cabTypeId = selectedCarType;
+        Log.e("customerId", "" + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+        loginCredentials.customerId = Utils.verifyLogInUserMobileInstantResponse.getUserId();
+        Log.e("from", "" + Utils.startingPlaceAddress);
+        loginCredentials.from = Utils.startingPlaceAddress;
+        Log.e("to", "" + Utils.endingPlaceAddress);
+        loginCredentials.to = Utils.endingPlaceAddress;
+        Log.e("suggestedPrice", "" + basePrice.getTag().toString().trim());
+        loginCredentials.suggestedPrice = basePrice.getTag().toString().trim();
+        Log.e("offeredPrice", "" + requestPickupBtn.getTag().toString().trim());
+        loginCredentials.offeredPrice = requestPickupBtn.getTag().toString().trim();
+        Log.e("noOfPassengers", "" + noofSeatsSpinner.getSelectedItem().toString().trim());
+        loginCredentials.noOfPassengers = Integer.parseInt(noofSeatsSpinner.getSelectedItem().toString().trim());
+
+        //Get the date and time.
+        loginCredentials.bookingDateTime = schedulePickupTime;//"08-24-2017 21:30:00";
+
+        String km = Utils.parsedDistance.split(" ")[0].trim();
+        String kmtomile = "" + (Double.parseDouble(km.replaceAll(",", "")) * 0.6214);
+        GeoLocationRequest bookingObjects = new GeoLocationRequest();
+        Log.e("fromLatitude", "" + Utils.startingLatLan.latitude);
+        bookingObjects.fromLatitude = "" + new DecimalFormat("##.######").format(Utils.startingLatLan.latitude);
+        Log.e("fromLongitude", "" + Utils.startingLatLan.longitude);
+        bookingObjects.fromLongitude = "" + new DecimalFormat("##.######").format(Utils.startingLatLan.longitude);
+        Log.e("toLatitude", "" + Utils.endingLatLan.latitude);
+        bookingObjects.toLatitude = "" + new DecimalFormat("##.######").format(Utils.endingLatLan.latitude);
+        Log.e("toLongitude", "" + Utils.endingLatLan.longitude);
+        bookingObjects.toLongitude = "" + new DecimalFormat("##.######").format(Utils.endingLatLan.longitude);
+        Log.e("kmtomile", "" + kmtomile);
+        bookingObjects.distanceInMiles = "" + kmtomile;
+
+        loginCredentials.geoLocationRequest = bookingObjects;
+
+        Gson gson = new Gson();
+        String json = gson.toJson(loginCredentials);
+        Log.e("json", "" + json);
+        callRequestBooking(loginCredentials);
+
+    }
+
 
     public void callRequestBooking(SingleInstantParameters loginCredentials) {
         if (Utils.connectivity(DirectionConfirmationActivity.this)) {

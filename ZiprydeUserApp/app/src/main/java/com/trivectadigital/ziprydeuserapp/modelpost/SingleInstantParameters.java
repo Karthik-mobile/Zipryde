@@ -31,6 +31,7 @@ public class SingleInstantParameters {
     public int isEnable;
     public String comments;
     public int overrideSessionToken;
+    public String bookingDateTime;
 
 }
 

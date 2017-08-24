@@ -176,12 +176,23 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             Log.e("bookingStatusFinal", "" + bookingStatusFinal);
             driverStatus = listOfBooking.getDriverStatusCode();
             Log.e("driverStatus", "" + driverStatus);
+
+            if (driverStatus.equals("SCHEDULED")) {
+
+                endtripBtn.setVisibility(View.GONE);
+                starttripBtn.setVisibility(View.GONE);
+                siteBtn.setText("Start Schedule");
+                siteBtn.setTag(2010);
+                siteBtn.setVisibility(View.VISIBLE);
+                confirmBtn.setVisibility(View.GONE);
+            }else
             if (driverStatus.equals("ACCEPTED")) {
                 endtripBtn.setVisibility(View.GONE);
                 starttripBtn.setVisibility(View.GONE);
                 confirmBtn.setVisibility(View.GONE);
                 callCustomer.setVisibility(View.VISIBLE);
                 siteBtn.setVisibility(View.VISIBLE);
+                siteBtn.setTag(2000);
             } else if (driverStatus.equals("ON_TRIP")) {
                 confirmBtn.setVisibility(View.GONE);
                 endtripBtn.setVisibility(View.VISIBLE);
@@ -295,6 +306,13 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        /*************/
+        /*
+
+        TODO:Need to change this for the scheduled trip.
+
+         */
+
         acceptBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -321,6 +339,8 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             }
         });
 
+
+
         starttripBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -340,20 +360,37 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             }
         });
 
+        /*************/
+        /*
+
+        TODO:Need to change this for the scheduled trip. Because , this button will act as ACCEPTED button otehrwise On Site.
+
+         */
+
         siteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (intent.hasExtra("type")) {
+
+
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
                     loginCredentials.bookingId = bookingIdFinal;
-                    loginCredentials.driverStatus = "ON_SITE";
+                    if((int)v.getTag() == 2010) {
+                        loginCredentials.driverStatus = "SCHEDULED";
+                    }else{
+                        loginCredentials.driverStatus = "ON_SITE";
+                    }
                     updateBookingDriverStatus(loginCredentials);
                 } else {
                     SingleInstantParameters loginCredentials = new SingleInstantParameters();
                     loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
                     loginCredentials.bookingId = bookingIdFinal;
-                    loginCredentials.driverStatus = "ON_SITE";
+                    if((int)v.getTag() == 2010) {
+                        loginCredentials.driverStatus = "SCHEDULED";
+                    }else{
+                        loginCredentials.driverStatus = "ON_SITE";
+                    }
                     updateBookingDriverStatus(loginCredentials);
                 }
             }
@@ -632,12 +669,26 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                         Log.e("driverStatus", "" + driverStatus);
                         if (driverStatus != null) {
                             if (!driverStatus.equalsIgnoreCase("null")) {
+
+                                if (driverStatus.equals("SCHEDULED")) {
+
+                                    endtripBtn.setVisibility(View.GONE);
+                                    starttripBtn.setVisibility(View.GONE);
+                                    siteBtn.setText("Start Schedule");
+                                    siteBtn.setTag(2010);
+                                    siteBtn.setVisibility(View.VISIBLE);
+                                    confirmBtn.setVisibility(View.GONE);
+                                }else
+
                                 if (driverStatus.equals("ACCEPTED")) {
                                     endtripBtn.setVisibility(View.GONE);
                                     starttripBtn.setVisibility(View.GONE);
                                     siteBtn.setVisibility(View.VISIBLE);
                                     confirmBtn.setVisibility(View.GONE);
                                     callCustomer.setVisibility(View.VISIBLE);
+
+                                    siteBtn.setTag(2000);
+
                                 } else if (driverStatus.equals("ON_SITE")) {
                                     confirmBtn.setVisibility(View.GONE);
                                     endtripBtn.setVisibility(View.GONE);
@@ -786,6 +837,16 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                         Log.e("BookingStatus", "" + Utils.updateBookingDriverStatusInstantResponse.getBookingStatus());
                         bookingStatus.setText(Utils.updateBookingDriverStatusInstantResponse.getBookingStatus());
                         driverStatus = Utils.updateBookingDriverStatusInstantResponse.getDriverStatusCode();
+
+                        if (loginCredentials.driverStatus.equals("SCHEDULED")) {
+
+                            endtripBtn.setVisibility(View.GONE);
+                            starttripBtn.setVisibility(View.GONE);
+                            siteBtn.setText("Start Schedule");
+                            siteBtn.setTag(2010);
+                            siteBtn.setVisibility(View.VISIBLE);
+                            confirmBtn.setVisibility(View.GONE);
+                        }else
                         if (loginCredentials.driverStatus.equals("ACCEPTED")) {
                             if(siteBtn.getVisibility() == View.VISIBLE) {
                                 showInfoDlg(getString(R.string.success), getString(R.string.usermsg_statusupdate), getString(R.string.btn_ok), "success");
@@ -794,6 +855,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                             starttripBtn.setVisibility(View.GONE);
                             siteBtn.setVisibility(View.VISIBLE);
                             confirmBtn.setVisibility(View.GONE);
+                            siteBtn.setTag(2000);
                         } else if (loginCredentials.driverStatus.equals("ON_SITE")) {
                             confirmBtn.setVisibility(View.GONE);
                             endtripBtn.setVisibility(View.GONE);

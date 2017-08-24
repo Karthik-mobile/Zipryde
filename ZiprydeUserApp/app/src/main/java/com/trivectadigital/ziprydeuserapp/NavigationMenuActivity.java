@@ -100,6 +100,9 @@ public class NavigationMenuActivity extends AppCompatActivity
         LinearLayout cashappLayout = (LinearLayout) headerview.findViewById(R.id.cashAppLayout);
         cashappLayout.setOnClickListener(this);
 
+        LinearLayout sRideLayout = (LinearLayout) headerview.findViewById(R.id.scheduledLayout);
+        sRideLayout.setOnClickListener(this);
+
         TextView editProfile = (TextView) headerview.findViewById(R.id.editProfile);
         editProfile.setOnClickListener(this);
         TextView buildNumber = (TextView) headerview.findViewById(R.id.buildNumber);
@@ -245,6 +248,25 @@ public class NavigationMenuActivity extends AppCompatActivity
         ft.commit();
     }
 
+    public void showScheduledFragment() {
+        // Creating a fragment object
+        ScheduledZipRydeFragment sFragment = new ScheduledZipRydeFragment();
+        // Creating a Bundle object
+        Bundle data = new Bundle();
+        // Setting the index of the currently selected item of mDrawerList
+//            data.putInt("position", position);
+        // Setting the position to the fragment
+        sFragment.setArguments(data);
+        // Getting reference to the FragmentManager
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        // Creating a fragment transaction
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        // Adding a fragment to the fragment transaction
+        ft.replace(R.id.content_frame, sFragment);
+        // Committing the transaction
+        ft.commit();
+    }
+
     @Override
     public void onClick(View v) {
         toolbar.setVisibility(View.VISIBLE);
@@ -273,6 +295,13 @@ public class NavigationMenuActivity extends AppCompatActivity
                 showHideNavigationMenu();
                 showHistoryFragment();
                 break;
+
+            case R.id.scheduledLayout:
+                titleText.setText("Scheduled ZipRyde Requests");
+                showHideNavigationMenu();
+                showScheduledFragment();
+                break;
+
             case R.id.aboutLayout:
                 //titleText.setText("About");
                 showHideNavigationMenu();

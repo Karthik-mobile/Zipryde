@@ -14,7 +14,7 @@
         android:layout_marginTop="10dp">
 
         <LinearLayout
-            android:id="@+id/logoutLayouttop"
+            android:id="@+id/logoutLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -24,7 +24,7 @@
             android:orientation="vertical"
             android:layout_marginLeft="10dp"
             android:layout_alignParentLeft="true"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <ImageView
                 android:layout_width="wrap_content"
@@ -50,9 +50,12 @@
             android:textSize="18dp"
             android:text="V2.4"
             android:layout_marginLeft="10dp"
-            android:layout_alignRight="@+id/logoutLayouttop"
             android:textStyle="bold"
-            android:visibility="visible"/>
+            android:visibility="visible"
+            android:layout_alignBottom="@+id/logoutLayout"
+            android:layout_toRightOf="@+id/logoutLayout"
+            android:layout_toEndOf="@+id/logoutLayout"
+            android:layout_marginStart="10dp" />
 
         <RelativeLayout
             android:id="@+id/onofflineLay"
@@ -292,7 +295,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/historyLayout"
+                android:id="@+id/rideLaterLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -300,6 +303,32 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:src="@drawable/ic_alarm_white_48dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Scheduled ZipRyde"
+                    android:textColor="@color/whiteColor"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/historyLayout1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <ImageView
                     android:layout_width="70dp"
@@ -323,6 +352,32 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
             android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:id="@+id/historyLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="10dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:src="@drawable/historyicon" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="History"
+                    android:textColor="@color/whiteColor"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/notificationLayout"
@@ -350,14 +405,15 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/paymentLayout"
+                android:id="@+id/paymentLayout1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="10dp"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <ImageView
                     android:layout_width="70dp"
@@ -387,11 +443,36 @@
 
 
             <LinearLayout
+                android:id="@+id/paymentLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:src="@drawable/ic_cash_dashboard" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Payment Setup"
+                    android:textColor="@color/whiteColor"
+                    android:textSize="18dp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/helpLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginBottom="5dp"
+
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
@@ -413,14 +494,15 @@
 
 
             <LinearLayout
-                android:id="@+id/logoutLayout"
+                android:id="@+id/logoutLayoutmenu"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="10dp"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <ImageView
                     android:layout_width="70dp"

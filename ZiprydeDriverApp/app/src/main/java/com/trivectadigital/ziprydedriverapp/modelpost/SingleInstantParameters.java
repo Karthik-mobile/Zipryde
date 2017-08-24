@@ -31,4 +31,5 @@ public class SingleInstantParameters {
     public String paidDateTime;
     public String deviceToken;
     public int overrideSessionToken;
+    public String bookingStatus;
 }

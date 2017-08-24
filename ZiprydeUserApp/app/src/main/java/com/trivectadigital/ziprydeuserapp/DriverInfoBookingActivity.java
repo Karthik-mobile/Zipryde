@@ -1,5 +1,6 @@
 package com.trivectadigital.ziprydeuserapp;
 
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -67,6 +68,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,6 +102,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     public static final int ACTIONCALL = 0x1;
     Polyline polyline;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -241,7 +244,12 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                 inputDialog.show();
             }
         });
+
+
+
     }
+
+
 
     private void saveLostItem(SingleInstantParameters loginCredentials) {
         if (Utils.connectivity(DriverInfoBookingActivity.this)) {
@@ -349,7 +357,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             }
 
             if (bookingStatusFinal != null) {
-                if (bookingStatusFinal.equals("SCHEDULED")) {
+                if (bookingStatusFinal.equals("SCHEDULED") || bookingStatusFinal.equals("ACCEPTED")) {
                     cancelBookingLay.setVisibility(View.VISIBLE);
                     callDriverImg.setVisibility(View.VISIBLE);
                     callDriverText.setVisibility(View.VISIBLE);
@@ -412,7 +420,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                 }
             }
             if (bookingStatusFinal != null) {
-                if (bookingStatusFinal.equals("SCHEDULED")) {
+                if (bookingStatusFinal.equals("SCHEDULED") || bookingStatusFinal.equals("ACCEPTED") ) {
                     cancelBookingLay.setVisibility(View.VISIBLE);
                     callDriverImg.setVisibility(View.VISIBLE);
                     callDriverText.setVisibility(View.VISIBLE);
@@ -564,7 +572,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                             }
                         }
                         if (bookingStatusFinal != null) {
-                            if (bookingStatusFinal.equals("SCHEDULED")) {
+                            if (bookingStatusFinal.equals("SCHEDULED") || bookingStatusFinal.equals("ACCEPTED")) {
                                 cancelBookingLay.setVisibility(View.VISIBLE);
                                 callDriverImg.setVisibility(View.VISIBLE);
                                 callDriverText.setVisibility(View.VISIBLE);
@@ -693,7 +701,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                             }
                         }
                         if (bookingStatusFinal != null) {
-                            if (bookingStatusFinal.equals("SCHEDULED")) {
+                            if (bookingStatusFinal.equals("SCHEDULED") || bookingStatusFinal.equals("ACCEPTED")) {
                                 cancelBookingLay.setVisibility(View.VISIBLE);
                                 callDriverImg.setVisibility(View.VISIBLE);
                                 callDriverText.setVisibility(View.VISIBLE);

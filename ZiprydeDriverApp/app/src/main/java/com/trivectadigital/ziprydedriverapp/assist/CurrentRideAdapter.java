@@ -110,6 +110,13 @@ public class CurrentRideAdapter extends BaseAdapter {
         String pickupLocation = currentRideDetails.getFrom();
         String dropLocation = currentRideDetails.getTo();
         String bookingStatus = currentRideDetails.getBookingStatus();
+        //Check whether the request is scheduled or now
+        //If scheduled , please change the color of the button and time.
+        if(currentRideDetails.getBookingStatusCode().equalsIgnoreCase("SCHEDULED")){
+
+            view.setBackgroundColor(Color.rgb(51,181,229));
+
+        }
 
         Calendar calendar = Calendar.getInstance();
         TimeZone zone = calendar.getTimeZone();
@@ -133,14 +140,22 @@ public class CurrentRideAdapter extends BaseAdapter {
         holder.positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SingleInstantParameters loginCredentials = new SingleInstantParameters();
-                loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
-                loginCredentials.bookingId = currentRideDetails.getBookingId();
-                loginCredentials.driverStatus = "ACCEPTED";
-                Gson gson = new Gson();
-                String json = gson.toJson(loginCredentials);
-                Log.e("json", "" + json);
-                updateBookingDriverStatus(loginCredentials, position);
+
+                //Check if the ride is an scheduled ride then alert the driver for the warning
+               // if(){
+
+                    showInfoDlg(context.getString(R.string.warning),"" , context.getString(R.string.btn_ok), "schedule", position);
+
+                //}else {
+                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                    loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
+                    loginCredentials.bookingId = currentRideDetails.getBookingId();
+                    loginCredentials.driverStatus = "ACCEPTED";
+                    Gson gson = new Gson();
+                    String json = gson.toJson(loginCredentials);
+                    Log.e("json", "" + json);
+                    updateBookingDriverStatus(loginCredentials, position);
+               // }
             }
         });
         holder.newnegativeBtn.setOnClickListener(new View.OnClickListener() {
@@ -278,6 +293,18 @@ public class CurrentRideAdapter extends BaseAdapter {
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     context.startActivity(ide);
                     // finish();
+                }else if(navType.equalsIgnoreCase("schedule")){
+
+                    final ListOfRequestedBooking currentRideDetails = currentRideDetailsList.get(position);
+                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                    loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
+                    loginCredentials.bookingId = currentRideDetails.getBookingId();
+                    loginCredentials.driverStatus = "SCHEDULE";
+                    Gson gson = new Gson();
+                    String json = gson.toJson(loginCredentials);
+                    Log.e("json", "" + json);
+                    updateBookingDriverStatus(loginCredentials, position);
+
                 }
             }
         });

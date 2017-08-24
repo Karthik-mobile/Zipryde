@@ -77,4 +77,7 @@ public interface ZiprydeApiInterface {
 
     @POST("logoutUser")
     Call<Void> logoutUser(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
+
+    @POST("getBookingByBookingStatusAndUserId")
+    Call<LinkedList<ListOfBooking>> getBookingByBookingStatusAndUserId(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 }
