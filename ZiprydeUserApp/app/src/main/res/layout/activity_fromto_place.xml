@@ -84,7 +84,9 @@
                             android:focusableInTouchMode="false"
                             android:hint="Enter place to search"
                             android:paddingLeft="10dp"
-                            android:maxLines="1" />
+                            android:maxLines="1"
+                            android:inputType="text"
+                            />
 
                         <ImageView
                             android:id="@+id/clearsearchImageView"

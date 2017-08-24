@@ -71,6 +71,8 @@ public class SingleInstantResponse {
     private GeoLocationRequest geoLocationResponse;
     @SerializedName("driverMobileNumber")
     private String driverMobileNumber;
+    @SerializedName("accessToken")
+    private String accessToken;
 
     public String getBookingStatusCode() {
         return bookingStatusCode;
@@ -310,5 +312,13 @@ public class SingleInstantResponse {
 
     public void setEmailId(String emailId) {
         this.emailId = emailId;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String token) {
+        this.accessToken = token;
     }
 }

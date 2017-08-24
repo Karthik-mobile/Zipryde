@@ -10,17 +10,18 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -30,18 +31,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -95,6 +96,8 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     ImageView callDriverImg;
 
+    PopupWindow pushNotificationPopwindow;
+
     public static final int ACTIONCALL = 0x1;
     Polyline polyline;
 
@@ -103,7 +106,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_info_booking);
 
-        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+        apiService = ZiprydeApiClient.getClient(Utils.verifyLogInUserMobileInstantResponse.getAccessToken()).create(ZiprydeApiInterface.class);
 
         driverNameText = (TextView) findViewById(R.id.driverNameText);
         cabTypeText = (TextView) findViewById(R.id.cabTypeText);
@@ -252,7 +255,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<SingleInstantResponse> call = apiService.saveLostItem(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.saveLostItem(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -268,7 +271,17 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
@@ -280,7 +293,8 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    //Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -365,6 +379,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                 reportLay.setVisibility(View.GONE);
             }
 
+
             if (bookingStatusFinal.equals("COMPLETED")) {
                 Intent ide = new Intent(DriverInfoBookingActivity.this, CashDisplyActivity.class);
                 ide.putExtra("bookingId", "" + bookingIdFinal);
@@ -441,7 +456,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             }
         }
 
-        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID")) {
+        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("COMPLETED")) {
             SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
             editor.putString("bookingId", bookingIdFinal);
             editor.commit();
@@ -468,6 +483,10 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         Log.e("Thread message", "" + messageReceivedEvent.message);
         Log.e("Thread title", "" + messageReceivedEvent.title);
         Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
+
+        Toast.makeText(this,messageReceivedEvent.message,Toast.LENGTH_SHORT).show();
+
+        //onShowPopup(view,messageReceivedEvent.message);
         if (!messageReceivedEvent.title.equals("BOOKING_PAYMENT_SUCCESS")) {
             SingleInstantParameters loginCredentials = new SingleInstantParameters();
             loginCredentials.bookingId = "" + bookingIdFinal;
@@ -514,7 +533,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -600,7 +619,17 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                         dialog.dismiss();
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
@@ -612,7 +641,8 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                   // Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -632,7 +662,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -704,7 +734,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                             getGeoLocationByDriverId(loginCredentials);
                         }
 
-                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID")) {
+                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("COMPLETED") && !bookingStatusFinal.equals("PAID") ) {
                             SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                             editor.putString("bookingId", bookingIdFinal);
                             editor.commit();
@@ -737,7 +767,17 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                         dialog.dismiss();
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
@@ -749,7 +789,8 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    //Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -769,7 +810,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<SingleInstantResponse> call = apiService.updateBookingStatus(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.updateBookingStatus(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -786,7 +827,17 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
@@ -798,7 +849,8 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                   // Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -812,7 +864,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     @Override
     public void onBackPressed() {
-        if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED")) {
+        if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED") || bookingStatusFinal.equals("COMPLETED") ) {
             if (handler != null && finalizer != null) {
                 handler.removeCallbacks(finalizer);
             }
@@ -836,7 +888,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             Gson gson = new Gson();
             String json = gson.toJson(loginCredentials);
             Log.e("GeoLocationId json", "" + json);
-            Call<SingleInstantResponse> call = apiService.getGeoLocationByDriverId(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.getGeoLocationByDriverId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -854,10 +906,19 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                             if (driverMarker != null) {
 //                                driverMarker.remove();
                                 LatLng perLatLng = driverMarker.getPosition();
+                                driverMarker.setAnchor(0.5f,0.5f);
                                 driverLatLng = new LatLng(Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLatitude()), Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLongitude()));
                                 float toRotation = bearingBetweenLocations(perLatLng, driverLatLng);
                                 rotateMarker(driverMarker, toRotation);
                                 animateMarker(driverLatLng, false);
+                                //Move the camera along with this position.
+                                mMap.moveCamera(CameraUpdateFactory
+                                        .newCameraPosition
+                                                (new CameraPosition.Builder().
+                                                        target(driverLatLng)
+                                                                .zoom(15.5f)
+                                                                .build()));
+
                             } else {
                                 driverLatLng = new LatLng(Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLatitude()), Double.parseDouble(Utils.getGeoLocationByDriverIdResponse.getLongitude()));
                                 driverMarker = mMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f).position(driverLatLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
@@ -904,7 +965,17 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
@@ -915,7 +986,8 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                 public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
-                    Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    //Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -1029,7 +1101,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("error") || navType.equalsIgnoreCase("server") || navType.equals("requestCancelled")) {
+        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("logout") || navType.equalsIgnoreCase("error") || navType.equalsIgnoreCase("server") || navType.equals("requestCancelled")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -1058,6 +1130,20 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+
+                if(navType.equalsIgnoreCase("logout")){
+                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
+                    SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                    deditor.putString("disclaimer", "");
+                    deditor.commit();
+                    Intent ide = new Intent(DriverInfoBookingActivity.this, LoginActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    // finish();
+                }
             }
         });
 
@@ -1343,4 +1429,66 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             }
         }
     }
+
+    // call this method when required to show popup
+    public void onShowPopup(View v){
+
+        LayoutInflater layoutInflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        // inflate the custom popup layout
+        final View inflatedView = layoutInflater.inflate(R.layout.localpushmsg_popupwindow_layout, null,false);
+        // find the ListView in the popup layout
+
+
+        // get device size
+        Display display = getWindowManager().getDefaultDisplay();
+        final Point size = new Point();
+        display.getSize(size);
+        // mDeviceHeight = size.y;
+
+
+        // fill the data to the list items
+        // setSimpleList(listView);
+
+        TextView msg  = (TextView) inflatedView.findViewById(R.id.pushmsgText);
+
+//        Button paypalBtn = (Button) inflatedView.findViewById(R.id.paypalBtn);
+//        paypalBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.com/us/home"));
+//                startActivity(browserIntent);
+//
+//
+//
+//            }
+//        });
+//
+//        Button cashAppBtn = (Button) inflatedView.findViewById(R.id.cashBtn);
+//        cashAppBtn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cash.me/app/WTXRWNB"));
+//                startActivity(browserIntent);
+//
+//
+//
+//            }
+//        });
+
+
+
+        // set height depends on the device size
+        pushNotificationPopwindow = new PopupWindow(inflatedView, size.x - 50,size.y - 400, true );
+        // set a background drawable with rounders corners
+        //pushNotificationPopwindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.paymentsetup_popup_shape));
+        // make it focusable to show the keyboard to enter in `EditText`
+        pushNotificationPopwindow.setFocusable(true);
+        // make it outside touchable to dismiss the popup window
+        pushNotificationPopwindow.setOutsideTouchable(true);
+
+        // show the popup at bottom of the screen and set some margin at bottom ie,
+        pushNotificationPopwindow.showAtLocation(v, Gravity.BOTTOM, 0,100);
+    }
+
 }

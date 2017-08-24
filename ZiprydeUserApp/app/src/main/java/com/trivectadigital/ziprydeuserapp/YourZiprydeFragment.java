@@ -3,6 +3,7 @@ package com.trivectadigital.ziprydeuserapp;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -26,7 +27,6 @@ import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.MessageReceivedEvent;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.assist.ZiprydeHistoryAdapter;
-import com.trivectadigital.ziprydeuserapp.assist.ZiprydeHistoryDetails;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfBooking;
 import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
 
@@ -100,7 +100,7 @@ public class YourZiprydeFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_yourzipryde, container, false);
 
-        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+        apiService = ZiprydeApiClient.getClient(Utils.verifyLogInUserMobileInstantResponse.getAccessToken()).create(ZiprydeApiInterface.class);
         history_list = (ListView) view.findViewById(R.id.history_list);
 
         history_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -111,9 +111,9 @@ public class YourZiprydeFragment extends Fragment {
                 String bookingStatus = listOfBooking.getBookingStatusCode();
                 if (driverStatus != null) {
                     if (bookingStatus.equals("CANCELLED")) {
-                        showInfoDlg("Information", "This booking has been cancelled. Please try some other bookings.", "OK", "info");
+                        showInfoDlg(getString(R.string.information),getString(R.string.usermsg_bookingcancelled), getString(R.string.btn_ok), "info");
                     } else if (driverStatus.equals("REQUESTED")) {
-                        showInfoDlg("Information", "Please wait till the driver accepts your request", "OK", "info");
+                        showInfoDlg(getString(R.string.information), getString(R.string.usermsg_bookingsuccessfull_waitdriver), getString(R.string.btn_ok), "info");
                     } else {
                         Intent ide = new Intent(getActivity(), DriverInfoBookingActivity.class);
                         ide.putExtra("position", position);
@@ -123,9 +123,9 @@ public class YourZiprydeFragment extends Fragment {
                     }
                 } else {
                     if (bookingStatus.equals("CANCELLED")) {
-                        showInfoDlg("Information", "This booking has been cancelled. Please try some other bookings.", "OK", "info");
+                        showInfoDlg(getString(R.string.information),getString(R.string.usermsg_bookingcancelled), getString(R.string.btn_ok), "info");
                     } else {
-                        showInfoDlg("Information", "Please wait till the driver accepts your request", "OK", "info");
+                        showInfoDlg(getString(R.string.information), getString(R.string.usermsg_bookingsuccessfull_waitdriver), getString(R.string.btn_ok), "info");
                     }
                 }
             }
@@ -175,7 +175,7 @@ public class YourZiprydeFragment extends Fragment {
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<LinkedList<ListOfBooking>> call = apiService.getBookingByUserId(loginCredentials);
+            Call<LinkedList<ListOfBooking>> call = apiService.getBookingByUserId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<LinkedList<ListOfBooking>>() {
                 @Override
                 public void onResponse(Call<LinkedList<ListOfBooking>> call, Response<LinkedList<ListOfBooking>> response) {
@@ -199,7 +199,17 @@ public class YourZiprydeFragment extends Fragment {
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
@@ -211,7 +221,10 @@ public class YourZiprydeFragment extends Fragment {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+
+                   // Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -231,7 +244,7 @@ public class YourZiprydeFragment extends Fragment {
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equals("info") || navType.equalsIgnoreCase("server")) {
+        if (navType.equals("info") || navType.equalsIgnoreCase("server")|| navType.equalsIgnoreCase("logout")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -244,6 +257,19 @@ public class YourZiprydeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+                if(navType.equalsIgnoreCase("logout")){
+                    SharedPreferences.Editor editor = getActivity().getSharedPreferences("LoginCredentials", getActivity().MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
+                    SharedPreferences.Editor deditor = getActivity().getSharedPreferences("DisclaimerCredentials", getActivity().MODE_PRIVATE).edit();
+                    deditor.putString("disclaimer", "");
+                    deditor.commit();
+                    Intent ide = new Intent(getActivity(), LoginActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    // finish();
+                }
             }
         });
 

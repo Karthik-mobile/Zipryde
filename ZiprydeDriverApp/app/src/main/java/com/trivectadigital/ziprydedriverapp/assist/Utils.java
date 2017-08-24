@@ -12,7 +12,12 @@ import com.trivectadigital.ziprydedriverapp.modelget.ListOfRequestedBooking;
 import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 /**
@@ -100,5 +105,26 @@ public class Utils {
             Log.d("ConStatus", "No Active Connection");
             return false;
         }
+    }
+
+    public static String UTCtoSysTime(String utcTime){
+
+
+        Calendar calendar = Calendar.getInstance();
+        TimeZone zone = calendar.getTimeZone();
+        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+        //sdf.setTimeZone(zone);
+        Date sysDate = new Date();
+        try {
+            sysDate = sdf.parse(utcTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        SimpleDateFormat sdf1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm");
+        sdf1.setTimeZone(zone);
+        String systemTime = sdf1.format(sysDate);
+
+
+        return systemTime;
     }
 }

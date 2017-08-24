@@ -13,6 +13,7 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
@@ -39,6 +40,8 @@ public interface ZiprydeApiInterface {
     Call<SingleInstantResponse> saveUpdateUser(@Part("userType") RequestBody userType, @Part("firstName") RequestBody firstName,
                                          @Part("lastName") RequestBody lastName, @Part("emailId") RequestBody emailId, @Part("mobileNumber") RequestBody mobileNumber, @Part("userId") RequestBody userId, @Part("alternateNumber") RequestBody alternateNumber);
 
+
+    //@Header("Content-Range") String contentRange
     @POST("verifyLogInUser")
     Call<SingleInstantResponse> verifyLogInUser(@Body SingleInstantParameters parameters);
 
@@ -46,29 +49,32 @@ public interface ZiprydeApiInterface {
     Call<SingleInstantResponse> updatePasswordByUserAndType(@Body SingleInstantParameters parameters);
 
     @GET("getAllCabTypes")
-    Call<LinkedList<ListOfCarTypes>> getAllCabTypes();
+    Call<LinkedList<ListOfCarTypes>> getAllCabTypes(@Header("access-token") String contentRange);
 
     @POST("getAllNYOPByCabTypeDistAndNoOfPassenger")
-    Call<LinkedList<ListOfFairEstimate>> getAllNYOPByCabTypeAndDistance(@Body SingleInstantParameters parameters);
+    Call<LinkedList<ListOfFairEstimate>> getAllNYOPByCabTypeAndDistance(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("getNearByActiveDrivers")
-    Call<LinkedList<ListOfCurrentCabs>> getNearByActiveDrivers(@Body SingleInstantParameters parameters);
+    Call<LinkedList<ListOfCurrentCabs>> getNearByActiveDrivers(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("requestBooking")
-    Call<SingleInstantResponse> requestBooking(@Body SingleInstantParameters parameters);
+    Call<SingleInstantResponse> requestBooking(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("getBookingByBookingId")
-    Call<SingleInstantResponse> getBookingByBookingId(@Body SingleInstantParameters parameters);
+    Call<SingleInstantResponse> getBookingByBookingId(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("getBookingByuserId")
-    Call<LinkedList<ListOfBooking>> getBookingByUserId(@Body SingleInstantParameters parameters);
+    Call<LinkedList<ListOfBooking>> getBookingByUserId(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("getGeoLocationByDriverId")
-    Call<SingleInstantResponse> getGeoLocationByDriverId(@Body SingleInstantParameters parameters);
+    Call<SingleInstantResponse> getGeoLocationByDriverId(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("updateBookingStatus")
-    Call<SingleInstantResponse> updateBookingStatus(@Body SingleInstantParameters parameters);
+    Call<SingleInstantResponse> updateBookingStatus(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("saveLostItem")
-    Call<SingleInstantResponse> saveLostItem(@Body SingleInstantParameters parameters);
+    Call<SingleInstantResponse> saveLostItem(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
+
+    @POST("logoutUser")
+    Call<Void> logoutUser(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 }

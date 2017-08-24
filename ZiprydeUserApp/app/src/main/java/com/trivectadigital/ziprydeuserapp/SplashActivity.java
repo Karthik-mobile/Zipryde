@@ -11,19 +11,16 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.location.Location;
 import android.location.LocationManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -34,14 +31,10 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.assist.NotificationUtils;
@@ -133,11 +126,11 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
                     if (statusOfGPS) {
                         gotoNextActivity();
                     } else {
-                        showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
+                        showInfoDlg(getString(R.string.information), getString(R.string.usermsg_locationturnon), getString(R.string.btn_open), "gps");
                     }
                 }
             } else {
-                showInfoDlg("Information", "Either there is no network connectivity or server is not available.. Please try again later..", "OK", "network");
+                showInfoDlg(getString(R.string.information), getString(R.string.errmsg_network_noconnection), getString(R.string.btn_ok), "network");
             }
         }
     }
@@ -252,7 +245,7 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
                         gotoNextActivity();
                     }else{
                         //askSwitchOnGPS();
-                        showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
+                        showInfoDlg(getString(R.string.information), getString(R.string.usermsg_locationturnon), getString(R.string.btn_open), "gps");
                     }
                     break;
             }
@@ -293,7 +286,7 @@ public class SplashActivity extends AppCompatActivity implements ResultCallback<
             if(statusOfGPS){
                 gotoNextActivity();
             }else{
-                showInfoDlg("Information", "Please turn ON location services in your device.", "OPEN", "gps");
+                showInfoDlg(getString(R.string.information), getString(R.string.usermsg_locationturnon), getString(R.string.btn_open), "gps");
             }
         }
     }

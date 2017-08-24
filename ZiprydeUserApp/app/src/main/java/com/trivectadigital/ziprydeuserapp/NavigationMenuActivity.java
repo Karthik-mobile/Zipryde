@@ -25,12 +25,18 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
+import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class NavigationMenuActivity extends AppCompatActivity
                                                 implements View.OnClickListener {
@@ -45,7 +51,7 @@ public class NavigationMenuActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigationmenu);
-        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+        apiService = ZiprydeApiClient.getClient(Utils.verifyLogInUserMobileInstantResponse.getAccessToken()).create(ZiprydeApiInterface.class);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -341,17 +347,7 @@ public class NavigationMenuActivity extends AppCompatActivity
             public void onClick(View v) {
                 dialog.dismiss();
                 if(navType.equalsIgnoreCase("logout")){
-                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
-                    editor.remove("phoneNumber");
-                    editor.remove("password");
-                    editor.commit();
-                    SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
-                    editor.putString("disclaimer", "");
-                    deditor.commit();
-                    Intent ide = new Intent(NavigationMenuActivity.this, LoginActivity.class);
-                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(ide);
-                    finish();
+                    sendLogout();
                 }
             }
         });
@@ -367,5 +363,67 @@ public class NavigationMenuActivity extends AppCompatActivity
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
+    }
+
+    private void sendLogout(){
+
+        if (Utils.connectivity(NavigationMenuActivity.this)) {
+            SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+            Gson gson = new Gson();
+            String json = prefs.getString("LoginCredentials", "");
+            Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
+            Log.e("UserId", "updateDriverStatus - " + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+            Log.e("active", "updateDriverStatus - " + 0);
+            final Dialog dialog = new Dialog(NavigationMenuActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.userId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
+
+
+            Call<Void> call = apiService.logoutUser(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    int statusCode = response.code();
+
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+
+                        SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                        editor.remove("phoneNumber");
+                        editor.remove("password");
+                        editor.commit();
+                        SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                        deditor.putString("disclaimer", "");
+                        deditor.commit();
+                        Intent ide = new Intent(NavigationMenuActivity.this, LoginActivity.class);
+                        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(ide);
+                        finish();
+
+                        //Call Logout service from here.
+
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    //Toast.makeText(NavigationMenuActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(NavigationMenuActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 }

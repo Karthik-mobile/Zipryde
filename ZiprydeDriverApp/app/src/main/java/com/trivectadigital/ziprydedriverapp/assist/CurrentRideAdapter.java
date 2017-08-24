@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
-import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,9 +21,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.trivectadigital.ziprydedriverapp.CashDisplyActivity;
-import com.trivectadigital.ziprydedriverapp.HistoryActivity;
-import com.trivectadigital.ziprydedriverapp.NewDashBoardActivity;
 import com.trivectadigital.ziprydedriverapp.OnGoingBookingActivity;
 import com.trivectadigital.ziprydedriverapp.R;
 import com.trivectadigital.ziprydedriverapp.RideActivity;
@@ -38,8 +34,10 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -111,10 +109,13 @@ public class CurrentRideAdapter extends BaseAdapter {
         String dropLocation = currentRideDetails.getTo();
         String bookingStatus = currentRideDetails.getBookingStatus();
 
+        Calendar calendar = Calendar.getInstance();
+        TimeZone zone = calendar.getTimeZone();
         SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
         try {
             Date dat = sdf.parse(dateTime);
             sdf = new SimpleDateFormat("EEE MMM dd HH:mm");
+            sdf.setTimeZone(zone);
             dateTime = sdf.format(dat);
         } catch (ParseException ex) {
             ex.printStackTrace();
@@ -161,7 +162,7 @@ public class CurrentRideAdapter extends BaseAdapter {
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<SingleInstantResponse> call = apiService.updateBookingDriverStatus(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.updateBookingDriverStatus(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {

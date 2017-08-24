@@ -138,7 +138,7 @@ public class CashDisplyActivity extends AppCompatActivity {
             dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
-            Call<Void> call = apiService.savePayment(loginCredentials);
+            Call<Void> call = apiService.savePayment(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
@@ -171,7 +171,8 @@ public class CashDisplyActivity extends AppCompatActivity {
                     // Log error here since request failed
                     dialog.dismiss();
                     Log.e("onFailure", t.toString());
-                    Toast.makeText(CashDisplyActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    //Toast.makeText(CashDisplyActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -197,7 +198,7 @@ public class CashDisplyActivity extends AppCompatActivity {
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server")) {
+        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("logout")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -222,6 +223,19 @@ public class CashDisplyActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 dialog.dismiss();
+                if(navType.equalsIgnoreCase("logout")){
+                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
+                    SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                    deditor.putString("disclaimer", "");
+                    deditor.commit();
+                    Intent ide = new Intent(CashDisplyActivity.this, LoginActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    // finish();
+                }
             }
         });
 

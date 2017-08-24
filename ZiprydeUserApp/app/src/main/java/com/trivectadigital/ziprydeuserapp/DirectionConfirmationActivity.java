@@ -94,7 +94,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_direction_confirmation);
 
-        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+        apiService = ZiprydeApiClient.getClient(Utils.verifyLogInUserMobileInstantResponse.getAccessToken()).create(ZiprydeApiInterface.class);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -403,7 +403,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             requestdialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             requestdialog.show();
 
-            Call<SingleInstantResponse> call = apiService.requestBooking(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.requestBooking(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -434,7 +434,17 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         requestdialog.dismiss();
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
@@ -446,7 +456,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     requestdialog.dismiss();
-                    Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    //Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -466,7 +477,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -502,7 +513,17 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         dialog.dismiss();
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            }
                         } catch (Exception e) {
                             showInfoDlg("Error..", getString(R.string.errmsg_network_noconnection), "OK", "server");
                         }
@@ -514,7 +535,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                   // Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -534,7 +556,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<SingleInstantResponse> call = apiService.updateBookingStatus(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.updateBookingStatus(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -554,7 +576,17 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
@@ -566,7 +598,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                   // Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -586,7 +619,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<LinkedList<ListOfCarTypes>> call = apiService.getAllCabTypes();
+            Call<LinkedList<ListOfCarTypes>> call = apiService.getAllCabTypes(Utils.verifyLogInUserMobileInstantResponse.getAccessToken());
             call.enqueue(new Callback<LinkedList<ListOfCarTypes>>() {
                 @Override
                 public void onResponse(Call<LinkedList<ListOfCarTypes>> call, Response<LinkedList<ListOfCarTypes>> response) {
@@ -631,7 +664,17 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
@@ -643,7 +686,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    //Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -663,7 +707,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<LinkedList<ListOfFairEstimate>> call = apiService.getAllNYOPByCabTypeAndDistance(singleInstantParameters);
+            Call<LinkedList<ListOfFairEstimate>> call = apiService.getAllNYOPByCabTypeAndDistance(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),singleInstantParameters);
             call.enqueue(new Callback<LinkedList<ListOfFairEstimate>>() {
                 @Override
                 public void onResponse(Call<LinkedList<ListOfFairEstimate>> call, Response<LinkedList<ListOfFairEstimate>> response) {
@@ -729,9 +773,20 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
+                            showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
                             Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
                     }
@@ -742,7 +797,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    //Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -762,7 +818,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("server")) {
+        if (navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("server")|| navType.equalsIgnoreCase("logout")) {
             newnegativeBtn.setVisibility(View.GONE);
         } else {
             newnegativeBtn.setVisibility(View.VISIBLE);
@@ -804,6 +860,18 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     updateBookingStatus(loginCredentials);
                 } else if (navType.equalsIgnoreCase("invalid")) {
                     onBackPressed();
+                }else if(navType.equalsIgnoreCase("logout")){
+                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
+                    SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                    deditor.putString("disclaimer", "");
+                    deditor.commit();
+                    Intent ide = new Intent(DirectionConfirmationActivity.this, LoginActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    // finish();
                 }
             }
         });
@@ -1153,7 +1221,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<LinkedList<ListOfCurrentCabs>> call = apiService.getNearByActiveDrivers(loginCredentials);
+            Call<LinkedList<ListOfCurrentCabs>> call = apiService.getNearByActiveDrivers(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<LinkedList<ListOfCurrentCabs>>() {
                 @Override
                 public void onResponse(Call<LinkedList<ListOfCurrentCabs>> call, Response<LinkedList<ListOfCurrentCabs>> response) {
@@ -1271,7 +1339,17 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
@@ -1283,7 +1361,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    //Toast.makeText(DirectionConfirmationActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {

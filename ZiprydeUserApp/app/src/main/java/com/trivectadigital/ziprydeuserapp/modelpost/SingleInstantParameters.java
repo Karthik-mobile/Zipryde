@@ -30,6 +30,8 @@ public class SingleInstantParameters {
     public String deviceToken;
     public int isEnable;
     public String comments;
+    public int overrideSessionToken;
+
 }
 
 

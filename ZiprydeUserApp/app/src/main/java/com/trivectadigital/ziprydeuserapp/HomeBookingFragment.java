@@ -1,6 +1,5 @@
 package com.trivectadigital.ziprydeuserapp;
 
-import android.*;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -8,7 +7,6 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Interpolator;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -17,8 +15,6 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,7 +28,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -53,7 +48,6 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -173,7 +167,7 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
 
         View view = inflater.inflate(R.layout.fragment_home_booking, container, false);
 
-        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+        apiService = ZiprydeApiClient.getClient(Utils.verifyLogInUserMobileInstantResponse.getAccessToken()).create(ZiprydeApiInterface.class);
 
         mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
                 .addConnectionCallbacks(this)
@@ -500,6 +494,8 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
     Dialog dialog;
 
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
+
+       // Toast.makeText(getActivity(), "Reached Here", Toast.LENGTH_LONG).show();
         dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -510,7 +506,8 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("server")) {
+        if (navType.equalsIgnoreCase("gps") || navType.equalsIgnoreCase("warning") || navType.equalsIgnoreCase("server")
+                || navType.equalsIgnoreCase("logout")) {
             newnegativeBtn.setVisibility(View.GONE);
         } else {
             newnegativeBtn.setVisibility(View.VISIBLE);
@@ -527,6 +524,18 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                 dialog.dismiss();
                 if (navType.equalsIgnoreCase("gps")) {
                     startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_CHECK_SETTINGS);
+                }else if(navType.equalsIgnoreCase("logout")){
+                    SharedPreferences.Editor editor = getActivity().getSharedPreferences("LoginCredentials", getActivity().MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
+                    SharedPreferences.Editor deditor = getActivity().getSharedPreferences("DisclaimerCredentials", getActivity().MODE_PRIVATE).edit();
+                    deditor.putString("disclaimer", "");
+                    deditor.commit();
+                    Intent ide = new Intent(getActivity(), LoginActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                   // finish();
                 }
             }
         });
@@ -804,7 +813,9 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<LinkedList<ListOfCurrentCabs>> call = apiService.getNearByActiveDrivers(loginCredentials);
+           // Toast.makeText(getActivity(),Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),Toast.LENGTH_LONG).show();
+
+            Call<LinkedList<ListOfCurrentCabs>> call = apiService.getNearByActiveDrivers(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<LinkedList<ListOfCurrentCabs>>() {
                 @Override
                 public void onResponse(Call<LinkedList<ListOfCurrentCabs>> call, Response<LinkedList<ListOfCurrentCabs>> response) {
@@ -828,10 +839,25 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                         }
                     } else {
                         try {
+
+
+                           // Toast.makeText(getActivity(), "reached here"+response.toString(), Toast.LENGTH_LONG).show();
+
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            }
                         } catch (Exception e) {
-                            Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -840,8 +866,12 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
                 public void onFailure(Call<LinkedList<ListOfCurrentCabs>> call, Throwable t) {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
+                    //Toast.makeText(getActivity(), "OnFailure"+t.toString(), Toast.LENGTH_LONG).show();
                     dialog.dismiss();
-                    Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+
+                    //Temperary  fix for the session timeout error
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    //Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {

@@ -6,10 +6,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Interpolator;
 import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
@@ -25,7 +22,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -48,7 +44,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -56,7 +51,6 @@ import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -413,7 +407,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                         }
                     }
                 } else {
-                    Toast.makeText(OnGoingBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(OnGoingBookingActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -439,7 +433,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                         }
                     }
                 } else {
-                    Toast.makeText(OnGoingBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(OnGoingBookingActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -614,7 +608,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -730,9 +724,19 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                         dialog.dismiss();
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "forcelogout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            }
                         } catch (Exception e) {
-                            Toast.makeText(OnGoingBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                            Toast.makeText(OnGoingBookingActivity.this,  getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -742,11 +746,12 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(OnGoingBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    //Toast.makeText(OnGoingBookingActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(OnGoingBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            Toast.makeText(OnGoingBookingActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -764,7 +769,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<SingleInstantResponse> call = apiService.updateBookingDriverStatus(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.updateBookingDriverStatus(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -782,18 +787,20 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                         bookingStatus.setText(Utils.updateBookingDriverStatusInstantResponse.getBookingStatus());
                         driverStatus = Utils.updateBookingDriverStatusInstantResponse.getDriverStatusCode();
                         if (loginCredentials.driverStatus.equals("ACCEPTED")) {
+                            if(siteBtn.getVisibility() == View.VISIBLE) {
+                                showInfoDlg(getString(R.string.success), getString(R.string.usermsg_statusupdate), getString(R.string.btn_ok), "success");
+                            }
                             endtripBtn.setVisibility(View.GONE);
                             starttripBtn.setVisibility(View.GONE);
                             siteBtn.setVisibility(View.VISIBLE);
                             confirmBtn.setVisibility(View.GONE);
-                            showInfoDlg("Success..", "Request Accepted Successfully.", "OK", "success");
                         } else if (loginCredentials.driverStatus.equals("ON_SITE")) {
                             confirmBtn.setVisibility(View.GONE);
                             endtripBtn.setVisibility(View.GONE);
                             starttripBtn.setVisibility(View.VISIBLE);
                             callCustomer.setVisibility(View.VISIBLE);
                             siteBtn.setVisibility(View.GONE);
-                            showInfoDlg("Success..", "Status updated Successfully.", "OK", "success");
+                            showInfoDlg(getString(R.string.success), getString(R.string.usermsg_statusupdate),  getString(R.string.btn_ok), "success");
                         } else if (loginCredentials.driverStatus.equals("ON_TRIP")) {
                             if (polyline != null) {
                                 polyline.remove();
@@ -801,16 +808,26 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                             endtripBtn.setVisibility(View.VISIBLE);
                             starttripBtn.setVisibility(View.GONE);
                             siteBtn.setVisibility(View.GONE);
-                            showInfoDlg("Success..", "Trip Started Successfully.", "OK", "success");
+                            showInfoDlg(getString(R.string.success), getString(R.string.bookingtrack_tripstarted),  getString(R.string.btn_ok), "success");
                         } else if (loginCredentials.driverStatus.equals("COMPLETED")) {
-                            showInfoDlg("Success..", "Trip Ended Successfully.", "OK", "trip success");
+                            showInfoDlg(getString(R.string.success), getString(R.string.bookingtrack_tripend),  getString(R.string.btn_ok), "trip success");
                         }
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "forcelogout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            }
                         } catch (Exception e) {
-                            Toast.makeText(OnGoingBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                            Toast.makeText(OnGoingBookingActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -820,11 +837,12 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(OnGoingBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                   // Toast.makeText(OnGoingBookingActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(OnGoingBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            Toast.makeText(OnGoingBookingActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -1453,6 +1471,8 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                     marker = mMap.addMarker(new MarkerOptions().position(tempLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.pickup_icon_48)));
                     markers.add(marker);
 
+
+                    //Get the difference between user location
                     String url = getUrl(crtLocation, tempLocation);
                     Log.d("url", "" + url);
                     FetchUrl FetchUrl = new FetchUrl();

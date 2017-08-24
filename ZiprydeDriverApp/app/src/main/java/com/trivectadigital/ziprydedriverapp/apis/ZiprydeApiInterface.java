@@ -13,6 +13,7 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.Part;
@@ -54,35 +55,38 @@ public interface ZiprydeApiInterface {
     Call<SingleInstantResponse> updatePasswordByUserAndType(@Body SingleInstantParameters parameters);
 
     @POST("zipryde/getBookingByBookingId")
-    Call<SingleInstantResponse> getBookingByBookingId(@Body SingleInstantParameters parameters);
+    Call<SingleInstantResponse> getBookingByBookingId(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @GET("zipryde/getAllNYOPList")
-    Call<LinkedList<ListOfPercentage>> getAllNYOPList();
+    Call<LinkedList<ListOfPercentage>> getAllNYOPList(@Header("access-token") String contentRange);
 
     @POST("zipryde/insertDriverSession")
-    Call<Void> insertDriverSession(@Body SingleInstantParameters parameters);
+    Call<Void> insertDriverSession(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("zipryde/updateDriverSession")
-    Call<Void> updateDriverSession(@Body SingleInstantParameters parameters);
+    Call<Void> updateDriverSession(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("zipryde/updateDriverStatus")
-    Call<Void> updateDriverStatus(@Body SingleInstantParameters parameters);
+    Call<Void> updateDriverStatus(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("zipryde/getBookingRequestedByDriverId")
-    Call<LinkedList<ListOfRequestedBooking>> getBookingRequestedByDriverId(@Body SingleInstantParameters parameters);
+    Call<LinkedList<ListOfRequestedBooking>> getBookingRequestedByDriverId(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("zipryde/updateBookingDriverStatus")
-    Call<SingleInstantResponse> updateBookingDriverStatus(@Body SingleInstantParameters parameters);
+    Call<SingleInstantResponse> updateBookingDriverStatus(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("zipryde/getRevenueByDateAndDriverId")
-    Call<SingleInstantResponse> getRevenueByDateAndDriverId(@Body SingleInstantParameters parameters);
+    Call<SingleInstantResponse> getRevenueByDateAndDriverId(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("zipryde/getBookingCountByDateAndDriverId")
-    Call<SingleInstantResponse> getBookingCountByDateAndDriverId(@Body SingleInstantParameters parameters);
+    Call<SingleInstantResponse> getBookingCountByDateAndDriverId(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("zipryde/getBookingByDriverId")
-    Call<LinkedList<ListOfBooking>> getBookingByDriverId(@Body SingleInstantParameters parameters);
+    Call<LinkedList<ListOfBooking>> getBookingByDriverId(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("zipryde/savePayment")
-    Call<Void> savePayment(@Body SingleInstantParameters parameters);
+    Call<Void> savePayment(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
+
+    @POST("zipryde/logoutUser")
+    Call<Void> logoutUser(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 }

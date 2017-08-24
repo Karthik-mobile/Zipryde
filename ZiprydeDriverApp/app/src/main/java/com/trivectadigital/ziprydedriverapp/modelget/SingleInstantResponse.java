@@ -73,6 +73,8 @@ public class SingleInstantResponse {
 
     @SerializedName("count")
     private String count;
+    @SerializedName("accessToken")
+    private String accessToken;
 
     public String getCustomerMobileNumber() {
         return customerMobileNumber;
@@ -320,5 +322,13 @@ public class SingleInstantResponse {
 
     public void setEmailId(String emailId) {
         this.emailId = emailId;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String token) {
+        this.accessToken = token;
     }
 }

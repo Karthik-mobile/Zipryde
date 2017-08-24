@@ -83,6 +83,7 @@ public class LoginActivity extends AppCompatActivity {
                     loginCredentials.mobileNumber = phoneno;
                     loginCredentials.password = password;
                     loginCredentials.deviceToken = regId;
+                    loginCredentials.overrideSessionToken=0;
                     Gson gson = new Gson();
                     String json = gson.toJson(loginCredentials);
                     Log.e("json", "" + json);
@@ -151,15 +152,34 @@ public class LoginActivity extends AppCompatActivity {
                         SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
                         editor.putString("phoneNumber", phoneno);
                         editor.putString("password", password);
+                       // editor.putString("accesstoken",)
                         editor.putString("LoginCredentials", json);
+                        //String s = Utils.verifyLogInUserMobileInstantResponse.getAccessToken();
+                        //Toast.makeText(getApplicationContext(),s,Toast.LENGTH_LONG).show();
                         editor.commit();
-                        showInfoDlg("Success..", "Successfully logged in.", "OK", "success");
+                        showInfoDlg(getString(R.string.success), getString(R.string.usermsg_successfullogin), getString(R.string.btn_ok), "success");
                     } else {
                         try {
+
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+
+                            if(response.code() == 409){
+
+
+                               // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_yes), "forcelogin");
+
+                            }else {
+
+
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "error");
+                            }
                         } catch (Exception e) {
-                            Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                            Toast.makeText(LoginActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -168,12 +188,13 @@ public class LoginActivity extends AppCompatActivity {
                 public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
+                    //Toast.makeText(LoginActivity.this, t.toString(), Toast.LENGTH_LONG).show();
                     dialog.dismiss();
-                    Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(LoginActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            Toast.makeText(LoginActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -234,6 +255,27 @@ public class LoginActivity extends AppCompatActivity {
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if(navType.equalsIgnoreCase("forcelogin")) {
+
+                    //initiate the login with overwrite function as 1
+
+
+                    SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_PREF, 0);
+                    String regId = pref.getString("regId", null);
+                    apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                    loginCredentials.userType = "RIDER";
+                    loginCredentials.mobileNumber = phoneno;
+                    loginCredentials.password = password;
+                    loginCredentials.deviceToken = regId;
+                    loginCredentials.overrideSessionToken=1;
+                    Gson gson = new Gson();
+                    String json = gson.toJson(loginCredentials);
+                    Log.e("json", "" + json);
+                    callMobileService(loginCredentials);
+                }
+
                 dialog.dismiss();
             }
         });

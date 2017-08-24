@@ -30,4 +30,5 @@ public class SingleInstantParameters {
     public String paymentType;
     public String paidDateTime;
     public String deviceToken;
+    public int overrideSessionToken;
 }

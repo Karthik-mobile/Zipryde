@@ -134,14 +134,20 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
             EventBus.getDefault().post(new MessageReceivedEvent(message));
 //        }
-////                // app is in foreground, broadcast the push message
-////                Intent pushNotification = new Intent(Utils.PUSH_NOTIFICATION);
-////                pushNotification.putExtra("message", message);
-////                LocalBroadcastManager.getInstance(this).sendBroadcast(pushNotification);
-////
-////                // play notification sound
-//                NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
-//                notificationUtils.playNotificationSound();
+                // app is in foreground, broadcast the push message
+               // Intent pushNotification = new Intent(Utils.PUSH_NOTIFICATION);
+                //pushNotification.putExtra("message", message);
+                //LocalBroadcastManager.getInstance(this).sendBroadcast(pushNotification);
+//
+//                // play notification sound
+                NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
+                notificationUtils.playNotificationSound();
+            Intent resultIntent = new Intent(getApplicationContext(), RideActivity.class);
+            Calendar c = Calendar.getInstance();
+            System.out.println("Current time => " + c.getTime());
+            SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss a");
+            String formattedDate = df.format(c.getTime());
+            showNotificationMessage(getApplicationContext(), getString(R.string.app_name), message, formattedDate, resultIntent);
         } else {
             EventBus.getDefault().post(new MessageReceivedEvent(message));
 //                // app is in background, show the notification in notification tray

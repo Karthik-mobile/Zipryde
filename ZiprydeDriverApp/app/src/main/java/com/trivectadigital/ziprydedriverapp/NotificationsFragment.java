@@ -192,7 +192,7 @@ public class NotificationsFragment extends Fragment {
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<LinkedList<ListOfRequestedBooking>> call = apiService.getBookingRequestedByDriverId(loginCredentials);
+            Call<LinkedList<ListOfRequestedBooking>> call = apiService.getBookingRequestedByDriverId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<LinkedList<ListOfRequestedBooking>>() {
                 @Override
                 public void onResponse(Call<LinkedList<ListOfRequestedBooking>> call, Response<LinkedList<ListOfRequestedBooking>> response) {
@@ -229,7 +229,8 @@ public class NotificationsFragment extends Fragment {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    //Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {

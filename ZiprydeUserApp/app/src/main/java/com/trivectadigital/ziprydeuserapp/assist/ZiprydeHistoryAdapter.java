@@ -22,7 +22,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.trivectadigital.ziprydeuserapp.DirectionConfirmationActivity;
 import com.trivectadigital.ziprydeuserapp.NavigationMenuActivity;
 import com.trivectadigital.ziprydeuserapp.R;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
@@ -117,8 +116,8 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
         holder.bookingCRN.setText("" + ziprydeBookingCRN);
         holder.bookingStarting.setText("" + ziprydeBookingStarting);
         holder.bookingEnding.setText("" + ziprydeBookingEnding);
-        holder.bookingPrice.setText("$ " + ziprydeBookingPrice);
-        holder.bookingOfferPrice.setText("Offer $ " + ziprydeBookingOfferPrice);
+        holder.bookingPrice.setText(context.getString(R.string.currencysymbol) + ziprydeBookingPrice);
+        holder.bookingOfferPrice.setText(context.getString(R.string.offer)+context.getString(R.string.currencysymbol)+" "+ ziprydeBookingOfferPrice);
 
         holder.cancelBookingImg.setVisibility(View.GONE);
 
@@ -166,7 +165,7 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<SingleInstantResponse> call = apiService.updateBookingStatus(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.updateBookingStatus(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -179,13 +178,13 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
                     if (response.isSuccessful()) {
                         Utils.updateBookingStatusInstantResponse = response.body();
                         Log.e("BookingStatus", "" + Utils.updateBookingStatusInstantResponse.getBookingStatus());
-                        showInfoDlg("Success..", "Your ZipRyde has been cancelled.", "Ok", "success");
+                        showInfoDlg(context.getString(R.string.success), context.getString(R.string.usermsg_bookingcancelled), context.getString(R.string.btn_ok), "success");
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
                             showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
                         } catch (Exception e) {
-                            Toast.makeText(context, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, context.getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -195,11 +194,11 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(context, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, context.getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(context, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
     }
 

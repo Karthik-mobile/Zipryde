@@ -74,8 +74,23 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
 
         ListOfBooking ziprydeHistoryDetails = ziprydeHistoryDetailsList.get(position);
 
+        //Convert the time to system time.
 //        String ziprydeBookingCarType = ziprydeHistoryDetails.getZiprydeBookingCarType();
-        String ziprydeBookingDateTime = ziprydeHistoryDetails.getBookingDateTime();
+//        Calendar calendar = Calendar.getInstance();
+//        TimeZone zone = calendar.getTimeZone();
+//        SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm");
+//        sdf.setTimeZone(zone);
+//        Date sysDate = new Date();
+//        try {
+//            sysDate = sdf.parse(ziprydeHistoryDetails.getBookingDateTime());
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+//        SimpleDateFormat sdf1 = new SimpleDateFormat("EEE, d MMM yyyy HH:mm");
+//        sdf.setTimeZone(zone);
+//        String systemTime = sdf1.format(sysDate.getTime());
+
+        String ziprydeBookingDateTime =  Utils.UTCtoSysTime(ziprydeHistoryDetails.getBookingDateTime());
         String ziprydeBookingCRN = ziprydeHistoryDetails.getCrnNumber();
         String ziprydeBookingStarting = ziprydeHistoryDetails.getFrom();
         String ziprydeBookingEnding = ziprydeHistoryDetails.getTo();

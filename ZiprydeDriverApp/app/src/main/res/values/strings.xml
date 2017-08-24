@@ -125,6 +125,11 @@
     <string name="bookingtrack_offredprice">Price Offered</string>
     <string name="bookingtrack_compprice">Competition</string>
 
+    <string name="bookingtrack_tripstarted">Trip Started Successfully.</string>
+    <string name="bookingtrack_tripend">Trip Ended Successfully.</string>
+
+
+
 
     <!-- Cash Display  screen -->
 
@@ -167,15 +172,17 @@
     <string name="usermsg_ziprydecancelled">Your ZipRyde has been cancelled.</string>
     <string name="usermsg_querysubmit">Your query has been successfully submitted</string>
     <string name="usermsg_permissiondenied">Permission denied</string>
-    <string name="usermsg_bookingsuccessfull_waitdriver">Your Booking request has been submitted successfully\. Please wait till driver accepts\.\.\.</string>
-    <string name="usermsg_driveraccepted">Your Booking request has been accepted by driver\.\.\.</string>
+    <string name="usermsg_bookingsuccessfull_waitdriver">Your Booking request has been submitted successfully. Please wait till driver accepts.</string>
+    <string name="usermsg_driveraccepted">Your Booking request has been accepted by driver.</string>
     <string name="usermsg_nodriveravailable">available \/ Driver Not accepted the request. Try after sometime</string>
+    <string name="usermsg_statusupdate">Request Accepted Successfully</string>
 
     <!-- Error Messages -->
 
-    <string name="errmsg_network_noconnection">Either there is no network connectivity or server is not available\.\. Please try again later\.\.</string>
-    <string name="errmsg_nolocationfound">Couldn\'t get the current location. Please wait\.\.\.</string>
+    <string name="errmsg_network_noconnection">Either there is no network connectivity or server is not available. Please try again later.</string>
+    <string name="errmsg_nolocationfound">Couldn\'t get the current location. Please wait.</string>
     <string name="errmsg_googleapi">Could not connect to Google API Client</string>
+    <string name="errmsg_sessionexpired">Your session has expired. Please re-login!</string>
 
 
 

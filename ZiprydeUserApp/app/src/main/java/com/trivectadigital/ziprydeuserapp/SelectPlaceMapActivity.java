@@ -442,7 +442,7 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
 
-        Call<LinkedList<ListOfCurrentCabs>> call = apiService.getNearByActiveDrivers(loginCredentials);
+        Call<LinkedList<ListOfCurrentCabs>> call = apiService.getNearByActiveDrivers(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
         call.enqueue(new Callback<LinkedList<ListOfCurrentCabs>>() {
             @Override
             public void onResponse(Call<LinkedList<ListOfCurrentCabs>> call, Response<LinkedList<ListOfCurrentCabs>> response) {
@@ -471,7 +471,18 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
                 } else {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        if(response.code() == 408){
+
+
+                            // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                            //if(jObjError.getString("message"))
+                            showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                        }else {
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        }
+
                     } catch (Exception e) {
                         Toast.makeText(SelectPlaceMapActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                     }
@@ -483,7 +494,8 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 dialog.dismiss();
-                Toast.makeText(SelectPlaceMapActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                //Toast.makeText(SelectPlaceMapActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
             }
         });
     }

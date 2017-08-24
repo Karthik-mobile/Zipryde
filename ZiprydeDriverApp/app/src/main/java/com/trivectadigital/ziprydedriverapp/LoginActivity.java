@@ -83,6 +83,7 @@ public class LoginActivity extends AppCompatActivity {
                     loginCredentials.mobileNumber = phoneno;
                     loginCredentials.password = password;
                     loginCredentials.deviceToken = regId;
+                    loginCredentials.overrideSessionToken=0;
                     Gson gson = new Gson();
                     String json = gson.toJson(loginCredentials);
                     Log.e("json", "" + json);
@@ -131,7 +132,7 @@ public class LoginActivity extends AppCompatActivity {
             loginCredentials.fromLatitude = "" + Utils.gpsLocationService.getLatitude();
             loginCredentials.fromLongitude = "" + Utils.gpsLocationService.getLongitude();
 
-            Call<Void> call = apiService.updateDriverSession(loginCredentials);
+            Call<Void> call = apiService.updateDriverSession(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
@@ -147,6 +148,9 @@ public class LoginActivity extends AppCompatActivity {
                         } catch (Exception e) {
                             Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
+                    }else{
+                        insertDriverSession();
+                        showInfoDlg("Success..", "Successfully logged in.", "OK", "success");
                     }
                 }
 
@@ -154,7 +158,8 @@ public class LoginActivity extends AppCompatActivity {
                 public void onFailure(Call<Void> call, Throwable t) {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
-                    Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                   // Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
                 }
             });
         } else {
@@ -196,12 +201,26 @@ public class LoginActivity extends AppCompatActivity {
                         editor.putString("password", password);
                         editor.putString("LoginCredentials", json);
                         editor.commit();
-                        insertDriverSession();
-                        showInfoDlg("Success..", "Successfully logged in.", "OK", "success");
+
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+
+                            if(response.code() == 409){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_yes), "forcelogin");
+
+                            }else {
+
+
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
@@ -213,7 +232,7 @@ public class LoginActivity extends AppCompatActivity {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                   Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -239,7 +258,7 @@ public class LoginActivity extends AppCompatActivity {
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("error")) {
+        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("error") | navType.equalsIgnoreCase("logout"))   {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -280,6 +299,26 @@ public class LoginActivity extends AppCompatActivity {
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if(navType.equalsIgnoreCase("forcelogin")) {
+
+                    //initiate the login with overwrite function as 1
+
+
+                    SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_PREF, 0);
+                    String regId = pref.getString("regId", null);
+                    apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                    loginCredentials.userType = "DRIVER";
+                    loginCredentials.mobileNumber = phoneno;
+                    loginCredentials.password = password;
+                    loginCredentials.deviceToken = regId;
+                    loginCredentials.overrideSessionToken=1;
+                    Gson gson = new Gson();
+                    String json = gson.toJson(loginCredentials);
+                    Log.e("json", "" + json);
+                    callMobileService(loginCredentials);
+                }
                 dialog.dismiss();
             }
         });

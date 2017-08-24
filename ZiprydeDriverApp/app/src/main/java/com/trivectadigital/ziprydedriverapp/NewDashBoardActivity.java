@@ -171,16 +171,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
 
                     updateDriverStatus(1);
                     isOnline = true;
-                    onofflineLay.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (isOnline) {
-                                updateDriverStatus(1);
-                            } else {
-                                updateDriverStatus(0);
-                            }
-                        }
-                    });
+
                 }
             });
 
@@ -192,17 +183,28 @@ public class NewDashBoardActivity extends AppCompatActivity {
 
             updateDriverStatus(1);
             isOnline = true;
-            onofflineLay.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (isOnline) {
-                        updateDriverStatus(1);
-                    } else {
-                        updateDriverStatus(0);
-                    }
-                }
-            });
+//            onofflineLay.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    if (isOnline) {
+//                        updateDriverStatus(1);
+//                    } else {
+//                        updateDriverStatus(0);
+//                    }
+//                }
+//            });
         }
+
+        onofflineLay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isOnline) {
+                    updateDriverStatus(1);
+                } else {
+                    updateDriverStatus(0);
+                }
+            }
+        });
     }
 
     @Override
@@ -248,6 +250,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
             dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
+
             Calendar c = Calendar.getInstance();
             System.out.println("Current time => " + c.getTime());
             SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy");
@@ -257,7 +260,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
             loginCredentials.paidDateTime = formattedDate;
             dateText.setText(formattedDate);
 
-            Call<SingleInstantResponse> call = apiService.getRevenueByDateAndDriverId(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.getRevenueByDateAndDriverId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -275,7 +278,17 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "forcelogout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
@@ -287,7 +300,8 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + "Your session is expired. Please re-login!", getString(R.string.btn_ok), "logout");
+                   // Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -307,7 +321,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<SingleInstantResponse> call = apiService.getBookingCountByDateAndDriverId(singleInstantParameters);
+            Call<SingleInstantResponse> call = apiService.getBookingCountByDateAndDriverId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),singleInstantParameters);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -324,7 +338,17 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "forcelogout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
@@ -336,7 +360,8 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                   // Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -365,7 +390,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
             loginCredentials.userId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
             loginCredentials.isOnline = active;
 
-            Call<Void> call = apiService.updateDriverStatus(loginCredentials);
+            Call<Void> call = apiService.updateDriverStatus(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
@@ -378,7 +403,17 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     if (!response.isSuccessful()) {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "forcelogout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
@@ -403,7 +438,8 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "forcelogout");
+                    //Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -420,7 +456,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
         loginCredentials.fromLatitude = ""+Utils.gpsLocationService.getLatitude();
         loginCredentials.fromLongitude = ""+Utils.gpsLocationService.getLongitude();
         ZiprydeApiInterface apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
-        Call<Void> call = apiService.updateDriverSession(loginCredentials);
+        Call<Void> call = apiService.updateDriverSession(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
@@ -429,12 +465,32 @@ public class NewDashBoardActivity extends AppCompatActivity {
                 Log.e("response.body", "" + response.body());
                 Log.e("response.errorBody", "" + response.errorBody());
                 Log.e("response.isSuccessful", "" + response.isSuccessful());
+
+                if (!response.isSuccessful()) {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        if (response.code() == 408) {
+
+
+                            // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                            //if(jObjError.getString("message"))
+                            showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "forcelogout");
+
+                        } else {
+                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    }
+                }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
+                showInfoDlg(getString(R.string.error), "" + "Your session is expired. Please re-login!", getString(R.string.btn_ok), "logout");
             }
         });
     }
@@ -451,7 +507,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("server")) {
+        if (navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("forcelogout")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -465,11 +521,36 @@ public class NewDashBoardActivity extends AppCompatActivity {
             public void onClick(View v) {
                 dialog.dismiss();
                 if (navType.equalsIgnoreCase("logout")) {
-                    SharedPreferences.Editor editor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
-                    editor.putString("disclaimer", "");
-                    editor.commit();
+                    SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                    deditor.putString("disclaimer", "");
+                    deditor.commit();
                     updateDriverStatus();
+                }else if(navType.equalsIgnoreCase("forcelogout")){
+                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
+                    SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                    deditor.putString("disclaimer", "");
+                    deditor.commit();
+                    Intent ide = new Intent(NewDashBoardActivity.this, LoginActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    // finish();
                 }
+//                if(navType.equalsIgnoreCase("logout")){
+//                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+//                    editor.remove("phoneNumber");
+//                    editor.remove("password");
+//                    editor.commit();
+//                    SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+//                    deditor.putString("disclaimer", "");
+//                    deditor.commit();
+//                    Intent ide = new Intent(NewDashBoardActivity.this, LoginActivity.class);
+//                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                    startActivity(ide);
+//                    // finish();
+//                }
             }
         });
 
@@ -507,7 +588,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
             loginCredentials.userId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
             loginCredentials.isOnline = 0;
 
-            Call<Void> call = apiService.updateDriverStatus(loginCredentials);
+            Call<Void> call = apiService.updateDriverStatus(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
@@ -520,19 +601,33 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     if (!response.isSuccessful()) {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "forcelogout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            }
                         } catch (Exception e) {
                             Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
-                        editor.remove("phoneNumber");
-                        editor.remove("password");
-                        editor.commit();
-                        Intent ide = new Intent(NewDashBoardActivity.this, LoginActivity.class);
-                        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(ide);
-                        finish();
+//                        SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+//                        editor.remove("phoneNumber");
+//                        editor.remove("password");
+//                        editor.commit();
+//                        Intent ide = new Intent(NewDashBoardActivity.this, LoginActivity.class);
+//                        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                        startActivity(ide);
+//                        finish();
+
+                        //Call Logout service from here.
+                        sendLogout();
+
                     }
                 }
 
@@ -541,7 +636,8 @@ public class NewDashBoardActivity extends AppCompatActivity {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "forcelogout");
+                   // Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
@@ -613,5 +709,64 @@ public class NewDashBoardActivity extends AppCompatActivity {
 
         // show the popup at bottom of the screen and set some margin at bottom ie,
         paymentPopwindow.showAtLocation(v, Gravity.BOTTOM, 0,100);
+    }
+
+    private void sendLogout(){
+
+        if (Utils.connectivity(NewDashBoardActivity.this)) {
+            SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+            Gson gson = new Gson();
+            String json = prefs.getString("LoginCredentials", "");
+            Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
+            Log.e("UserId", "updateDriverStatus - " + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+            Log.e("active", "updateDriverStatus - " + 0);
+            final Dialog dialog = new Dialog(NewDashBoardActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.userId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
+
+
+            Call<Void> call = apiService.logoutUser(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    int statusCode = response.code();
+
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+
+                        SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                        editor.remove("phoneNumber");
+                        editor.remove("password");
+                        editor.commit();
+                        Intent ide = new Intent(NewDashBoardActivity.this, LoginActivity.class);
+                        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(ide);
+                        finish();
+
+
+
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    dialog.dismiss();
+                    showInfoDlg(getString(R.string.error), "" +getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "forcelogout");
+                    //Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
     }
 }

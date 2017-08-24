@@ -59,7 +59,7 @@ public class CashDisplyActivity extends AppCompatActivity {
         String json = prefs.getString("LoginCredentials", "");
         Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
 
-        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+        apiService = ZiprydeApiClient.getClient(Utils.verifyLogInUserMobileInstantResponse.getAccessToken()).create(ZiprydeApiInterface.class);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -94,11 +94,11 @@ public class CashDisplyActivity extends AppCompatActivity {
             distanceInMiles = intent.getStringExtra("distanceInMiles");
             fromaddress = intent.getStringExtra("fromaddress");
             toaddress = intent.getStringExtra("toaddress");
-            mainTotalText.setText("$ " + offeredPrice);
-            distanceText.setText(distanceInMiles + " mi");
+            mainTotalText.setText(getString(R.string.currencysymbol)+" " + offeredPrice);
+            distanceText.setText(distanceInMiles + getString(R.string.distanceunit));
             bookingStarting.setText(fromaddress);
             bookingEnding.setText(toaddress);
-            fareText.setText("$ " + offeredPrice);
+            fareText.setText(getString(R.string.currencysymbol)+" " + offeredPrice);
         }
 
         cashBtn = (Button) findViewById(R.id.cashBtn);
@@ -154,6 +154,8 @@ public class CashDisplyActivity extends AppCompatActivity {
                 paypalBtn.setAlpha(0.5f);
                 cashAppBtn.setAlpha(0.5f);
                 creditBtn.setAlpha(1f);
+
+                showInfoDlg(getString(R.string.information),getString(R.string.usermsg_ccmsg),getString(R.string.btn_ok),"info");
             }
         });
     }
@@ -189,6 +191,11 @@ public class CashDisplyActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
+        Intent ide = new Intent(CashDisplyActivity.this, NavigationMenuActivity.class);
+        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(ide);
+        finish();
+
     }
 
     @Override
@@ -219,7 +226,7 @@ public class CashDisplyActivity extends AppCompatActivity {
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(loginCredentials);
+            Call<SingleInstantResponse> call = apiService.getBookingByBookingId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
@@ -232,7 +239,7 @@ public class CashDisplyActivity extends AppCompatActivity {
                         dialog.dismiss();
                         Utils.requestBookingResponse = response.body();
                         String bookingStatusFinal = Utils.requestBookingResponse.getBookingStatusCode();
-                        if(bookingStatusFinal.equals("PAID")){
+                        if(bookingStatusFinal.equals("PAID") ){
                             SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                             editor.putString("bookingId", "");
                             editor.commit();
@@ -245,9 +252,19 @@ public class CashDisplyActivity extends AppCompatActivity {
                         dialog.dismiss();
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "error");
+                            if(response.code() == 408){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "logout");
+
+                            }else {
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "Ok", "error");
+                            }
                         } catch (Exception e) {
-                            Toast.makeText(CashDisplyActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                            Toast.makeText(CashDisplyActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                         }
                     }
                 }
@@ -257,11 +274,12 @@ public class CashDisplyActivity extends AppCompatActivity {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    Toast.makeText(CashDisplyActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                   // Toast.makeText(CashDisplyActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(CashDisplyActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            Toast.makeText(CashDisplyActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -282,7 +300,7 @@ public class CashDisplyActivity extends AppCompatActivity {
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server")) {
+        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("logout")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -306,7 +324,21 @@ public class CashDisplyActivity extends AppCompatActivity {
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 dialog.dismiss();
+                if(navType.equalsIgnoreCase("logout")){
+                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
+                    SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                    deditor.putString("disclaimer", "");
+                    deditor.commit();
+                    Intent ide = new Intent(CashDisplyActivity.this, LoginActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    // finish();
+                }
             }
         });
 

@@ -3,20 +3,15 @@ package com.trivectadigital.ziprydeuserapp.service;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.trivectadigital.ziprydeuserapp.DriverInfoBookingActivity;
-import com.trivectadigital.ziprydeuserapp.NavigationMenuActivity;
 import com.trivectadigital.ziprydeuserapp.R;
 import com.trivectadigital.ziprydeuserapp.assist.MessageReceivedEvent;
 import com.trivectadigital.ziprydeuserapp.assist.NotificationUtils;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -99,10 +94,33 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
 //                // app is in foreground, broadcast the push message
                 EventBus.getDefault().post(new MessageReceivedEvent(message, title));
+
+                Intent pushNotification = new Intent(Utils.PUSH_NOTIFICATION);
+                pushNotification.putExtra("message", message);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(pushNotification);
 //
 //                // play notification sound
                 NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
                 notificationUtils.playNotificationSound();
+
+//                if(!title.equals("DRIVER_LOGOUT")){
+////                // app is in background, show the notification in notification tray
+//                    Intent resultIntent = new Intent(getApplicationContext(), DriverInfoBookingActivity.class);
+////                resultIntent.putExtra("message", message);
+////
+////                // check for image attachment
+////                if (TextUtils.isEmpty(imageUrl)) {
+//                    Calendar c = Calendar.getInstance();
+//                    System.out.println("Current time => "+c.getTime());
+//                    SimpleDateFormat df = new SimpleDateFormat("MM-dd-yyyy hh:mm:ss a");
+//                    String formattedDate = df.format(c.getTime());
+//                    showNotificationMessage(getApplicationContext(), getString(R.string.app_name), message, formattedDate, resultIntent);
+////                } else {
+////                    // image is present, show notification with image
+////                    showNotificationMessageWithBigImage(getApplicationContext(), title, message, timestamp, resultIntent, imageUrl);
+////                }
+//                }
+
             } else {
                 if(!title.equals("DRIVER_LOGOUT")){
 //                // app is in background, show the notification in notification tray

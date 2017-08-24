@@ -170,7 +170,7 @@ public class GPSLocationService extends Service implements GoogleApiClient.Conne
         loginCredentials.fromLatitude = ""+Utils.gpsLocationService.getLatitude();
         loginCredentials.fromLongitude = ""+Utils.gpsLocationService.getLongitude();
         ZiprydeApiInterface apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
-        Call<Void> call = apiService.updateDriverSession(loginCredentials);
+        Call<Void> call = apiService.updateDriverSession(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
