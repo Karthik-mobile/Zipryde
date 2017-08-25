@@ -85,6 +85,8 @@ public class Utils {
     public static final String SHARED_PREF = "ah_firebase";
     public static final String SHARED_NOTIFI = "notification";
 
+    public static final boolean isHistory = true;
+
     // Check Network Availability
     public static boolean connectivity(Context c) {
         ConnectivityManager connec = (ConnectivityManager) c

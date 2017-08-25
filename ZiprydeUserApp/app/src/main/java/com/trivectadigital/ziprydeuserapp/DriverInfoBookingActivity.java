@@ -1,6 +1,5 @@
 package com.trivectadigital.ziprydeuserapp;
 
-import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -68,7 +67,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -464,7 +462,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             }
         }
 
-        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("COMPLETED")) {
+        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("COMPLETED") && !bookingStatusFinal.equalsIgnoreCase(("ACCEPTED"))) {
             SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
             editor.putString("bookingId", bookingIdFinal);
             editor.commit();
@@ -742,7 +740,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                             getGeoLocationByDriverId(loginCredentials);
                         }
 
-                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("COMPLETED") && !bookingStatusFinal.equals("PAID") ) {
+                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("COMPLETED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("ACCEPTED")) {
                             SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                             editor.putString("bookingId", bookingIdFinal);
                             editor.commit();
@@ -872,7 +870,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     @Override
     public void onBackPressed() {
-        if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED") || bookingStatusFinal.equals("COMPLETED") ) {
+        if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED") || bookingStatusFinal.equals("COMPLETED") || bookingStatusFinal.equals("ACCEPTED") ) {
             if (handler != null && finalizer != null) {
                 handler.removeCallbacks(finalizer);
             }
@@ -963,7 +961,9 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                                     Log.e("bookingStatusFinal", "" + bookingStatusFinal);
                                     if (!bookingStatusFinal.equals("COMPLETED")) {
                                         if (!bookingStatusFinal.equals("CANCELLED")) {
-                                            getGeoLocationByDriverId(loginCredentials);
+                                            if(!bookingStatusFinal.equals("ACCEPTED")) {
+                                                getGeoLocationByDriverId(loginCredentials);
+                                            }
                                         }
                                     }
                                 }

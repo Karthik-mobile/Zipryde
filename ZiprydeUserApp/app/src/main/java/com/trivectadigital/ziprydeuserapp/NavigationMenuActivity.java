@@ -262,9 +262,11 @@ public class NavigationMenuActivity extends AppCompatActivity
         // Creating a fragment transaction
         FragmentTransaction ft = fragmentManager.beginTransaction();
         // Adding a fragment to the fragment transaction
-        ft.replace(R.id.content_frame, sFragment);
+        ft.replace(R.id.content_frame1, sFragment);
         // Committing the transaction
         ft.commit();
+       // Toast.makeText(this,"Endof NaviMenu",Toast.LENGTH_SHORT).show();
+
     }
 
     @Override

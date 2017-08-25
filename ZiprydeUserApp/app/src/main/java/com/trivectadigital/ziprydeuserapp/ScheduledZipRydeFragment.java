@@ -60,7 +60,7 @@ public class ScheduledZipRydeFragment extends Fragment {
     ListView history_list;
     ZiprydeApiInterface apiService;
 
-    private OnFragmentInteractionListener mListener;
+    //private OnFragmentInteractionListener mListener;
 
     public ScheduledZipRydeFragment() {
         // Required empty public constructor
@@ -97,6 +97,7 @@ public class ScheduledZipRydeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+       // Toast.makeText(getActivity(),"OnCreateView Starts",Toast.LENGTH_SHORT).show();
         View view = inflater.inflate(R.layout.fragment_schedulezipryde, container, false);
 
         apiService = ZiprydeApiClient.getClient(Utils.verifyLogInUserMobileInstantResponse.getAccessToken()).create(ZiprydeApiInterface.class);
@@ -133,34 +134,36 @@ public class ScheduledZipRydeFragment extends Fragment {
         Log.e("UserId", "" + Utils.verifyLogInUserMobileInstantResponse.getUserId());
         SingleInstantParameters loginCredentials = new SingleInstantParameters();
         loginCredentials.customerId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
-        loginCredentials.bookingStatus="SCHEDULED";
+        loginCredentials.bookingStatus="ACCEPTED";
         getBookingByBookingStatus(loginCredentials);
+
+       // Toast.makeText(getActivity(),"OnCreateView Ends-->"+loginCredentials.toString(),Toast.LENGTH_SHORT).show();
 
         return  view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+//        if (mListener != null) {
+//            mListener.onFragmentInteraction(uri);
+//        }
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+//        if (context instanceof OnFragmentInteractionListener) {
+//            mListener = (OnFragmentInteractionListener) context;
+//        } else {
+//            throw new RuntimeException(context.toString()
+//                    + " must implement OnFragmentInteractionListener");
+//        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+       // mListener = null;
     }
 
     /**

@@ -68,7 +68,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import de.greenrobot.event.EventBus;
@@ -431,7 +430,11 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 showTimePicker();
             }
 
+
         }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+
+        //Set the minimum date as today
+        schedulePickupTime.getDatePicker().setMinDate(newCalendar.getTimeInMillis());
     }
 
     Handler handler = new Handler();
@@ -496,20 +499,21 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 //Form the DateTime with UTC TimeZone and call the Booking Serivce.
 
                 Calendar pickupDT = Calendar.getInstance();
-                pickupDT.setTimeZone(TimeZone.getTimeZone("UTC"));
+                //pickupDT.setTimeZone(TimeZone.getTimeZone("UTC"));
                 pickupDT.setTime(userSelDate);
 
                 pickupDT.set(Calendar.HOUR_OF_DAY, selectedHour);
                 pickupDT.set(Calendar.MINUTE, selectedMinute);
                 pickupDT.set(Calendar.SECOND, 0);
 
-                SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss", Locale.ENGLISH);
+                SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
                 sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                 String  selTime = sdf.format(pickupDT.getTime());
                 submitScheduleZipBook(selTime);
             }
         }, hour, minute, true);//Yes 24 hour time
         mTimePicker.setTitle("Select Time");
+       // mTimePicker.getTime
         mTimePicker.show();
     }
 
@@ -555,6 +559,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         Gson gson = new Gson();
         String json = gson.toJson(loginCredentials);
         Log.e("json", "" + json);
+
+        //Toast.makeText(this,json.toString(),Toast.LENGTH_LONG).show();
         callRequestBooking(loginCredentials);
 
     }
@@ -585,7 +591,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         Utils.requestBookingResponse = response.body();
                         Log.e("bookingId", "" + Utils.requestBookingResponse.getBookingId());
                         Log.e("bookingStatus", "" + Utils.requestBookingResponse.getBookingStatusCode());
-                        if (Utils.requestBookingResponse.getBookingStatusCode().equals("SCHEDULED")) {
+                        if (Utils.requestBookingResponse.getBookingStatusCode().equals("SCHEDULED") || Utils.requestBookingResponse.getBookingStatusCode().equals("ACCEPTED")) {
                             requestdialog.dismiss();
                             showInfoDlg("Booking Successful", "Your Booking request has been submitted successfully. Please wait till driver accepts...", "Done", "successBooking");
                         } else {
@@ -660,7 +666,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         Utils.requestBookingResponse = response.body();
                         Log.e("bookingId", "" + Utils.requestBookingResponse.getBookingId());
                         Log.e("bookingStatus", "" + Utils.requestBookingResponse.getBookingStatusCode());
-                        if (Utils.requestBookingResponse.getBookingStatusCode().equals("SCHEDULED")) {
+                        if (Utils.requestBookingResponse.getBookingStatusCode().equals("SCHEDULED") || Utils.requestBookingResponse.getBookingStatusCode().equals("ACCEPTED") ) {
                             showInfoDlg("Booking Successful", "Your Booking request has been accepted by driver...", "Done", "successBooking");
                         } else {
 //                            if(count != 3){

@@ -112,9 +112,11 @@ public class CurrentRideAdapter extends BaseAdapter {
         String bookingStatus = currentRideDetails.getBookingStatus();
         //Check whether the request is scheduled or now
         //If scheduled , please change the color of the button and time.
-        if(currentRideDetails.getBookingStatusCode().equalsIgnoreCase("SCHEDULED")){
+        if(currentRideDetails.getBookingStatusCode().equalsIgnoreCase("FUTURE_REQUESTED")){
 
             view.setBackgroundColor(Color.rgb(51,181,229));
+            holder.positiveBtn.setText("Accept Schedule");
+
 
         }
 
@@ -141,21 +143,26 @@ public class CurrentRideAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
 
+                SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
+                loginCredentials.bookingId = currentRideDetails.getBookingId();
+
                 //Check if the ride is an scheduled ride then alert the driver for the warning
-               // if(){
+                if(currentRideDetails.getBookingStatusCode().equalsIgnoreCase("FUTURE_REQUESTED")){
 
-                    showInfoDlg(context.getString(R.string.warning),"" , context.getString(R.string.btn_ok), "schedule", position);
+                   //showInfoDlg(context.getString(R.string.warning),"" , context.getString(R.string.btn_ok), "schedule", position);
 
-                //}else {
-                    SingleInstantParameters loginCredentials = new SingleInstantParameters();
-                    loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
-                    loginCredentials.bookingId = currentRideDetails.getBookingId();
+                    loginCredentials.driverStatus = "SCHEDULED";
+                }else {
+
                     loginCredentials.driverStatus = "ACCEPTED";
-                    Gson gson = new Gson();
-                    String json = gson.toJson(loginCredentials);
-                    Log.e("json", "" + json);
-                    updateBookingDriverStatus(loginCredentials, position);
-               // }
+
+                }
+
+                Gson gson = new Gson();
+                String json = gson.toJson(loginCredentials);
+                Log.e("json", "" + json);
+                updateBookingDriverStatus(loginCredentials, position);
             }
         });
         holder.newnegativeBtn.setOnClickListener(new View.OnClickListener() {

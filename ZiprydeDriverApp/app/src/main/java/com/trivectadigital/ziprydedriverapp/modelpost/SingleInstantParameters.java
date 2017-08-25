@@ -32,4 +32,5 @@ public class SingleInstantParameters {
     public String deviceToken;
     public int overrideSessionToken;
     public String bookingStatus;
+    public String driverStatusCode;
 }

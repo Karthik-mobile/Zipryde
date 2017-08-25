@@ -377,7 +377,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                     loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
                     loginCredentials.bookingId = bookingIdFinal;
                     if((int)v.getTag() == 2010) {
-                        loginCredentials.driverStatus = "SCHEDULED";
+                        loginCredentials.driverStatus = "ACCEPTED";
                     }else{
                         loginCredentials.driverStatus = "ON_SITE";
                     }
@@ -387,7 +387,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                     loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
                     loginCredentials.bookingId = bookingIdFinal;
                     if((int)v.getTag() == 2010) {
-                        loginCredentials.driverStatus = "SCHEDULED";
+                        loginCredentials.driverStatus = "ACCEPTED";
                     }else{
                         loginCredentials.driverStatus = "ON_SITE";
                     }
@@ -851,6 +851,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                             if(siteBtn.getVisibility() == View.VISIBLE) {
                                 showInfoDlg(getString(R.string.success), getString(R.string.usermsg_statusupdate), getString(R.string.btn_ok), "success");
                             }
+                            siteBtn.setText("On Site");
                             endtripBtn.setVisibility(View.GONE);
                             starttripBtn.setVisibility(View.GONE);
                             siteBtn.setVisibility(View.VISIBLE);
@@ -1093,7 +1094,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         mMap.getUiSettings().setMapToolbarEnabled(false);
 
         if (bookingStatusFinal != null) {
-            if (bookingStatusFinal.equals("COMPLETED") || bookingStatusFinal.equals("CANCELLED")) {
+            if (bookingStatusFinal.equals("COMPLETED") || bookingStatusFinal.equals("CANCELLED") || bookingStatusFinal.equals("SCHEDULED")) {
                 mMap.getUiSettings().setScrollGesturesEnabled(false);
                 mMap.getUiSettings().setZoomGesturesEnabled(false);
                 getDirections.setVisibility(View.GONE);
@@ -1161,10 +1162,12 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         if (bookingStatusFinal != null) {
             if (!bookingStatusFinal.equals("COMPLETED")) {
                 if (!bookingStatusFinal.equals("CANCELLED")) {
-                    if (handler != null && finalizer != null) {
-                        handler.removeCallbacks(finalizer);
+                    if(!bookingStatusFinal.equals("SCHEDULED")) {
+                        if (handler != null && finalizer != null) {
+                            handler.removeCallbacks(finalizer);
+                        }
+                        updateDriverLocationinMap();
                     }
-                    updateDriverLocationinMap();
                 }
             }
         }
@@ -1214,7 +1217,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
 
         if(isOnPause){
             isOnPause = false;
-            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID")) {
+            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("SCHEDULED")) {
                 SingleInstantParameters loginCredentials = new SingleInstantParameters();
                 loginCredentials.bookingId = "" + bookingIdFinal;
                 getBookingByBookingId(loginCredentials, 0);
@@ -1224,7 +1227,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
 
     @Override
     public void onBackPressed() {
-        if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED")) {
+        if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED") || bookingStatusFinal.equals("SCHEDULED")) {
             Intent ide = new Intent(OnGoingBookingActivity.this, NewDashBoardActivity.class);
             ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(ide);
