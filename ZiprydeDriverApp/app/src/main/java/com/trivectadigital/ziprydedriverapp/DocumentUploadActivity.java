@@ -524,6 +524,9 @@ public class DocumentUploadActivity extends AppCompatActivity {
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
+            final String mobileno = loginCredentials.mobileNumber;
+            final String pwd = loginCredentials.password;
+
             RequestBody userType = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.userType);
             RequestBody firstName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.firstName);
             RequestBody lastName = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.lastName);
@@ -531,12 +534,12 @@ public class DocumentUploadActivity extends AppCompatActivity {
             RequestBody mobileNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.mobileNumber);
             RequestBody password = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.password);
             RequestBody licenseNo = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseNo);
-//        RequestBody vehicleNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.vehicleNumber);
+//          RequestBody vehicleNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.vehicleNumber);
             RequestBody licenseValidUntil = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseValidUntil);
             RequestBody licenseIssuedOn = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.licenseIssuedOn);
             RequestBody alternateNumber = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.alternateNumber);
             RequestBody status = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.status);
-//        RequestBody defaultPercentageAccepted = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.defaultPercentageAccepted);
+//          RequestBody defaultPercentageAccepted = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.defaultPercentageAccepted);
             RequestBody deviceToken = RequestBody.create(MediaType.parse("text/plain"), loginCredentials.deviceToken);
 
             RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), finalmediaFileProfile);
@@ -599,8 +602,19 @@ public class DocumentUploadActivity extends AppCompatActivity {
 //                    editor.putString("LoginCredentials", json);
 //                    editor.commit();
 //                    Utils.verifyLogInUserMobileInstantResponse = Utils.saveUserMobileInstantResponse;
-                        insertDriverSession();
-                        showInfoDlg("Success..", "Successfully registered.", "OK", "success");
+                      //  insertDriverSession();
+                       // showInfoDlg("Success..", "Successfully registered.", "OK", "success");
+                        SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_PREF, 0);
+                        String regId = pref.getString("regId", null);
+                        SingleInstantParameters loginCredentials1 = new SingleInstantParameters();
+                        loginCredentials1.userType = "DRIVER";
+                        loginCredentials1.mobileNumber = mobileno;
+                        loginCredentials1.password = pwd;
+                        loginCredentials1.deviceToken = regId;
+                        loginCredentials1.overrideSessionToken=0;
+
+
+                        callLoginTogetAccessToken(loginCredentials1);
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -622,6 +636,83 @@ public class DocumentUploadActivity extends AppCompatActivity {
             });
         } else {
             Toast.makeText(DocumentUploadActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+    public void callLoginTogetAccessToken(SingleInstantParameters loginCredentials) {
+        if (Utils.connectivity(DocumentUploadActivity.this)) {
+            final Dialog dialog = new Dialog(DocumentUploadActivity.this, android.R.style.Theme_Dialog);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.loadingimage_layout);
+            dialog.setCanceledOnTouchOutside(false);
+            dialog.setCancelable(false);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialog.show();
+
+            Call<SingleInstantResponse> call = apiService.verifyLogInUser(loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
+                @Override
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                    int statusCode = response.code();
+                    Log.e("statusCode", "" + statusCode);
+                    Log.e("response.body", "" + response.body());
+                    Log.e("response.errorBody", "" + response.errorBody());
+                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+                    dialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Utils.verifyLogInUserMobileInstantResponse = response.body();
+                        Gson gson = new Gson();
+                        String json = gson.toJson(Utils.verifyLogInUserMobileInstantResponse);
+                        SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                        editor.putString("phoneNumber", phoneno);
+                        editor.putString("password", password);
+                        // editor.putString("accesstoken",)
+                        editor.putString("LoginCredentials", json);
+                        //String s = Utils.verifyLogInUserMobileInstantResponse.getAccessToken();
+                        //Toast.makeText(getApplicationContext(),s,Toast.LENGTH_LONG).show();
+                        editor.commit();
+                        //showInfoDlg(getString(R.string.success), getString(R.string.usermsg_successfullogin), getString(R.string.btn_ok), "success");
+                        showInfoDlg("Success..", "Successfully registered.", "OK", "success");
+                    } else {
+                        try {
+
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+
+                            if(response.code() == Utils.NETOWRKERR_OVERRIDE_LOGIN){
+
+
+                                // JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_yes), "forcelogin");
+
+                            }else {
+
+
+                                // Toast.makeText(LoginActivity.this, jObjError.toString(), Toast.LENGTH_LONG).show();
+                                //if(jObjError.getString("message"))
+                                showInfoDlg(getString(R.string.error), "" + jObjError.getString("message"), getString(R.string.btn_ok), "error");
+                            }
+                        } catch (Exception e) {
+                            Toast.makeText(DocumentUploadActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                    // Log error here since request failed
+                    Log.e("onFailure", t.toString());
+                    //Toast.makeText(LoginActivity.this, t.toString(), Toast.LENGTH_LONG).show();
+                    dialog.dismiss();
+                    Toast.makeText(DocumentUploadActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            Toast.makeText(DocumentUploadActivity.this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
         }
     }
 

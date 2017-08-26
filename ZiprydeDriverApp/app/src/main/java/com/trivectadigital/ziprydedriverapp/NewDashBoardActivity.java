@@ -104,6 +104,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
         historyLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Utils.isHistory = true;
                 Intent ide = new Intent(NewDashBoardActivity.this, HistoryActivity.class);
                 ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(ide);
@@ -142,8 +143,10 @@ public class NewDashBoardActivity extends AppCompatActivity {
         rideLaterLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent ide = new Intent(NewDashBoardActivity.this, scheduleZiprydeActivity.class);
-                ide.putExtra("schedule", 1);
+               // Toast.makeText(NewDashBoardActivity.this,"Reached here",Toast.LENGTH_SHORT).show();
+                Utils.isHistory = false;
+                Intent ide = new Intent(NewDashBoardActivity.this, HistoryActivity.class);
+                //ide.putExtra("schedule",1);
                 ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(ide);
             }

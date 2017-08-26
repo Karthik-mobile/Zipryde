@@ -156,13 +156,7 @@ public class CashDisplyActivity extends AppCompatActivity {
                             Toast.makeText(CashDisplyActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
-                        editor.putString("bookingID", "");
-                        editor.commit();
-                        Intent ide = new Intent(CashDisplyActivity.this, NewDashBoardActivity.class);
-                        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(ide);
-                        finish();
+                        showInfoDlg(getString(R.string.information),getString(R.string.usermsg_lostitempopup),getString(R.string.btn_ok),"cashpaid");
                     }
                 }
 
@@ -198,7 +192,7 @@ public class CashDisplyActivity extends AppCompatActivity {
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("logout")) {
+        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("logout") || navType.equalsIgnoreCase("cashpaid")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -235,6 +229,15 @@ public class CashDisplyActivity extends AppCompatActivity {
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
                     // finish();
+                }else if (navType.equalsIgnoreCase("cashpaid")){
+
+                    SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+                    editor.putString("bookingID", "");
+                    editor.commit();
+                    Intent ide = new Intent(CashDisplyActivity.this, NewDashBoardActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
                 }
             }
         });

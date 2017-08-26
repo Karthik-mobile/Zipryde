@@ -760,7 +760,27 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
         Log.e("Thread message", "" + messageReceivedEvent.message);
         Log.e("Thread title", "" + messageReceivedEvent.title);
         Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
-        getNearByActiveDrivers(String.valueOf(mLastLocation.getLatitude()), String.valueOf(mLastLocation.getLongitude()));
+
+
+        if (!messageReceivedEvent.title.equals("BOOKING_PAYMENT_SUCCESS")) {
+            //Move to Direction Info Screen.
+
+//            SharedPreferences prefs = getSharedPreferences("BookingCredentials", MODE_PRIVATE);
+//            String bookingIdFinal = prefs.getString("bookingId", "");
+//            Intent ide;
+//            if(!bookingIdFinal.equals("")) {
+            Intent ide = new Intent(getActivity(), DriverInfoBookingActivity.class);
+
+            //Get the booking id from the message
+            String str = messageReceivedEvent.message;
+            String[] splitStr = str.split("\\s+");
+            ide.putExtra("bookingId", splitStr[splitStr.length-1]);
+            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(ide);
+            //finish();
+        }else{
+            getNearByActiveDrivers(String.valueOf(mLastLocation.getLatitude()), String.valueOf(mLastLocation.getLongitude()));
+        }
     }
 
     private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {

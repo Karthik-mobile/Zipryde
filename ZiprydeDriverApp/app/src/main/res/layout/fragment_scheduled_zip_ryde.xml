@@ -4,10 +4,10 @@ android:layout_width="match_parent"
 android:layout_height="match_parent"
 android:orientation="vertical"
 android:background="@color/appBackground"
-tools:context="com.trivectadigital.ziprydedriverapp.ScheduledZipRydeFragment">
+tools:context=".ScheduleZipRydeFragment">
 
 <ListView
-    android:id="@+id/history_list"
+    android:id="@+id/schedule_list"
     android:layout_width="match_parent"
     android:layout_height="match_parent" />
 

@@ -20,6 +20,6 @@ public class WaitingActivity extends AppCompatActivity {
                 startActivity(ide);
                 finish();
             }
-        }, 3000);
+        }, 1000);
     }
 }

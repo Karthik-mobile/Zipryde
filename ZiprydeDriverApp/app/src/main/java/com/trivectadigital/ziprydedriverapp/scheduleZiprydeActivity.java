@@ -1,8 +1,8 @@
 package com.trivectadigital.ziprydedriverapp;
 
 import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,10 +16,13 @@ import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 
 public class scheduleZiprydeActivity extends AppCompatActivity {
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedule_zipryde);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -38,6 +41,9 @@ public class scheduleZiprydeActivity extends AppCompatActivity {
                 onBackPressed();
             }
         });
+
+
+
     }
 
     @Override
@@ -48,5 +54,7 @@ public class scheduleZiprydeActivity extends AppCompatActivity {
         String json = prefs.getString("LoginCredentials", "");
         Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
     }
+
+
 
 }

@@ -1,11 +1,11 @@
 package com.trivectadigital.ziprydedriverapp;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -13,8 +13,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.trivectadigital.ziprydedriverapp.assist.MessageReceivedEvent;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
 import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
+
+import de.greenrobot.event.EventBus;
 
 public class HistoryActivity extends AppCompatActivity {
 
@@ -32,7 +35,14 @@ public class HistoryActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT);
         toolbar.addView(mCustomView, layoutParams);
         TextView titleText = (TextView) mCustomView.findViewById(R.id.titleText);
-        titleText.setText("Past ZipRydes");
+
+        if(Utils.isHistory) {
+            titleText.setText("Past ZipRydes");
+        }
+        else{
+            titleText.setText("Scheduled ZipRydes");
+        }
+
         ImageView backImg = (ImageView) mCustomView.findViewById(R.id.backImg);
         backImg.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,6 +59,26 @@ public class HistoryActivity extends AppCompatActivity {
         Gson gson = new Gson();
         String json = prefs.getString("LoginCredentials", "");
         Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    protected void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    public void onEventMainThread(MessageReceivedEvent messageReceivedEvent) {
+        Log.e("onEventMainThread", "" + messageReceivedEvent.message);
+        Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
+        Intent ide = new Intent(HistoryActivity.this, RideActivity.class);
+        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(ide);
     }
 
 }

@@ -204,7 +204,7 @@
             android:layout_marginRight="25dp"
             android:gravity="center_vertical"
             android:singleLine="true"
-            android:text="Pay By Using"
+            android:text="Pay Using"
             android:textColor="@color/primaryText"
             android:textSize="18dp" />
 

@@ -156,10 +156,21 @@ public class YourZiprydeFragment extends Fragment {
         Log.e("Thread title", "" + messageReceivedEvent.title);
         Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
         Log.e("UserId", "" + Utils.verifyLogInUserMobileInstantResponse.getUserId());
-        if (!messageReceivedEvent.title.equals("BOOKING_CANCELLED")) {
+        if (messageReceivedEvent.title.equals("BOOKING_CANCELLED")) {
             SingleInstantParameters loginCredentials = new SingleInstantParameters();
             loginCredentials.customerId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
             getBookingByUserId(loginCredentials);
+        }else if(messageReceivedEvent.title.equals("BOOKING_DRIVER_ONTRIP") || messageReceivedEvent.title.equals("BOOKING_DRIVER_ONSITE"))
+        {
+
+            Intent ide = new Intent(getActivity(), DriverInfoBookingActivity.class);
+            //Get the booking id from the message
+            String str = messageReceivedEvent.message;
+            String[] splitStr = str.split("\\s+");
+            ide.putExtra("bookingId", splitStr[splitStr.length-1]);
+            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(ide);
+
         }
     }
 

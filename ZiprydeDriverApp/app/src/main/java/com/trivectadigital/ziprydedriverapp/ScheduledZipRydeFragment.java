@@ -102,7 +102,7 @@ public class ScheduledZipRydeFragment extends Fragment {
 
         apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
 
-        history_list = (ListView) view.findViewById(R.id.history_list);
+        history_list = (ListView) view.findViewById(R.id.schedule_list);
 
         history_list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -124,10 +124,13 @@ public class ScheduledZipRydeFragment extends Fragment {
         Log.e("UserId", "UserId " + Utils.verifyLogInUserMobileInstantResponse.getUserId());
         SingleInstantParameters loginCredentials = new SingleInstantParameters();
         loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
-        loginCredentials.bookingStatus = "SCHEDULED";
+        loginCredentials.bookingStatus = "ACCEPTED";
         Gson gson = new Gson();
         String json = gson.toJson(loginCredentials);
         Log.e("json", "getBookingByDriverId " + json);
+
+       // Toast.makeText(getActivity(),json.toString(),Toast.LENGTH_LONG).show();
+
         getBookingByDriverId(loginCredentials);
 
         return view;
@@ -198,16 +201,18 @@ public class ScheduledZipRydeFragment extends Fragment {
                     dialog.dismiss();
                     if (response.isSuccessful()) {
                         Utils.getBookingByDriverIdInstantResponse = response.body();
+
+                       // Toast.makeText(getActivity(),"Total size"+Utils.getBookingByDriverIdInstantResponse.size(),Toast.LENGTH_LONG).show();
                         Log.e("size", "" + Utils.getBookingByDriverIdInstantResponse.size());
-                        for (int i = 0; i < Utils.getBookingByDriverIdInstantResponse.size(); i++) {
-                            Log.e("BookingId", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getBookingId());
-                            Log.e("CrnNumber", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getCrnNumber());
-                            Log.e("BookingStatus", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getBookingStatus());
-                            Log.e("DriverStatus", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getDriverStatus());
-                            Log.e("DriverStatusCode", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getDriverStatusCode());
-                            Log.e("BookingStatusCode", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getBookingStatusCode());
-                            Log.e("distanceInMiles", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getGeoLocationResponse().getDistanceInMiles());
-                        }
+//                        for (int i = 0; i < Utils.getBookingByDriverIdInstantResponse.size(); i++) {
+//                            Log.e("BookingId", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getBookingId());
+//                            Log.e("CrnNumber", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getCrnNumber());
+//                            Log.e("BookingStatus", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getBookingStatus());
+//                            Log.e("DriverStatus", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getDriverStatus());
+//                            Log.e("DriverStatusCode", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getDriverStatusCode());
+//                            Log.e("BookingStatusCode", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getBookingStatusCode());
+//                            Log.e("distanceInMiles", "" + Utils.getBookingByDriverIdInstantResponse.get(i).getGeoLocationResponse().getDistanceInMiles());
+//                        }
                         ZiprydeHistoryAdapter ziprydeHistoryAdapter = new ZiprydeHistoryAdapter(Utils.getBookingByDriverIdInstantResponse, getActivity());
                         history_list.setAdapter(ziprydeHistoryAdapter);
                     } else {

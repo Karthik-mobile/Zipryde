@@ -475,7 +475,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         if (!messageReceivedEvent.title.equals("BOOKING_CANCELLED")) {
             //snack.bar
 
-            Toast.makeText(this, messageReceivedEvent.message, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, messageReceivedEvent.message, Toast.LENGTH_SHORT).show();
             SingleInstantParameters loginCredentials = new SingleInstantParameters();
             loginCredentials.bookingId = "" + Utils.requestBookingResponse.getBookingId();
             getBookingByBookingId(loginCredentials, 1);

@@ -191,10 +191,10 @@ public class CashDisplyActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        Intent ide = new Intent(CashDisplyActivity.this, NavigationMenuActivity.class);
-        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(ide);
-        finish();
+        //Show a pop-up alert for their belongings
+
+        showInfoDlg(getString(R.string.information), "Thanks for Ride!Please check your belongings,have a nice day!", getString(R.string.btn_ok), "back");
+
 
     }
 
@@ -300,7 +300,7 @@ public class CashDisplyActivity extends AppCompatActivity {
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("logout")) {
+        if (navType.equalsIgnoreCase("info") || navType.equalsIgnoreCase("server") || navType.equalsIgnoreCase("logout") || navType.equalsIgnoreCase("back")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
@@ -338,6 +338,12 @@ public class CashDisplyActivity extends AppCompatActivity {
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
                     // finish();
+                }else if(navType.equalsIgnoreCase("back")){
+
+                    Intent ide = new Intent(CashDisplyActivity.this, NavigationMenuActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
                 }
             }
         });

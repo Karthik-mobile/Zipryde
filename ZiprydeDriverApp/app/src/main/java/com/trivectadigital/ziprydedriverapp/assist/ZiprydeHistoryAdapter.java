@@ -72,6 +72,7 @@ public class ZiprydeHistoryAdapter extends BaseAdapter {
             holder = (ViewHolder) view.getTag();
         }
 
+        //Toast.makeText(context,"Reached Here",Toast.LENGTH_SHORT).show();
         ListOfBooking ziprydeHistoryDetails = ziprydeHistoryDetailsList.get(position);
 
         //Convert the time to system time.

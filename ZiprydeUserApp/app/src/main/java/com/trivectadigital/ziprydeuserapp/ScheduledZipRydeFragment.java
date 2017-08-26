@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
+import com.trivectadigital.ziprydeuserapp.assist.MessageReceivedEvent;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.assist.ZiprydeHistoryAdapter;
 import com.trivectadigital.ziprydeuserapp.modelget.ListOfBooking;
@@ -33,6 +34,7 @@ import org.json.JSONObject;
 
 import java.util.LinkedList;
 
+import de.greenrobot.event.EventBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -179,6 +181,39 @@ public class ScheduledZipRydeFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    public void onEventMainThread(MessageReceivedEvent messageReceivedEvent) {
+        Log.e("onEventMainThread", "" + messageReceivedEvent.message);
+        Log.e("Thread title", "" + messageReceivedEvent.title);
+        Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
+        Log.e("UserId", "" + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+        if (!messageReceivedEvent.title.equals("BOOKING_CANCELLED")) {
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.customerId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
+            loginCredentials.bookingStatus="ACCEPTED";
+            getBookingByBookingStatus(loginCredentials);
+        }else
+            {
+
+                Intent ide = new Intent(getActivity(), DriverInfoBookingActivity.class);
+                ide.putExtra("from", "Navi");
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
+
+        }
     }
 
 

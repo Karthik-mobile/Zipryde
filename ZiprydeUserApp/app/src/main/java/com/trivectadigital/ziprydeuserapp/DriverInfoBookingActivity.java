@@ -490,7 +490,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         Log.e("Thread title", "" + messageReceivedEvent.title);
         Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
 
-        Toast.makeText(this,messageReceivedEvent.message,Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this,messageReceivedEvent.message,Toast.LENGTH_SHORT).show();
 
         //onShowPopup(view,messageReceivedEvent.message);
         if (!messageReceivedEvent.title.equals("BOOKING_PAYMENT_SUCCESS")) {
@@ -519,7 +519,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
         if(isOnPause){
             isOnPause = false;
-            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID")) {
+            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("ACCEPTED")) {
                 SingleInstantParameters loginCredentials = new SingleInstantParameters();
                 loginCredentials.bookingId = "" + bookingIdFinal;
                 getBookingByBookingId(loginCredentials);
@@ -598,7 +598,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                             showInfoDlg("Booking Cancelled", "Requested booking has been cancelled. Try after sometime", "Done", "requestCancelled");
                         }
 
-                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID")) {
+                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("ACCEPTED")) {
                             SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                             editor.putString("bookingId", bookingIdFinal);
                             editor.commit();
@@ -934,7 +934,10 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                                     Log.e("bookingStatusFinal", "" + bookingStatusFinal);
                                     if (!bookingStatusFinal.equals("COMPLETED")) {
                                         if (!bookingStatusFinal.equals("CANCELLED")) {
-                                            getGeoLocationByDriverId(loginCredentials);
+
+                                            if(!bookingStatusFinal.equals("ACCEPTED")) {
+                                                getGeoLocationByDriverId(loginCredentials);
+                                            }
                                         }
                                     }
                                 }
@@ -1432,6 +1435,15 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                 if (!displayType.equalsIgnoreCase("")) {
                     driverArrivingTime.setText(Utils.parsedDuration);
                 }
+
+//                if(displayType.equalsIgnoreCase("staticmap")){
+//                    if(result != null){
+//
+//                        //get the static map from the server.
+//
+//
+//                    }
+              //  }
             } else {
                 Log.d("onPostExecute", "without Polylines drawn");
             }

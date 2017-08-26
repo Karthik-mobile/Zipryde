@@ -120,18 +120,32 @@ public class YourZiprydeFragment extends Fragment {
             }
         });
 
+        if(Utils.isHistory){
         Log.e("UserId", "UserId " + Utils.verifyLogInUserMobileInstantResponse.getUserId());
         SingleInstantParameters loginCredentials = new SingleInstantParameters();
         loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
         Gson gson = new Gson();
         String json = gson.toJson(loginCredentials);
         Log.e("json", "getBookingByDriverId " + json);
-        getBookingByDriverId(loginCredentials);
+        getBookingByDriverId(loginCredentials,false);
+        }else{
+
+            Log.e("UserId", "UserId " + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+            SingleInstantParameters loginCredentials = new SingleInstantParameters();
+            loginCredentials.driverId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
+            loginCredentials.bookingStatus = "ACCEPTED";
+            Gson gson = new Gson();
+            String json = gson.toJson(loginCredentials);
+            Log.e("json", "getBookingByDriverId " + json);
+            getBookingByDriverId(loginCredentials,true);
+        }
+
+
 
         return view;
     }
 
-    public void getBookingByDriverId(SingleInstantParameters loginCredentials) {
+    public void getBookingByDriverId(SingleInstantParameters loginCredentials,boolean isBookingStatus) {
         if (Utils.connectivity(getActivity())) {
             final Dialog dialog = new Dialog(getActivity(), android.R.style.Theme_Dialog);
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -143,7 +157,14 @@ public class YourZiprydeFragment extends Fragment {
             dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             dialog.show();
 
-            Call<LinkedList<ListOfBooking>> call = apiService.getBookingByDriverId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
+            Call<LinkedList<ListOfBooking>> call ;
+
+            if(isBookingStatus) {
+                call = apiService.getBookingByBookingStatusAndDriverId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(), loginCredentials);
+            }else{
+                call = apiService.getBookingByDriverId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(), loginCredentials);
+            }
+
             call.enqueue(new Callback<LinkedList<ListOfBooking>>() {
                 @Override
                 public void onResponse(Call<LinkedList<ListOfBooking>> call, Response<LinkedList<ListOfBooking>> response) {
@@ -200,6 +221,9 @@ public class YourZiprydeFragment extends Fragment {
             Toast.makeText(getActivity(), "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
         }
     }
+
+
+
 
     Dialog dialog;
 

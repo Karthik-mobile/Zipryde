@@ -220,7 +220,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 siteBtn.setVisibility(View.GONE);
             }
 
-            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID")) {
+            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("ACCEPTED") ) {
                 SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                 editor.putString("bookingID", bookingIdFinal);
                 editor.commit();
@@ -257,7 +257,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             listOfRequestedBooking = Utils.getBookingRequestedByDriverIdResponse.get(position);
             bookingIdFinal = listOfRequestedBooking.getBookingId();
             bookingStatusFinal = listOfRequestedBooking.getBookingStatusCode();
-            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID")) {
+            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("ACCEPTED")) {
                 SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                 editor.putString("bookingID", bookingIdFinal);
                 editor.commit();
@@ -535,6 +535,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 Log.e("bookingStatusFinal", "" + bookingStatusFinal);
                 if (!bookingStatusFinal.equals("PAID")) {
                     if (!bookingStatusFinal.equals("CANCELLED")) {
+                        if(!bookingStatusFinal.equals("ACCEPTED"))
                         updateDriverLocationinMap();
                     }
                 }
@@ -720,7 +721,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                             gotoNavihation.setVisibility(View.GONE);
                         }
 
-                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID")) {
+                        if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("PAID")) {
                             SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
                             editor.putString("bookingID", bookingIdFinal);
                             editor.commit();
@@ -838,7 +839,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                         bookingStatus.setText(Utils.updateBookingDriverStatusInstantResponse.getBookingStatus());
                         driverStatus = Utils.updateBookingDriverStatusInstantResponse.getDriverStatusCode();
 
-                        if (loginCredentials.driverStatus.equals("SCHEDULED")) {
+                        if (driverStatus.equals("SCHEDULED")) {
 
                             endtripBtn.setVisibility(View.GONE);
                             starttripBtn.setVisibility(View.GONE);
@@ -847,7 +848,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                             siteBtn.setVisibility(View.VISIBLE);
                             confirmBtn.setVisibility(View.GONE);
                         }else
-                        if (loginCredentials.driverStatus.equals("ACCEPTED")) {
+                        if (driverStatus.equals("ACCEPTED")) {
                             if(siteBtn.getVisibility() == View.VISIBLE) {
                                 showInfoDlg(getString(R.string.success), getString(R.string.usermsg_statusupdate), getString(R.string.btn_ok), "success");
                             }
@@ -857,14 +858,14 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                             siteBtn.setVisibility(View.VISIBLE);
                             confirmBtn.setVisibility(View.GONE);
                             siteBtn.setTag(2000);
-                        } else if (loginCredentials.driverStatus.equals("ON_SITE")) {
+                        } else if (driverStatus.equals("ON_SITE")) {
                             confirmBtn.setVisibility(View.GONE);
                             endtripBtn.setVisibility(View.GONE);
                             starttripBtn.setVisibility(View.VISIBLE);
                             callCustomer.setVisibility(View.VISIBLE);
                             siteBtn.setVisibility(View.GONE);
                             showInfoDlg(getString(R.string.success), getString(R.string.usermsg_statusupdate),  getString(R.string.btn_ok), "success");
-                        } else if (loginCredentials.driverStatus.equals("ON_TRIP")) {
+                        } else if (driverStatus.equals("ON_TRIP")) {
                             if (polyline != null) {
                                 polyline.remove();
                             }
@@ -872,7 +873,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                             starttripBtn.setVisibility(View.GONE);
                             siteBtn.setVisibility(View.GONE);
                             showInfoDlg(getString(R.string.success), getString(R.string.bookingtrack_tripstarted),  getString(R.string.btn_ok), "success");
-                        } else if (loginCredentials.driverStatus.equals("COMPLETED")) {
+                        } else if (driverStatus.equals("COMPLETED")) {
                             showInfoDlg(getString(R.string.success), getString(R.string.bookingtrack_tripend),  getString(R.string.btn_ok), "trip success");
                         }
                     } else {
@@ -1162,7 +1163,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         if (bookingStatusFinal != null) {
             if (!bookingStatusFinal.equals("COMPLETED")) {
                 if (!bookingStatusFinal.equals("CANCELLED")) {
-                    if(!bookingStatusFinal.equals("SCHEDULED")) {
+                    if(!bookingStatusFinal.equals("ACCEPTED")) {
                         if (handler != null && finalizer != null) {
                             handler.removeCallbacks(finalizer);
                         }
@@ -1217,7 +1218,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
 
         if(isOnPause){
             isOnPause = false;
-            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("SCHEDULED")) {
+            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("ACCEPTED")) {
                 SingleInstantParameters loginCredentials = new SingleInstantParameters();
                 loginCredentials.bookingId = "" + bookingIdFinal;
                 getBookingByBookingId(loginCredentials, 0);
@@ -1227,7 +1228,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
 
     @Override
     public void onBackPressed() {
-        if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED") || bookingStatusFinal.equals("SCHEDULED")) {
+        if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED") || bookingStatusFinal.equals("ACCEPTED")) {
             Intent ide = new Intent(OnGoingBookingActivity.this, NewDashBoardActivity.class);
             ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(ide);

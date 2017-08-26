@@ -93,15 +93,34 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             NotificationUtils.clearNotifications(getApplicationContext());
             if (!NotificationUtils.isAppIsInBackground(getApplicationContext())) {
 //                // app is in foreground, broadcast the push message
-                EventBus.getDefault().post(new MessageReceivedEvent(message, title));
 
+                EventBus.getDefault().post(new MessageReceivedEvent(message, title));
                 Intent pushNotification = new Intent(Utils.PUSH_NOTIFICATION);
                 pushNotification.putExtra("message", message);
                 LocalBroadcastManager.getInstance(this).sendBroadcast(pushNotification);
-//
-//                // play notification sound
+
+                // play notification sound
                 NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
                 notificationUtils.playNotificationSound();
+
+//                if(!title.equalsIgnoreCase("BOOKING_PAYMENT_SUCCESS")){
+//                    EventBus.getDefault().post(new MessageReceivedEvent(message, title));
+//                    NotificationUtils notificationUtils = new NotificationUtils(getApplicationContext());
+//                    notificationUtils.playNotificationSound();
+//                    SharedPreferences preferences = getSharedPreferences("notificationpref", MODE_PRIVATE);
+//                    SharedPreferences.Editor editor = preferences.edit();
+//                    editor.putString("PushMsgkey", message);
+//                    editor.commit();
+//                    Intent intent2 = new Intent(this, DisplayPushNotificiationActivity.class);
+//                    intent2.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                    intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    startActivity(intent2);
+//
+//                }else{
+//
+//                    //Open the notification activiity
+//
+//                }
 
 //                if(!title.equals("DRIVER_LOGOUT")){
 ////                // app is in background, show the notification in notification tray

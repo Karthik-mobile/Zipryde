@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
+import com.trivectadigital.ziprydeuserapp.assist.MessageReceivedEvent;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
@@ -262,7 +263,7 @@ public class NavigationMenuActivity extends AppCompatActivity
         // Creating a fragment transaction
         FragmentTransaction ft = fragmentManager.beginTransaction();
         // Adding a fragment to the fragment transaction
-        ft.replace(R.id.content_frame1, sFragment);
+        ft.replace(R.id.content_frame, sFragment);
         // Committing the transaction
         ft.commit();
        // Toast.makeText(this,"Endof NaviMenu",Toast.LENGTH_SHORT).show();
@@ -457,4 +458,30 @@ public class NavigationMenuActivity extends AppCompatActivity
             Toast.makeText(NavigationMenuActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
         }
     }
+
+    public void onEventMainThread(MessageReceivedEvent messageReceivedEvent) {
+        Log.e("Thread message", "" + messageReceivedEvent.message);
+        Log.e("Thread title", "" + messageReceivedEvent.title);
+        Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
+
+        Toast.makeText(this,messageReceivedEvent.message,Toast.LENGTH_SHORT).show();
+
+        //onShowPopup(view,messageReceivedEvent.message);
+        if (!messageReceivedEvent.title.equals("BOOKING_PAYMENT_SUCCESS")) {
+            //Move to Direction Info Screen.
+
+//            SharedPreferences prefs = getSharedPreferences("BookingCredentials", MODE_PRIVATE);
+//            String bookingIdFinal = prefs.getString("bookingId", "");
+//            Intent ide;
+//            if(!bookingIdFinal.equals("")) {
+            Intent ide = new Intent(NavigationMenuActivity.this, DriverInfoBookingActivity.class);
+            ide.putExtra("from", "Navi");
+            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(ide);
+            finish();
+        }
+
+
+    }
+
 }

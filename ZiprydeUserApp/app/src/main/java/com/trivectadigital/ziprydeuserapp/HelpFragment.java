@@ -1,12 +1,19 @@
 package com.trivectadigital.ziprydeuserapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.trivectadigital.ziprydeuserapp.assist.MessageReceivedEvent;
+import com.trivectadigital.ziprydeuserapp.assist.Utils;
+
+import de.greenrobot.event.EventBus;
 
 
 /**
@@ -104,5 +111,33 @@ public class HelpFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
+    }
+
+    public void onEventMainThread(MessageReceivedEvent messageReceivedEvent) {
+        Log.e("onEventMainThread", "" + messageReceivedEvent.message);
+        Log.e("Thread title", "" + messageReceivedEvent.title);
+        Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
+        Log.e("UserId", "" + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+
+        if(!messageReceivedEvent.title.equals("BOOKING_PAYMENT_SUCCESS")){
+
+            Intent ide = new Intent(getActivity(), DriverInfoBookingActivity.class);
+            ide.putExtra("from", "-1");
+            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(ide);
+
+        }
     }
 }
