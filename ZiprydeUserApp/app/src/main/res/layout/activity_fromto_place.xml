@@ -120,7 +120,8 @@
                             android:focusableInTouchMode="true"
                             android:hint="Enter the drop location"
                             android:paddingLeft="10dp"
-                            android:maxLines="1" />
+                            android:maxLines="1"
+                            android:inputType="text" />
 
                         <ImageView
                             android:id="@+id/clearsearchImageViewdest"

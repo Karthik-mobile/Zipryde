@@ -25,9 +25,14 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.trivectadigital.ziprydedriverapp.SplashActivity;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
+import com.trivectadigital.ziprydedriverapp.modelget.ListOfBooking;
+import com.trivectadigital.ziprydedriverapp.modelget.ListOfBookings;
+import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydedriverapp.modelpost.SingleInstantParameters;
 
 import org.json.JSONObject;
+
+import java.util.LinkedList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -170,19 +175,28 @@ public class GPSLocationService extends Service implements GoogleApiClient.Conne
         loginCredentials.fromLatitude = ""+Utils.gpsLocationService.getLatitude();
         loginCredentials.fromLongitude = ""+Utils.gpsLocationService.getLongitude();
         ZiprydeApiInterface apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
-        Call<Void> call = apiService.updateDriverSession(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
-        call.enqueue(new Callback<Void>() {
+        Call<SingleInstantResponse> call = apiService.updateDriverSession(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
                 int statusCode = response.code();
                 Log.e("statusCode", "" + statusCode);
                 Log.e("response.body", "" + response.body());
                 Log.e("response.errorBody", "" + response.errorBody());
                 Log.e("response.isSuccessful", "" + response.isSuccessful());
+                SingleInstantResponse bookings = response.body();
+
+                if(bookings.getBooking().equalsIgnoreCase("y")){
+                    //Move to Ride Request Activity.
+                    ObservableObject.getInstance().updateValue(null);
+                }else{
+                    //Dont do anything here
+                }
+
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
             }

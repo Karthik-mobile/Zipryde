@@ -117,6 +117,7 @@ public class YourZiprydeFragment extends Fragment {
                     } else {
                         Intent ide = new Intent(getActivity(), DriverInfoBookingActivity.class);
                         ide.putExtra("position", position);
+                        ide.putExtra("back",1);
                         ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(ide);
                         getActivity().finish();

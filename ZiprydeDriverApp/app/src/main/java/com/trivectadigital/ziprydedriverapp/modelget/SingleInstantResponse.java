@@ -67,6 +67,8 @@ public class SingleInstantResponse {
     private String noOfPassengers;
     @SerializedName("geoLocationResponse")
     private GeoLocationRequest geoLocationResponse;
+    @SerializedName("booking")
+    private String booking;
 
     @SerializedName("revenueAmount")
     private String revenueAmount;
@@ -330,5 +332,13 @@ public class SingleInstantResponse {
 
     public void setAccessToken(String token) {
         this.accessToken = token;
+    }
+
+    public String getBooking() {
+        return booking;
+    }
+
+    public void setBooking(String token) {
+        this.booking = token;
     }
 }

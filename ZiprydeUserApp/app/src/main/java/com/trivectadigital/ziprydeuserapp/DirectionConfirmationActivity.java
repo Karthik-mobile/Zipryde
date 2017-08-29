@@ -603,7 +603,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                                     getBookingByBookingId(loginCredentials, 1);
                                 }
                             };
-                            handler.postDelayed(finalizer, 30000);
+                            handler.postDelayed(finalizer, 60000);
                         }
                     } else {
                         requestdialog.dismiss();

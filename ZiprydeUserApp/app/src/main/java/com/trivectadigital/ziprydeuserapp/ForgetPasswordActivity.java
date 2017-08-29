@@ -41,6 +41,8 @@ public class ForgetPasswordActivity extends AppCompatActivity {
     LinearLayout otpLay, mobileLay, passwordLay;
     ZiprydeApiInterface apiService;
 
+    String mobileNo;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -124,21 +126,17 @@ public class ForgetPasswordActivity extends AppCompatActivity {
         changeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String mobile = mobileNumberFinalEdit.getText().toString().trim();
+               // String mobile = mobileNumberFinalEdit.getText().toString().trim();
                 String password = passwordEdit.getText().toString();
                 String confirmpassword = confirmpasswordEdit.getText().toString();
-                if (mobile.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the mobile number", "OK", "info");
-                } else if (mobile.length() != 10) {
-                    showInfoDlg("Information", "Please enter valid mobile number", "OK", "info");
-                } else if (password.isEmpty()) {
+                if (password.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Password", "OK", "info");
                 } else if (confirmpassword.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Confirm Password", "OK", "info");
                 } else if (!password.equals(confirmpassword)) {
                     showInfoDlg("Information", "Password and Confirm Password are not matching", "OK", "info");
                 } else {
-                    callMobilePasswordUpdateService(mobile, password);
+                    callMobilePasswordUpdateService(mobileNo, password);
                 }
             }
         });
@@ -160,6 +158,7 @@ public class ForgetPasswordActivity extends AppCompatActivity {
             loginCredentials.mobileNumber = mobile;
             loginCredentials.password = password;
             loginCredentials.userType = "RIDER";
+
 
             Call<SingleInstantResponse> call = apiService.updatePasswordByUserAndType(loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
@@ -268,6 +267,8 @@ public class ForgetPasswordActivity extends AppCompatActivity {
             dialog.show();
             SingleInstantParameters loginCredentials = new SingleInstantParameters();
             loginCredentials.mobileNumber = mobile;
+
+            mobileNo = mobile;
 
             Call<SingleInstantResponse> call = apiService.getOTPByMobile(loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {

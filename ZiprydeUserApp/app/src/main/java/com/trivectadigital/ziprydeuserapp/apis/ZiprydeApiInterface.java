@@ -80,4 +80,6 @@ public interface ZiprydeApiInterface {
 
     @POST("getBookingByBookingStatusAndUserId")
     Call<LinkedList<ListOfBooking>> getBookingByBookingStatusAndUserId(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
+
+
 }

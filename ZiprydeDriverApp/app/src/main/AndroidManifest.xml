@@ -179,7 +179,12 @@
         <activity
             android:name=".ScheduleHistoryActivity"
             android:label="@string/title_activity_schedule_history"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <receiver
+            android:name=".service.LocationTrackerReceiver"
+            android:enabled="true"
+            android:exported="true"></receiver>
     </application>
 
 </manifest>

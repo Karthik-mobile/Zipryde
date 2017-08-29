@@ -149,9 +149,11 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateHidden" />
-        <activity android:name=".DisplayPushNotificiationActivity"
-            android:theme="@android:style/Theme.Dialog"
-            android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".DisplayPushNotificiationActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Dialog" />
+        <activity android:name=".RideHistroyActivity"></activity>
     </application>
 
 </manifest>

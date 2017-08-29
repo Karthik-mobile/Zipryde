@@ -64,7 +64,7 @@ public interface ZiprydeApiInterface {
     Call<Void> insertDriverSession(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
     @POST("zipryde/updateDriverSession")
-    Call<Void> updateDriverSession(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
+    Call<SingleInstantResponse> updateDriverSession(@Header("access-token") String contentRange, @Body SingleInstantParameters parameters);
 
     @POST("zipryde/updateDriverStatus")
     Call<Void> updateDriverStatus(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);

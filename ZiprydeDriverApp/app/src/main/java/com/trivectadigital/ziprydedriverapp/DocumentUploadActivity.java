@@ -141,7 +141,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
         exyText.setText(getRedManditoty(exyText.getText().toString().trim()));
 
 //        percentageSpinner = (Spinner) findViewById(R.id.percentageSpinner);
-        getAllNYOPList();
+       // getAllNYOPList();
 
         continueBtn.setOnClickListener(new View.OnClickListener() {
             @Override

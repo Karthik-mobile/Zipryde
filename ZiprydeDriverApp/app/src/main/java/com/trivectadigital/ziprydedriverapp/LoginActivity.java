@@ -5,9 +5,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -132,10 +132,10 @@ public class LoginActivity extends AppCompatActivity {
             loginCredentials.fromLatitude = "" + Utils.gpsLocationService.getLatitude();
             loginCredentials.fromLongitude = "" + Utils.gpsLocationService.getLongitude();
 
-            Call<Void> call = apiService.updateDriverSession(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
-            call.enqueue(new Callback<Void>() {
+            Call<SingleInstantResponse> call = apiService.updateDriverSession(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
+            call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
+                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
                     int statusCode = response.code();
                     Log.e("statusCode", "" + statusCode);
                     Log.e("response.body", "" + response.body());
@@ -155,7 +155,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onFailure(Call<Void> call, Throwable t) {
+                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                    // Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();

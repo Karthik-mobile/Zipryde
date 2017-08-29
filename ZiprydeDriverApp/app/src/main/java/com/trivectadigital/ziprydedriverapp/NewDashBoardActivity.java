@@ -11,6 +11,7 @@ import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Display;
@@ -30,6 +31,7 @@ import com.google.gson.Gson;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydedriverapp.assist.MessageReceivedEvent;
+import com.trivectadigital.ziprydedriverapp.assist.ObservableObject;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
 import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydedriverapp.modelpost.SingleInstantParameters;
@@ -38,13 +40,16 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Observable;
+import java.util.Observer;
 
+import br.com.safety.locationlistenerhelper.core.LocationTracker;
 import de.greenrobot.event.EventBus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NewDashBoardActivity extends AppCompatActivity {
+public class NewDashBoardActivity extends AppCompatActivity implements Observer {
 
     LinearLayout rideLayout, historyLayout, notificationLayout, logoutLayout, helpLayout,paymentSetupLayout, rideLaterLayout;
 
@@ -59,6 +64,8 @@ public class NewDashBoardActivity extends AppCompatActivity {
     ZiprydeApiInterface apiService;
 
     PopupWindow paymentPopwindow;
+
+    private LocationTracker locationTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -219,7 +226,24 @@ public class NewDashBoardActivity extends AppCompatActivity {
                 }
             }
         });
+
+        ObservableObject.getInstance().addObserver(this);
+
+
     }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        Toast.makeText(this, String.valueOf("activity observer " + data), Toast.LENGTH_SHORT).show();
+        //insertDriverSession();
+        //Open RideActivity
+        Intent ide = new Intent(NewDashBoardActivity.this, RideActivity.class);
+        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(ide);
+
+    }
+
+
 
     @Override
     protected void onResume() {
@@ -237,6 +261,12 @@ public class NewDashBoardActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         EventBus.getDefault().register(this);
+
+//            locationTracker=new LocationTracker("my.action")
+//                    .setInterval(20000)
+//                    .setGps(true)
+//                    .setNetWork(false)
+//                    .start(getBaseContext(), this);
     }
 
     @Override
@@ -244,6 +274,19 @@ public class NewDashBoardActivity extends AppCompatActivity {
         EventBus.getDefault().unregister(this);
         super.onStop();
     }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        locationTracker.onRequestPermission(requestCode, permissions, grantResults);
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+       // locationTracker.stopLocationService(this);
+
+    }
+
 
     public void onEventMainThread(MessageReceivedEvent messageReceivedEvent) {
         Log.e("onEventMainThread", "" + messageReceivedEvent.message);
@@ -470,10 +513,10 @@ public class NewDashBoardActivity extends AppCompatActivity {
         loginCredentials.fromLatitude = ""+Utils.gpsLocationService.getLatitude();
         loginCredentials.fromLongitude = ""+Utils.gpsLocationService.getLongitude();
         ZiprydeApiInterface apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
-        Call<Void> call = apiService.updateDriverSession(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
-        call.enqueue(new Callback<Void>() {
+        Call<SingleInstantResponse> call = apiService.updateDriverSession(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
+        call.enqueue(new Callback<SingleInstantResponse>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
+            public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
                 int statusCode = response.code();
                 Log.e("statusCode", "" + statusCode);
                 Log.e("response.body", "" + response.body());
@@ -501,7 +544,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
                 // Log error here since request failed
                 Log.e("onFailure", t.toString());
                 showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "forcelogout");
@@ -782,5 +825,7 @@ public class NewDashBoardActivity extends AppCompatActivity {
         } else {
             Toast.makeText(NewDashBoardActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
         }
+
+
     }
 }

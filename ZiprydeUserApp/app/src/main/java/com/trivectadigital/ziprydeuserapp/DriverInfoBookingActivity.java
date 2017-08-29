@@ -32,6 +32,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +49,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.CircleImageView;
@@ -90,17 +92,20 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     LinearLayout cancelBookingLay, getDirections, reportLay;
 
+    RelativeLayout mapLayout, staticImgLayout;
+
     String bookingStatusFinal = "";
     String bookingIdFinal = "";
     String bookingDriverMobileNumber = "";
 
-    ImageView callDriverImg;
+    ImageView callDriverImg,staticMapImg;
 
     PopupWindow pushNotificationPopwindow;
 
     public static final int ACTIONCALL = 0x1;
     Polyline polyline;
 
+    int isHome = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +129,14 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
         getDirections = (LinearLayout) findViewById(R.id.getDirections);
         reportLay = (LinearLayout) findViewById(R.id.reportLay);
 
+        mapLayout = (RelativeLayout) findViewById(R.id.mapLayout);
+        staticImgLayout = (RelativeLayout) findViewById(R.id.staticMapImgLayout);
+
+        mapLayout.setVisibility(View.VISIBLE);
+        staticImgLayout.setVisibility(View.GONE);
+
+
+        staticMapImg = (ImageView) findViewById(R.id.staticMapImgView);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -149,6 +162,10 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
             if (intent.hasExtra("from")) {
                 initiateViewToDisplay();
             }
+        }
+
+        if(intent.hasExtra("back")){
+            isHome = intent.getIntExtra("back",0);
         }
 
 
@@ -196,6 +213,12 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                     if (polyline != null) {
                         polyline.remove();
                     }
+
+                    //Move the camera to the origin.
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(origin, 18));
+                    mMap.animateCamera(CameraUpdateFactory.zoomIn());
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(18), 2000, null);
+
                     if (origin != null && dest != null) {
                         String url = getUrl(origin, dest);
                         Log.d("url", "" + url);
@@ -381,8 +404,12 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
             if (bookingStatusFinal.equals("PAID")) {
                 reportLay.setVisibility(View.VISIBLE);
+                staticImgLayout.setVisibility(View.VISIBLE);
+                mapLayout.setVisibility(View.GONE);
             } else {
                 reportLay.setVisibility(View.GONE);
+                staticImgLayout.setVisibility(View.GONE);
+                mapLayout.setVisibility(View.VISIBLE);
             }
 
 
@@ -444,8 +471,12 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
             if (bookingStatusFinal.equals("PAID")) {
                 reportLay.setVisibility(View.VISIBLE);
+                staticImgLayout.setVisibility(View.VISIBLE);
+                mapLayout.setVisibility(View.GONE);
             } else {
                 reportLay.setVisibility(View.GONE);
+                staticImgLayout.setVisibility(View.GONE);
+                mapLayout.setVisibility(View.VISIBLE);
             }
 
             if (bookingStatusFinal.equals("COMPLETED")) {
@@ -870,6 +901,17 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     @Override
     public void onBackPressed() {
+
+
+//        if(isHome == 1){
+//
+//            Intent ide = new Intent(DriverInfoBookingActivity.this, NavigationMenuActivity.class);
+//            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//            startActivity(ide);
+//            finish();
+//
+//        }
+//        else
         if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED") || bookingStatusFinal.equals("COMPLETED") || bookingStatusFinal.equals("ACCEPTED") ) {
             if (handler != null && finalizer != null) {
                 handler.removeCallbacks(finalizer);
@@ -1425,6 +1467,13 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
                 Log.d("onPostExecute", "onPostExecute lineoptions decoded");
 
+
+                if(bookingStatusFinal.equalsIgnoreCase("PAID")) {
+                    //Call the staticMap
+                    getStaticRouteMap(points);
+
+                }
+
             }
 
             // Drawing polyline in the Google Map for the i-th route
@@ -1509,6 +1558,16 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
         // show the popup at bottom of the screen and set some margin at bottom ie,
         pushNotificationPopwindow.showAtLocation(v, Gravity.BOTTOM, 0,100);
+    }
+
+    private void getStaticRouteMap(ArrayList<LatLng> allPoints) {
+
+        String staticMapURL = "http://maps.google.com/maps/api/staticmap?center=" + origin.latitude + "," + origin.longitude + "&zoom=15&size=200x200&sensor=false";//"https://maps.googleapis.com/maps/api/staticmap?size=400x400&path=enc:"+allPoints;
+
+        // Glide.with(this).load(staticMapURL).into(staticMapImg);
+
+        Picasso.with(getApplicationContext()).load(staticMapURL).into(staticMapImg);
+
     }
 
 }

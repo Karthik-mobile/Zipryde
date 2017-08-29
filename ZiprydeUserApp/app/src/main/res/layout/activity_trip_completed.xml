@@ -202,51 +202,13 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:visibility="gone"
-        android:id="@+id/staticMapImgLayout">
+        android:layout_weight="1">
+
+
 
         <android.support.v7.widget.AppCompatImageView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/staticMapImgView"
-            android:background="@drawable/sample"/>
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:visibility="visible"
-        android:id="@+id/mapLayout">
-
-        <fragment
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context=".BookingFragment"
-            />
-
-        <LinearLayout
-            android:id="@+id/getDirections"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginBottom="25dp"
-            android:layout_marginRight="15dp"
-            android:background="@drawable/cardlayout"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_action_directions" />
-
-        </LinearLayout>
+            android:layout_height="match_parent" />
 
 
     </RelativeLayout>
