@@ -23,6 +23,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.trivectadigital.ziprydedriverapp.LoginActivity;
+import com.trivectadigital.ziprydedriverapp.NewDashBoardActivity;
 import com.trivectadigital.ziprydedriverapp.OnGoingBookingActivity;
 import com.trivectadigital.ziprydedriverapp.R;
 import com.trivectadigital.ziprydedriverapp.RideActivity;
@@ -54,6 +55,7 @@ public class CurrentRideAdapter extends BaseAdapter {
     public LinkedList<ListOfRequestedBooking> currentRideDetailsList;
     public Context context;
     ZiprydeApiInterface apiService;
+    boolean isSchedleTrip;
 
     public CurrentRideAdapter(LinkedList<ListOfRequestedBooking> currentRideDetailsList, Context context) {
         apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
@@ -153,10 +155,12 @@ public class CurrentRideAdapter extends BaseAdapter {
                    //showInfoDlg(context.getString(R.string.warning),"" , context.getString(R.string.btn_ok), "schedule", position);
 
                     loginCredentials.driverStatus = "SCHEDULED";
+                    isSchedleTrip = true;
                 }else {
 
                     loginCredentials.driverStatus = "ACCEPTED";
 
+                    isSchedleTrip = false;
                 }
 
                 Gson gson = new Gson();
@@ -201,7 +205,14 @@ public class CurrentRideAdapter extends BaseAdapter {
                         Utils.updateBookingDriverStatusInstantResponse = response.body();
                         Log.e("CustomerName", "" + Utils.updateBookingDriverStatusInstantResponse.getCustomerName());
                         Log.e("DistanceInMiles", "" + Utils.updateBookingDriverStatusInstantResponse.getGeoLocationResponse().getDistanceInMiles());
-                        showInfoDlg("Success..", "Request Accepted Successfully.", "Ok", "success", position);
+
+                        if(!isSchedleTrip) {
+                            showInfoDlg("Success..", "Request Accepted Successfully.", "Ok", "success", position);
+                        }else {
+
+                            showInfoDlg("Success..", "Request Accepted Successfully.", "Ok", "acceptschedule", position);
+
+                        }
                     } else {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
@@ -254,11 +265,11 @@ public class CurrentRideAdapter extends BaseAdapter {
         positiveBtn.setText("" + btnText);
 
         Button newnegativeBtn = (Button) dialog.findViewById(R.id.newnegativeBtn);
-        if (navType.equalsIgnoreCase("error")) {
+        if (navType.equalsIgnoreCase("error") || navType.equalsIgnoreCase("acceptschedule")) {
             newnegativeBtn.setVisibility(View.GONE);
         }
 
-        if (navType.equalsIgnoreCase("success")) {
+        if (navType.equalsIgnoreCase("success") ) {
             headerIcon.setImageResource(R.drawable.successicon);
             positiveBtn.setVisibility(View.GONE);
             newnegativeBtn.setVisibility(View.GONE);
@@ -312,6 +323,11 @@ public class CurrentRideAdapter extends BaseAdapter {
                     Log.e("json", "" + json);
                     updateBookingDriverStatus(loginCredentials, position);
 
+                }else if(navType.equalsIgnoreCase("acceptschedule")){
+
+                    Intent ide = new Intent(context, NewDashBoardActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    context.startActivity(ide);
                 }
             }
         });

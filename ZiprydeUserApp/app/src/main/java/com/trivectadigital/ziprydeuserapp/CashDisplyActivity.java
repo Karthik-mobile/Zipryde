@@ -180,12 +180,9 @@ public class CashDisplyActivity extends AppCompatActivity {
         editor.putString("bookingId", "");
         editor.commit();
 
-        Toast.makeText(this, messageReceivedEvent.message, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, messageReceivedEvent.message, Toast.LENGTH_SHORT).show();
+        showInfoDlg(getString(R.string.information), getString(R.string.usermsg_tripcompletedreminder), getString(R.string.btn_ok), "back");
 
-        Intent ide = new Intent(CashDisplyActivity.this, NavigationMenuActivity.class);
-        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(ide);
-        finish();
     }
 
     @Override
@@ -193,7 +190,7 @@ public class CashDisplyActivity extends AppCompatActivity {
 
         //Show a pop-up alert for their belongings
 
-        showInfoDlg(getString(R.string.information), "Thanks for Ride!Please check your belongings,have a nice day!", getString(R.string.btn_ok), "back");
+        showInfoDlg(getString(R.string.information), getString(R.string.usermsg_tripcompletedreminder), getString(R.string.btn_ok), "back");
 
 
     }
@@ -343,7 +340,7 @@ public class CashDisplyActivity extends AppCompatActivity {
                     Intent ide = new Intent(CashDisplyActivity.this, NavigationMenuActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
-                    finish();
+                    //finish();
                 }
             }
         });

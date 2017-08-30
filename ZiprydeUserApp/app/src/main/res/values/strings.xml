@@ -158,15 +158,16 @@
     <string name="usermsg_successfullogin">Successfully logged in</string>
     <string name="usermsg_wanttologout">Are you sure you want to Log Out?</string>
     <string name="usermsg_successfullyregistered"> Successfully Registered</string>
-    <string name="usermsg_bookingcancelled">This booking has been cancelled. Please try to re-book your ZipRyde</string>
+    <string name="usermsg_bookingcancelled">Sorry, Unable to grab the request. Hint: Try with a higher fare</string>
     <string name="usermsg_waitdriveraccept">Please wait till the driver accepts your request</string>
     <string name="usermsg_ziprydecancelled">Your ZipRyde has been cancelled.</string>
     <string name="usermsg_querysubmit">Your query has been successfully submitted</string>
     <string name="usermsg_permissiondenied">Permission denied</string>
     <string name="usermsg_bookingsuccessfull_waitdriver">Your Booking request has been submitted successfully. Please wait till driver accepts.</string>
-    <string name="usermsg_driveraccepted">Your Booking request has been accepted by driver.</string>
+    <string name="usermsg_driveraccepted">Get Ready! Driver is on the Way.</string>
     <string name="usermsg_nodriveravailable">available \/ Driver Not accepted the request. Try after sometime</string>
     <string name="usermsg_ccmsg">Please hand over the credit card to driver</string>
+    <string name="usermsg_tripcompletedreminder">Reminder! Check your belongings before exiting  the vehicle</string>
 
     <!-- Error Messages -->
 

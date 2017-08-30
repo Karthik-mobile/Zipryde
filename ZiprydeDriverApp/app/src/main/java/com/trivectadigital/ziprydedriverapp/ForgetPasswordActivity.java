@@ -122,6 +122,8 @@ public class ForgetPasswordActivity extends AppCompatActivity {
         passwordEdit = (EditText) findViewById(R.id.passwordEdit);
         confirmpasswordEdit = (EditText) findViewById(R.id.confirmpasswordEdit);
 
+        mobileNumberFinalEdit.setVisibility(View.GONE);
+
         changeBtn = (Button) findViewById(R.id.changeBtn);
         changeBtn.setOnClickListener(new View.OnClickListener() {
             @Override

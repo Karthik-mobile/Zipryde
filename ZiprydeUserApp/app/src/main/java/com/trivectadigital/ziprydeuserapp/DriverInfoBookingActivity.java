@@ -402,15 +402,15 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                 getGeoLocationByDriverId(loginCredentials);
             }
 
-            if (bookingStatusFinal.equals("PAID")) {
-                reportLay.setVisibility(View.VISIBLE);
-                staticImgLayout.setVisibility(View.VISIBLE);
-                mapLayout.setVisibility(View.GONE);
-            } else {
-                reportLay.setVisibility(View.GONE);
-                staticImgLayout.setVisibility(View.GONE);
-                mapLayout.setVisibility(View.VISIBLE);
-            }
+//            if (bookingStatusFinal.equals("PAID")) {
+//                reportLay.setVisibility(View.VISIBLE);
+//                staticImgLayout.setVisibility(View.VISIBLE);
+//                mapLayout.setVisibility(View.GONE);
+//            } else {
+//                reportLay.setVisibility(View.GONE);
+//                staticImgLayout.setVisibility(View.GONE);
+//                mapLayout.setVisibility(View.VISIBLE);
+//            }
 
 
             if (bookingStatusFinal.equals("COMPLETED")) {
@@ -560,6 +560,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     public void getBookingByBookingId(SingleInstantParameters loginCredentials) {
         if (Utils.connectivity(DriverInfoBookingActivity.this)) {
+
             final Dialog dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -649,7 +650,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                             ide.putExtra("toaddress", "" + Utils.requestBookingResponse.getTo());
                             ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(ide);
-                            finish();
+                            //finish();
                         }
 
                     } else {
@@ -791,7 +792,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                             ide.putExtra("toaddress", "" + Utils.requestBookingResponse.getTo());
                             ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                             startActivity(ide);
-                            finish();
+                           // finish();
                         }
 
                         if (bookingStatusFinal.equals("PAID")) {
@@ -1470,7 +1471,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
                 if(bookingStatusFinal.equalsIgnoreCase("PAID")) {
                     //Call the staticMap
-                    getStaticRouteMap(points);
+                    //getStaticRouteMap(points);
 
                 }
 
@@ -1562,8 +1563,8 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
     private void getStaticRouteMap(ArrayList<LatLng> allPoints) {
 
-        String staticMapURL = "http://maps.google.com/maps/api/staticmap?center=" + origin.latitude + "," + origin.longitude + "&zoom=15&size=200x200&sensor=false";//"https://maps.googleapis.com/maps/api/staticmap?size=400x400&path=enc:"+allPoints;
-
+        //String staticMapURL = "http://maps.google.com/maps/api/staticmap?center=" + origin.latitude + "," + origin.longitude + "&zoom=15&size=200x200&sensor=false";//"https://maps.googleapis.com/maps/api/staticmap?size=400x400&path=enc:"+allPoints;
+        String staticMapURL = "http://maps.google.com/maps/api/staticmap?center=-33.882257,151.210243&zoom=13&markers=size:mid|color:red|label:E|-33.882257,151.210243&size=250x188&sensor=false";
         // Glide.with(this).load(staticMapURL).into(staticMapImg);
 
         Picasso.with(getApplicationContext()).load(staticMapURL).into(staticMapImg);

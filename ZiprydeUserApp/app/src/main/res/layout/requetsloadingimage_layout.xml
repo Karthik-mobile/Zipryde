@@ -23,7 +23,7 @@
         android:layout_below="@+id/determinateBar"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
-        android:text="Optimizing"
+        android:text="Routing"
         android:textColor="@color/newBackTextColor"
         android:textSize="18dp"
         android:textStyle="bold" />
@@ -34,7 +34,7 @@
         android:layout_below="@+id/infoText"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
-        android:text="Your ZipRyde now"
+        android:text="Your ZipRyde!"
         android:textColor="@color/newBackTextColor"
         android:textSize="22dp"
         android:textStyle="bold" />

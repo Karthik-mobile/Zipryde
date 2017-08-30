@@ -150,6 +150,10 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         requestPickupBtn = (Button) findViewById(R.id.requestPickupBtn);
         noofSeatsSpinner = (Spinner) findViewById(R.id.noofSeatsSpinner);
 
+
+        //Hide the fareDetails Button till it loads all the valid data
+        //getFareDetailsBtn.setVisibility(View.INVISIBLE);
+
         LinearLayout reqBooking = (LinearLayout) findViewById(R.id.reqBooking);
         requestPickupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -271,7 +275,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     noofSeatsSpinner.setAdapter(adapter);
                     noofSeatsSpinner.setSelection(0, true);
-                    textSeatCapacity.setText("Seats 1-4");
+                    textSeatCapacity.setText("");
                 }
             }
         });
@@ -293,7 +297,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     noofSeatsSpinner.setAdapter(adapter);
                     noofSeatsSpinner.setSelection(0, true);
-                    textSeatCapacity.setText("Seats 1-7");
+                    textSeatCapacity.setText("");
                 }
             }
         });
@@ -315,7 +319,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     noofSeatsSpinner.setAdapter(adapter);
                     noofSeatsSpinner.setSelection(0, true);
-                    textSeatCapacity.setText("Seats 1-4");
+                    textSeatCapacity.setText("");
                 }
             }
         });
@@ -667,7 +671,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         Log.e("bookingId", "" + Utils.requestBookingResponse.getBookingId());
                         Log.e("bookingStatus", "" + Utils.requestBookingResponse.getBookingStatusCode());
                         if (Utils.requestBookingResponse.getBookingStatusCode().equals("SCHEDULED") || Utils.requestBookingResponse.getBookingStatusCode().equals("ACCEPTED") ) {
-                            showInfoDlg("Booking Successful", "Your Booking request has been accepted by driver...", "Done", "successBooking");
+                            showInfoDlg(getString(R.string.bookingsuccess), getString(R.string.usermsg_driveraccepted), getString(R.string.btn_done), "successBooking");
                         } else {
 //                            if(count != 3){
 //                                new Handler().postDelayed(new Runnable() {
@@ -681,7 +685,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
 //                                }, 10000);
 //                            }else{
                             String cabType = Utils.requestBookingResponse.getCabType();
-                            showInfoDlg("Booking Cancelled", "No " + cabType + " available / Driver Not accepted the request. Try after sometime", "Done", "requestCancelled");
+                            showInfoDlg("Booking Cancelled", "No " + cabType + " available / Driver Not accepted the request.\n Hint: Try with higher fare", "Done", "requestCancelled");
 //                            }
                         }
                     } else {
@@ -1102,16 +1106,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         markers.add(startingMarker);
         markers.add(endingMarker);
 
-        if (Utils.connectivity(DirectionConfirmationActivity.this)) {
-            // Getting URL to the Google Directions API
-            String url = getUrl(origin, dest);
-            Log.d("url", "" + url);
-            FetchUrl FetchUrl = new FetchUrl();
-            // Start downloading json data from Google Directions API
-            FetchUrl.execute(url);
-        } else {
-            Toast.makeText(this, getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
-        }
+
 
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
@@ -1125,6 +1120,20 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
                 mMap.moveCamera(cu);
                 mMap.animateCamera(cu);
+
+                if (Utils.connectivity(DirectionConfirmationActivity.this)) {
+
+                    LatLng origin = Utils.startingLatLan;
+                    LatLng dest = Utils.endingLatLan;
+                    // Getting URL to the Google Directions API
+                    String url = getUrl(origin, dest);
+                    Log.d("url", "" + url);
+                    FetchUrl FetchUrl = new FetchUrl();
+                    // Start downloading json data from Google Directions API
+                    FetchUrl.execute(url);
+                } else {
+                    Toast.makeText(getApplicationContext(), getString(R.string.errmsg_network_noconnection), Toast.LENGTH_LONG).show();
+                }
             }
         });
     }
@@ -1197,7 +1206,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             this.cabType = cabType;
         }
 
-        public FetchUrl() {
+        public  FetchUrl() {
         }
 
         @Override
@@ -1417,6 +1426,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                             vehicleTypeLay.setVisibility(View.GONE);
                         } else {
                             vehicleTypeLay.setVisibility(View.VISIBLE);
+
                             for (int i = 0; i < Utils.getNearByActiveDriversInstantResponse.size(); i++) {
                                 String cabtypeId = Utils.getNearByActiveDriversInstantResponse.get(i).getCabTypeId();
                                 Log.e("cabtypeId", "" + cabtypeId);

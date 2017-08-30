@@ -7,7 +7,14 @@ import android.util.Log;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
+import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
+import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.Utils;
+import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
     private static final String TAG = MyFirebaseInstanceIDService.class.getSimpleName();
@@ -39,6 +46,35 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         SharedPreferences.Editor editor = pref.edit();
         editor.putString("regId", token);
         editor.commit();
+        //Update the token to the remote server
+        updateDeviceToken(token);
+        //ObservableObject.getInstance().onActivityChange();
+
+    }
+
+    public void updateDeviceToken(final String regId){
+
+        SingleInstantParameters loginCredentials = new SingleInstantParameters();
+        loginCredentials.deviceToken = ""+regId;
+
+        ZiprydeApiInterface apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+        Call<Void> call = apiService.updateDeviceToken(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+
+                //SingleInstantResponse bookings = response.body();
+
+                Log.e("onResponse-->", response.toString());
+
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                // Log error here since request failed
+                Log.e("onFailure==>", t.toString());
+            }
+        });
     }
 }
 

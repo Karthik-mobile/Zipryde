@@ -146,7 +146,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Name your own price"
+                android:text="Select your fare"
                 android:textColor="@color/appBackground" />
 
             <TextView
@@ -231,6 +231,18 @@
                 android:textSize="18dp" />
 
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textSize="@dimen/textsize_12dp"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@color/silverwhite"
+                android:text="This is base fare Not including toll or waiting time or surcharge"/>
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -265,7 +277,8 @@
         android:layout_height="wrap_content"
         android:background="@color/colorAccent"
         android:orientation="vertical"
-        android:visibility="visible">
+        android:visibility="gone"
+        >
 
         <Button
             android:id="@+id/getFareDetailsBtn"
@@ -341,7 +354,7 @@
                     android:id="@+id/microTextSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Micro"
+                    android:text=""
                     android:textColor="@color/whiteColor"
                     android:textSize="16dp" />
 
@@ -448,7 +461,7 @@
                     android:id="@+id/sedanTextSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Sedan"
+                    android:text=""
                     android:textColor="@color/whiteColor"
                     android:textSize="16dp" />
 
@@ -484,7 +497,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
-                    android:text="SUV"
+                    android:text=""
                     android:textColor="@color/newBackTextColor"
                     android:textSize="18dp" />
 
@@ -559,7 +572,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
-                    android:text="Seats 1-7"
+                    android:text=""
                     android:textColor="@color/whiteColor"
                     android:textSize="18dp" />
 

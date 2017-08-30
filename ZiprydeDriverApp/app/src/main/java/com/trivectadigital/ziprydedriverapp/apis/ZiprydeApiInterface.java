@@ -93,4 +93,8 @@ public interface ZiprydeApiInterface {
     @POST("zipryde/getBookingByBookingStatusAndDriverId")
     Call<LinkedList<ListOfBooking>> getBookingByBookingStatusAndDriverId(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
 
+
+    @POST("zipryde/updateDeviceToken")
+    Call<Void> updateDeviceToken(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
+
 }

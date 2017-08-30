@@ -764,7 +764,7 @@ public class DocumentUploadActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 dialog.dismiss();
-                if(navType.equalsIgnoreCase("logout")){
+                if(navType.equalsIgnoreCase("logout") || navType.equalsIgnoreCase("forcelogin")){
                     SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
                     editor.remove("phoneNumber");
                     editor.remove("password");

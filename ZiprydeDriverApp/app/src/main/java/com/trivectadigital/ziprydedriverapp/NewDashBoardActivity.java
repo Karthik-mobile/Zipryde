@@ -234,7 +234,7 @@ public class NewDashBoardActivity extends AppCompatActivity implements Observer 
 
     @Override
     public void update(Observable observable, Object data) {
-        Toast.makeText(this, String.valueOf("activity observer " + data), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, String.valueOf("activity observer " + data), Toast.LENGTH_SHORT).show();
         //insertDriverSession();
         //Open RideActivity
         Intent ide = new Intent(NewDashBoardActivity.this, RideActivity.class);

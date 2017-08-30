@@ -779,6 +779,8 @@ public class HomeBookingFragment extends Fragment implements OnMapReadyCallback,
             startActivity(ide);
             //finish();
         }else{
+
+
             getNearByActiveDrivers(String.valueOf(mLastLocation.getLatitude()), String.valueOf(mLastLocation.getLongitude()));
         }
     }
