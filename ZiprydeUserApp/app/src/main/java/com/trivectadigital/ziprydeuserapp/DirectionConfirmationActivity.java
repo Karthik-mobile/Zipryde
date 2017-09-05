@@ -83,6 +83,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
     static final Integer LOCATION = 0x1;
 
     boolean fairDetailsVisible = false;
+    boolean isScheduledTrip;
 
     ZiprydeApiInterface apiService;
 
@@ -158,6 +159,9 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         requestPickupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                isScheduledTrip = false;
+
                 selectedCarType = Integer.parseInt(getFareDetailsBtn.getTag().toString().trim());
                 SingleInstantParameters loginCredentials = new SingleInstantParameters();
                 Log.e("selectedCarType", "" + selectedCarType);
@@ -523,6 +527,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
 
     public void submitScheduleZipBook(String schedulePickupTime){
 
+        isScheduledTrip = true;
         //Show the date and time pick up window with one hour ahead of the current time.
         selectedCarType = Integer.parseInt(getFareDetailsBtn.getTag().toString().trim());
         SingleInstantParameters loginCredentials = new SingleInstantParameters();
@@ -670,9 +675,14 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         Utils.requestBookingResponse = response.body();
                         Log.e("bookingId", "" + Utils.requestBookingResponse.getBookingId());
                         Log.e("bookingStatus", "" + Utils.requestBookingResponse.getBookingStatusCode());
-                        if (Utils.requestBookingResponse.getBookingStatusCode().equals("SCHEDULED") || Utils.requestBookingResponse.getBookingStatusCode().equals("ACCEPTED") ) {
+                        if (Utils.requestBookingResponse.getBookingStatusCode().equals("SCHEDULED") ) {
+
+                            showInfoDlg(getString(R.string.bookingsuccess), getString(R.string.usermsg_driverscheduleaccepted), getString(R.string.btn_done), "successBooking");
+                        } else if(Utils.requestBookingResponse.getBookingStatusCode().equals("ACCEPTED")){
+
                             showInfoDlg(getString(R.string.bookingsuccess), getString(R.string.usermsg_driveraccepted), getString(R.string.btn_done), "successBooking");
-                        } else {
+
+                        }  else{
 //                            if(count != 3){
 //                                new Handler().postDelayed(new Runnable() {
 //                                    @Override
@@ -1027,7 +1037,13 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 if (navType.equalsIgnoreCase("gps")) {
                     startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_CHECK_SETTINGS);
                 } else if (navType.equalsIgnoreCase("successBooking")) {
-                    Intent ide = new Intent(DirectionConfirmationActivity.this, DriverInfoBookingActivity.class);
+
+                    Intent ide;
+                    if(isScheduledTrip){
+                        ide = new Intent(DirectionConfirmationActivity.this, NavigationMenuActivity.class);
+                    }else {
+                        ide = new Intent(DirectionConfirmationActivity.this, DriverInfoBookingActivity.class);
+                    }
                     ide.putExtra("from", "Acceptance");
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);

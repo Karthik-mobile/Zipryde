@@ -23,7 +23,7 @@ public class ObservableObject extends Observable {
         }
     }
 
-    public void onActivityChange( ) {
+    public void onActivityChange(String Data ) {
         synchronized (this) {
             setChanged();
             notifyObservers();

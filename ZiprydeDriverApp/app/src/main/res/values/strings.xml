@@ -173,7 +173,7 @@
     <string name="usermsg_nodriveravailable">available \/ Driver Not accepted the request. Try after sometime</string>
     <string name="usermsg_statusupdate">Request Accepted Successfully</string>
 
-    <string name="usermsg_lostitempopup">Thanks for the Ride!Please check the car whether the passenger kept any belongings on your car.</string>
+    <string name="usermsg_lostitempopup">Thanks for the Ride! Please check the vehicle whether the passenger has left any of the belongings in your vehicle.</string>
 
     <!-- Error Messages -->
 

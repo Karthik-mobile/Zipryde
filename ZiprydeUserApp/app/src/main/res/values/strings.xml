@@ -136,7 +136,7 @@
     <string name="directionconf_suggprice">Suggested price</string>
     <string name="directionconf_fareprice">Fare Price</string>
     <string name="directionconf_zipnotavailable">ZipRyde is currently unavailable in the vicinity of the pickup location.</string>
-
+    <string name="directionconf_zipextrachargesmsg">Not including waiting time, tolls and surcharge</string>
 
     <!-- Driver Tracking Page-->
     <string name="driverinfo_call">Call</string>
@@ -165,6 +165,7 @@
     <string name="usermsg_permissiondenied">Permission denied</string>
     <string name="usermsg_bookingsuccessfull_waitdriver">Your Booking request has been submitted successfully. Please wait till driver accepts.</string>
     <string name="usermsg_driveraccepted">Get Ready! Driver is on the Way.</string>
+    <string name="usermsg_driverscheduleaccepted">Your trip has been scheduled Successfully.</string>
     <string name="usermsg_nodriveravailable">available \/ Driver Not accepted the request. Try after sometime</string>
     <string name="usermsg_ccmsg">Please hand over the credit card to driver</string>
     <string name="usermsg_tripcompletedreminder">Reminder! Check your belongings before exiting  the vehicle</string>

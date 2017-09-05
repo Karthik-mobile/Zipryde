@@ -237,11 +237,26 @@ public class NewDashBoardActivity extends AppCompatActivity implements Observer 
         //Toast.makeText(this, String.valueOf("activity observer " + data), Toast.LENGTH_SHORT).show();
         //insertDriverSession();
         //Open RideActivity
-        Intent ide = new Intent(NewDashBoardActivity.this, RideActivity.class);
-        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(ide);
+        if(data == null) {
+            Intent ide = new Intent(NewDashBoardActivity.this, RideActivity.class);
+            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(ide);
+        }else{
+            Toast.makeText(this, String.valueOf("Device Token Has Changed " + data.toString()), Toast.LENGTH_SHORT).show();
+        }
 
     }
+
+//    @Override
+//    public void onActivityChange(Observable observable,String token) {
+//        Toast.makeText(this, String.valueOf("Device token has changed"+token), Toast.LENGTH_LONG).show();
+//        //insertDriverSession();
+//        //Open RideActivity
+////        Intent ide = new Intent(NewDashBoardActivity.this, RideActivity.class);
+////        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+////        startActivity(ide);
+//
+//    }
 
 
 
@@ -746,6 +761,18 @@ public class NewDashBoardActivity extends AppCompatActivity implements Observer 
             @Override
             public void onClick(View v) {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cash.me/app/WTXRWNB"));
+                startActivity(browserIntent);
+
+
+
+            }
+        });
+
+        Button ccBtn = (Button) inflatedView.findViewById(R.id.ccBtn);
+        ccBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://squareup.com/signup/us?lang_code=en"));
                 startActivity(browserIntent);
 
 

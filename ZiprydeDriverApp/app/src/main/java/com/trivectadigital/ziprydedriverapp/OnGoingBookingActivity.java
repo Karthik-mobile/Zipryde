@@ -30,6 +30,7 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -110,6 +111,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             fromPlaceText, toPlaceText, suggestedPrice, offerPriceText, timeText, bookingStatus;
     ImageView navigationImg;
     LinearLayout confirmBtn, getDirections, callCustomer, gotoNavihation;
+    RelativeLayout mapLayout;
 
     Intent intent;
     ListOfRequestedBooking listOfRequestedBooking;
@@ -161,6 +163,8 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
         pickdroplocationText = (TextView) findViewById(R.id.pickdroplocationText);
         navigationImg = (ImageView) findViewById(R.id.navigationImg);
 
+        mapLayout = (RelativeLayout) findViewById(R.id.ongoingmap);
+
         intent = getIntent();
         if (intent.hasExtra("type")) {
             int position = intent.getIntExtra("position", 0);
@@ -199,6 +203,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 starttripBtn.setVisibility(View.GONE);
                 callCustomer.setVisibility(View.VISIBLE);
                 siteBtn.setVisibility(View.GONE);
+
             } else if (driverStatus.equals("ON_SITE")) {
                 confirmBtn.setVisibility(View.GONE);
                 endtripBtn.setVisibility(View.GONE);
@@ -218,6 +223,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 confirmBtn.setVisibility(View.GONE);
                 callCustomer.setVisibility(View.GONE);
                 siteBtn.setVisibility(View.GONE);
+
             }
 
             if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("ACCEPTED") ) {
@@ -241,6 +247,8 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(ide);
                 finish();
+            } else  if(bookingStatusFinal.equalsIgnoreCase("CANCELLED") ||bookingStatusFinal.equals("PAID") ){
+                mapLayout.setVisibility(View.GONE);
             }
 
         } else if (intent.hasExtra("bookingIdFinal")) {
@@ -272,6 +280,10 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             String json = gson.toJson(loginCredentials);
             Log.e("json", "" + json);
             getBookingByBookingId(loginCredentials, 1);
+
+            if(bookingStatusFinal.equalsIgnoreCase("CANCELLED") ||bookingStatusFinal.equals("PAID") ){
+                mapLayout.setVisibility(View.GONE);
+            }
         }
 
         mGoogleApiClient = new GoogleApiClient.Builder(OnGoingBookingActivity.this)

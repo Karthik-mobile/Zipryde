@@ -82,7 +82,21 @@
             android:layout_margin="@dimen/fab_margin"
             android:drawableLeft="@drawable/ic_action_debitcard"/>
 
+
+
     </LinearLayout>
+
+    <Button
+        android:id="@+id/ccBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorAccent"
+        android:text="Credit Card"
+        android:textColor="@color/secondaryText"
+        android:textSize="14dp"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/fab_margin"
+        android:drawableLeft="@drawable/ic_action_debitcard"/>
 
 
 </LinearLayout>

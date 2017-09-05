@@ -241,7 +241,7 @@
                 android:textSize="@dimen/textsize_12dp"
                 android:layout_gravity="center_horizontal"
                 android:textColor="@color/silverwhite"
-                android:text="This is base fare Not including toll or waiting time or surcharge"/>
+                android:text="@string/directionconf_zipextrachargesmsg"/>
         </LinearLayout>
     </LinearLayout>
 

@@ -166,6 +166,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
         if(intent.hasExtra("back")){
             isHome = intent.getIntExtra("back",0);
+            mapLayout.setVisibility(View.GONE);
         }
 
 
@@ -912,12 +913,16 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 //            finish();
 //
 //        }
-//        else
+
         if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED") || bookingStatusFinal.equals("COMPLETED") || bookingStatusFinal.equals("ACCEPTED") ) {
             if (handler != null && finalizer != null) {
                 handler.removeCallbacks(finalizer);
             }
             Intent ide = new Intent(DriverInfoBookingActivity.this, NavigationMenuActivity.class);
+
+            if(isHome == 1){
+                ide.putExtra("body",1);
+            }
             ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(ide);
             finish();
@@ -951,6 +956,10 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                         Log.e("Latitude", "" + Utils.getGeoLocationByDriverIdResponse.getLatitude());
                         Log.e("Longitude", "" + Utils.getGeoLocationByDriverIdResponse.getLongitude());
                         LatLng driverLatLng;
+                        //Check the user status and change his status
+
+                        changeDriverStatus(Utils.getGeoLocationByDriverIdResponse.getBookingStatusCode(),Utils.getGeoLocationByDriverIdResponse.getBookingStatus());
+
                         if (Utils.getGeoLocationByDriverIdResponse.getLatitude() != null && Utils.getGeoLocationByDriverIdResponse.getLongitude() != null) {
                             if (driverMarker != null) {
 //                                driverMarker.remove();
@@ -1050,6 +1059,70 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
     }
 
 
+    private void changeDriverStatus(String newStatusCode,String newStatus){
+
+       // Toast.makeText(this,"newStatus",Toast.LENGTH_SHORT).show();
+        if(bookingStatusFinal.equalsIgnoreCase(newStatusCode)){
+            //Dont do anything here
+        }else{
+
+            bookingStatusFinal = newStatusCode;
+
+            bookingStatus.setText(newStatus);
+
+            if (bookingStatusFinal != null) {
+                if (bookingStatusFinal.equals("SCHEDULED") || bookingStatusFinal.equals("ACCEPTED")) {
+                    cancelBookingLay.setVisibility(View.VISIBLE);
+                    callDriverImg.setVisibility(View.VISIBLE);
+                    callDriverText.setVisibility(View.VISIBLE);
+                    driverArrivingTime.setVisibility(View.VISIBLE);
+                } else {
+                    cancelBookingLay.setVisibility(View.GONE);
+                    callDriverImg.setVisibility(View.GONE);
+                    callDriverText.setVisibility(View.GONE);
+                    driverArrivingTime.setVisibility(View.GONE);
+                }
+            } else {
+                cancelBookingLay.setVisibility(View.GONE);
+                callDriverImg.setVisibility(View.GONE);
+                callDriverText.setVisibility(View.GONE);
+                driverArrivingTime.setVisibility(View.GONE);
+            }
+
+            if (!bookingStatusFinal.equals("COMPLETED")) {
+                SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                loginCredentials.userId = "" + Utils.requestBookingResponse.getDriverId();
+                //getGeoLocationByDriverId(loginCredentials);
+            }
+
+            if (bookingStatusFinal.equals("CANCELLED")) {
+                showInfoDlg("Booking Cancelled", "Requested booking has been cancelled. Try after sometime", "Done", "requestCancelled");
+            }
+
+            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("ACCEPTED")) {
+                SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+                editor.putString("bookingId", bookingIdFinal);
+                editor.commit();
+            } else {
+                SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+                editor.putString("bookingId", "");
+                editor.commit();
+            }
+
+            if (bookingStatusFinal.equals("COMPLETED")) {
+                Intent ide = new Intent(DriverInfoBookingActivity.this, CashDisplyActivity.class);
+                ide.putExtra("bookingId", "" + bookingIdFinal);
+                ide.putExtra("suggestedPrice", "" + Utils.requestBookingResponse.getSuggestedPrice());
+                ide.putExtra("offeredPrice", "" + Utils.requestBookingResponse.getOfferedPrice());
+                ide.putExtra("distanceInMiles", "" + Utils.requestBookingResponse.getGeoLocationResponse().getDistanceInMiles());
+                ide.putExtra("fromaddress", "" + Utils.requestBookingResponse.getFrom());
+                ide.putExtra("toaddress", "" + Utils.requestBookingResponse.getTo());
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
+                //finish();
+            }
+        }
+    }
     private float bearingBetweenLocations(LatLng latLng1, LatLng latLng2) {
 
         double PI = 3.14159;

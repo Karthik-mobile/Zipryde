@@ -9,6 +9,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
+import com.trivectadigital.ziprydedriverapp.assist.ObservableObject;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
 import com.trivectadigital.ziprydedriverapp.modelpost.SingleInstantParameters;
 
@@ -49,7 +50,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
 
         //Update the token to the remote server
         updateDeviceToken(token);
-        //ObservableObject.getInstance().onActivityChange();
+        ObservableObject.getInstance().updateValue(token);
 
     }
 

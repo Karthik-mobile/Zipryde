@@ -219,7 +219,8 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:visibility="visible"
-        android:id="@+id/mapLayout">
+        android:id="@+id/mapLayout"
+        >
 
         <fragment
             android:id="@+id/map"
