@@ -101,6 +101,10 @@ public class NavigationMenuActivity extends AppCompatActivity
         LinearLayout cashappLayout = (LinearLayout) headerview.findViewById(R.id.cashAppLayout);
         cashappLayout.setOnClickListener(this);
 
+        LinearLayout airlineVoucherLayout = (LinearLayout) headerview.findViewById(R.id.airlineVoucherLayout);
+        airlineVoucherLayout.setOnClickListener(this);
+
+
         LinearLayout sRideLayout = (LinearLayout) headerview.findViewById(R.id.scheduledLayout);
         sRideLayout.setOnClickListener(this);
 
@@ -344,6 +348,11 @@ public class NavigationMenuActivity extends AppCompatActivity
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://cash.me/app/WTXRWNB"));
                 startActivity(browserIntent);
             }
+            break;
+            case R.id.airlineVoucherLayout:{
+
+                showInfoDlg(getString(R.string.information),getString(R.string.navimenu_airlinevouchermsg),getString(R.string.btn_ok),"info");
+            }
 
                 break;
         }
@@ -375,6 +384,10 @@ public class NavigationMenuActivity extends AppCompatActivity
         dialogtitleText.setText(""+title);
         TextView dialogcontentText = (TextView) dialog.findViewById(R.id.dialogcontentText);
         dialogcontentText.setText(""+content);
+
+        if (navType.equalsIgnoreCase("info") ) {
+            newnegativeBtn.setVisibility(View.GONE);
+        }
 
         positiveBtn.setOnClickListener(new View.OnClickListener() {
             @Override

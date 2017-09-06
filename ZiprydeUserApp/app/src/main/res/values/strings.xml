@@ -99,6 +99,8 @@
     <string name="navimenu_paypal">Paypal</string>
     <string name="navimenu_cashapp">Cash App</string>
     <string name="navimenu_logout">Log Out</string>
+    <string name="navimenu_airlinevoucher">Airline Voucher</string>
+    <string name="navimenu_airlinevouchermsg">We will take vouchers from any airline to provide transportation for passengers.Upon entering the ZipRyde customer will hand it over to the driver. \n ZipTips are appreciated.</string>
 
 
     <!-- From-To selection screen-->
