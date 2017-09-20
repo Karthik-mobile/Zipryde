@@ -677,10 +677,10 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                         Log.e("bookingStatus", "" + Utils.requestBookingResponse.getBookingStatusCode());
                         if (Utils.requestBookingResponse.getBookingStatusCode().equals("SCHEDULED") ) {
 
-                            showInfoDlg(getString(R.string.bookingsuccess), getString(R.string.usermsg_driverscheduleaccepted), getString(R.string.btn_done), "successBooking");
+                            showInfoDlg(getString(R.string.bookingsuccess), getString(R.string.usermsg_driveraccepted), getString(R.string.btn_done), "successBooking");
                         } else if(Utils.requestBookingResponse.getBookingStatusCode().equals("ACCEPTED")){
 
-                            showInfoDlg(getString(R.string.bookingsuccess), getString(R.string.usermsg_driveraccepted), getString(R.string.btn_done), "successBooking");
+                            showInfoDlg(getString(R.string.bookingsuccess),getString(R.string.usermsg_driverscheduleaccepted) , getString(R.string.btn_done), "successBooking");
 
                         }  else{
 //                            if(count != 3){

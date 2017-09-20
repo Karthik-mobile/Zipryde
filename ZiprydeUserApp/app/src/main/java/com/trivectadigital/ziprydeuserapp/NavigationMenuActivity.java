@@ -132,7 +132,7 @@ public class NavigationMenuActivity extends AppCompatActivity
         Log.e("intent ","intent : "+intent.getExtras());
         if(intent.hasExtra("body")){
             titleText.setText("ZipRyde Requests");
-            showHideNavigationMenu();
+          //  showHideNavigationMenu();
             showHistoryFragment();
         }else{
             showBookingFragment();

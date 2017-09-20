@@ -1,27 +1,27 @@
 {
   "project_info": {
-    "project_number": "821151447582",
-    "firebase_url": "https://zipryde-179717.firebaseio.com",
-    "project_id": "zipryde-179717",
-    "storage_bucket": "zipryde-179717.appspot.com"
+    "project_number": "344743968798",
+    "firebase_url": "https://zipryde-6ded6.firebaseio.com",
+    "project_id": "zipryde-6ded6",
+    "storage_bucket": "zipryde-6ded6.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:821151447582:android:efaa19c0fc7c715f",
+        "mobilesdk_app_id": "1:344743968798:android:038bb55179715f7d",
         "android_client_info": {
-          "package_name": "com.trivectadigital.ziprydeuserapp"
+          "package_name": "com.trivectadigital.ziprydedriverapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "821151447582-734sojksldvdj42jn121s9t10csp7r31.apps.googleusercontent.com",
+          "client_id": "344743968798-1ivtdofe910ikvb9godmes8no1ald37k.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBziXe7fpyyLNcv5i_TMvBEJCF54SekdBw"
+          "current_key": "AIzaSyDo_dSjW398TpFjGrOJrW_U8PJ2CPzkmKc"
         }
       ],
       "services": {

@@ -167,9 +167,9 @@ public class GPSLocationService extends Service implements GoogleApiClient.Conne
     }
 
     public void insertDriverSession(){
-        Log.e("UserId","insertDriverSession - "+Utils.verifyLogInUserMobileInstantResponse.getUserId());
-        Log.e("Latitude","insertDriverSession - "+Utils.gpsLocationService.getLatitude());
-        Log.e("Longitude","insertDriverSession - "+Utils.gpsLocationService.getLongitude());
+//        Log.e("UserId","insertDriverSession - "+Utils.verifyLogInUserMobileInstantResponse.getUserId());
+//        Log.e("Latitude","insertDriverSession - "+Utils.gpsLocationService.getLatitude());
+//        Log.e("Longitude","insertDriverSession - "+Utils.gpsLocationService.getLongitude());
         SingleInstantParameters loginCredentials = new SingleInstantParameters();
         loginCredentials.userId = ""+Utils.verifyLogInUserMobileInstantResponse.getUserId();
         loginCredentials.fromLatitude = ""+Utils.gpsLocationService.getLatitude();
@@ -180,10 +180,10 @@ public class GPSLocationService extends Service implements GoogleApiClient.Conne
             @Override
             public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
                 int statusCode = response.code();
-                Log.e("statusCode", "" + statusCode);
-                Log.e("response.body", "" + response.body());
-                Log.e("response.errorBody", "" + response.errorBody());
-                Log.e("response.isSuccessful", "" + response.isSuccessful());
+//                Log.e("statusCode", "" + statusCode);
+//                Log.e("response.body", "" + response.body());
+//                Log.e("response.errorBody", "" + response.errorBody());
+//                Log.e("response.isSuccessful", "" + response.isSuccessful());
                 SingleInstantResponse bookings = response.body();
 
                 if(bookings.getBooking().equalsIgnoreCase("y")){

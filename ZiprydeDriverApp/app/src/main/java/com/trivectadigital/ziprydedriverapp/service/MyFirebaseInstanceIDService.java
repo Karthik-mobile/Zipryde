@@ -55,11 +55,14 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
     }
 
     public void updateDeviceToken(final String regId){
-        Log.e("UserId","insertDriverSession - "+Utils.verifyLogInUserMobileInstantResponse.getUserId());
-        Log.e("Latitude","insertDriverSession - "+Utils.gpsLocationService.getLatitude());
-        Log.e("Longitude","insertDriverSession - "+Utils.gpsLocationService.getLongitude());
+
         SingleInstantParameters loginCredentials = new SingleInstantParameters();
         loginCredentials.deviceToken = ""+regId;
+
+        if (Utils.verifyLogInUserMobileInstantResponse == null) {
+            return;
+        }
+
 
         ZiprydeApiInterface apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
         Call<Void> call = apiService.updateDeviceToken(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);

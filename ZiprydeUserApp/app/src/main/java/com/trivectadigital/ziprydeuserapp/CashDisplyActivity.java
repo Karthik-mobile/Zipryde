@@ -114,6 +114,8 @@ public class CashDisplyActivity extends AppCompatActivity {
                 paypalBtn.setAlpha(0.5f);
                 cashAppBtn.setAlpha(0.5f);
                 creditBtn.setAlpha(0.5f);
+
+                showInfoDlg(getString(R.string.information),getString(R.string.usermsg_cashmsg),getString(R.string.btn_ok),"info");
             }
         });
 

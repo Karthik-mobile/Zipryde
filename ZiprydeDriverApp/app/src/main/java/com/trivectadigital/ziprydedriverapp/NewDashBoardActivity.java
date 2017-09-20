@@ -441,7 +441,7 @@ public class NewDashBoardActivity extends AppCompatActivity implements Observer 
         }
     }
 
-    public void updateDriverStatus(final int active) {
+    public void  updateDriverStatus(final int active) {
         if (Utils.connectivity(NewDashBoardActivity.this)) {
             SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
             Gson gson = new Gson();
@@ -520,13 +520,16 @@ public class NewDashBoardActivity extends AppCompatActivity implements Observer 
     }
 
     public void insertDriverSession(){
-        Log.e("UserId","insertDriverSession - "+Utils.verifyLogInUserMobileInstantResponse.getUserId());
-        Log.e("Latitude","insertDriverSession - "+Utils.gpsLocationService.getLatitude());
-        Log.e("Longitude","insertDriverSession - "+Utils.gpsLocationService.getLongitude());
+//        Log.e("UserId","insertDriverSession - "+Utils.verifyLogInUserMobileInstantResponse.getUserId());
+//        Log.e("Latitude","insertDriverSession - "+Utils.gpsLocationService.getLatitude());
+//        Log.e("Longitude","insertDriverSession - "+Utils.gpsLocationService.getLongitude());
         SingleInstantParameters loginCredentials = new SingleInstantParameters();
         loginCredentials.userId = ""+Utils.verifyLogInUserMobileInstantResponse.getUserId();
-        loginCredentials.fromLatitude = ""+Utils.gpsLocationService.getLatitude();
-        loginCredentials.fromLongitude = ""+Utils.gpsLocationService.getLongitude();
+
+        if(Utils.gpsLocationService != null) {
+            loginCredentials.fromLatitude = "" + Utils.gpsLocationService.getLatitude();
+            loginCredentials.fromLongitude = "" + Utils.gpsLocationService.getLongitude();
+        }
         ZiprydeApiInterface apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
         Call<SingleInstantResponse> call = apiService.updateDriverSession(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
         call.enqueue(new Callback<SingleInstantResponse>() {
@@ -569,6 +572,7 @@ public class NewDashBoardActivity extends AppCompatActivity implements Observer 
 
     Dialog dialog;
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
+
         dialog = new Dialog(this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);

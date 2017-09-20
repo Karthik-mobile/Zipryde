@@ -4,4 +4,27 @@
     android:layout_height="match_parent"
     tools:context="com.trivectadigital.ziprydeuserapp.HelpFragment">
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_margin="@dimen/layout_margin_5dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/help_text"
+                android:textColor="@color/primaryText"
+                android:textSize="16dp"
+                android:autoLink="web|email|phone"/>
+
+        </LinearLayout>
+
+    </ScrollView>
+
 </FrameLayout>

@@ -124,44 +124,47 @@ public class LoginActivity extends AppCompatActivity {
 
     public void insertDriverSession() {
         if (Utils.connectivity(LoginActivity.this)) {
-            Log.e("UserId", "insertDriverSession - " + Utils.verifyLogInUserMobileInstantResponse.getUserId());
-            Log.e("Latitude", "insertDriverSession - " + Utils.gpsLocationService.getLatitude());
-            Log.e("Longitude", "insertDriverSession - " + Utils.gpsLocationService.getLongitude());
+//            Log.e("UserId", "insertDriverSession - " + Utils.verifyLogInUserMobileInstantResponse.getUserId());
+//            Log.e("Latitude", "insertDriverSession - " + Utils.gpsLocationService.getLatitude());
+//            Log.e("Longitude", "insertDriverSession - " + Utils.gpsLocationService.getLongitude());
             SingleInstantParameters loginCredentials = new SingleInstantParameters();
             loginCredentials.userId = "" + Utils.verifyLogInUserMobileInstantResponse.getUserId();
-            loginCredentials.fromLatitude = "" + Utils.gpsLocationService.getLatitude();
-            loginCredentials.fromLongitude = "" + Utils.gpsLocationService.getLongitude();
 
-            Call<SingleInstantResponse> call = apiService.updateDriverSession(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
-            call.enqueue(new Callback<SingleInstantResponse>() {
-                @Override
-                public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
-                    int statusCode = response.code();
-                    Log.e("statusCode", "" + statusCode);
-                    Log.e("response.body", "" + response.body());
-                    Log.e("response.errorBody", "" + response.errorBody());
-                    Log.e("response.isSuccessful", "" + response.isSuccessful());
-                    if (!response.isSuccessful()) {
-                        try {
-                            JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "info");
-                        } catch (Exception e) {
-                            Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            if(Utils.gpsLocationService != null) {
+                loginCredentials.fromLatitude = "" + Utils.gpsLocationService.getLatitude();
+                loginCredentials.fromLongitude = "" + Utils.gpsLocationService.getLongitude();
+
+                Call<SingleInstantResponse> call = apiService.updateDriverSession(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(), loginCredentials);
+                call.enqueue(new Callback<SingleInstantResponse>() {
+                    @Override
+                    public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
+                        int statusCode = response.code();
+                        Log.e("statusCode", "" + statusCode);
+                        Log.e("response.body", "" + response.body());
+                        Log.e("response.errorBody", "" + response.errorBody());
+                        Log.e("response.isSuccessful", "" + response.isSuccessful());
+                        if (!response.isSuccessful()) {
+                            try {
+                                JSONObject jObjError = new JSONObject(response.errorBody().string());
+                                showInfoDlg("Error..", "" + jObjError.getString("message"), "OK", "info");
+                            } catch (Exception e) {
+                                Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                            }
+                        } else {
+
+                            showInfoDlg("Success..", "Successfully logged in.", "OK", "success");
                         }
-                    }else{
-
-                        showInfoDlg("Success..", "Successfully logged in.", "OK", "success");
                     }
-                }
 
-                @Override
-                public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
-                    // Log error here since request failed
-                    Log.e("onFailure", t.toString());
-                   // Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
-                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
-                }
-            });
+                    @Override
+                    public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
+                        // Log error here since request failed
+                        Log.e("onFailure", t.toString());
+                        // Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+                        showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    }
+                });
+            }
         } else {
             Toast.makeText(LoginActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
         }

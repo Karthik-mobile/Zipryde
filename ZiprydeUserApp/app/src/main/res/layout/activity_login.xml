@@ -29,7 +29,8 @@
         android:layout_gravity="right"
         android:layout_marginRight="15dp"
         android:layout_marginTop="15dp"
-        android:src="@drawable/ic_action_settings" />
+        android:src="@drawable/ic_action_settings"
+        android:visibility="gone"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -37,12 +38,12 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <com.trivectadigital.ziprydeuserapp.assist.CircleImageView
+        <android.support.v7.widget.AppCompatImageView
             android:id="@+id/user_view"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginTop="15dp"
-            android:src="@drawable/person"
+            android:src="@drawable/logo"
             app:civ_border_color="@color/dark"
             app:civ_border_width="2dp" />
 
