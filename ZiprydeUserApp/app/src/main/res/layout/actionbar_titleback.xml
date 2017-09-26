@@ -16,7 +16,7 @@
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
-            android:src="@drawable/ic_action_arrow_back" />
+            android:src="@android:drawable/ic_menu_edit" />
 
         <TextView
             android:id="@+id/titleText"

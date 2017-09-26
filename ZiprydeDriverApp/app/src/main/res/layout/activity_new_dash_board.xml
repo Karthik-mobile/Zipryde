@@ -209,7 +209,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
                 android:textColor="@color/whiteColor"
-                android:textSize="19dp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -256,6 +256,12 @@
         android:layout_marginRight="10dp"
         android:layout_marginTop="10dp"
         android:background="#7899cb" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -551,5 +557,7 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    </ScrollView>
 
 </LinearLayout>
