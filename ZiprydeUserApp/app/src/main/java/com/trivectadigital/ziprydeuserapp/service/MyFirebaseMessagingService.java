@@ -141,7 +141,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 //                }
 
             } else {
-                if(!title.equals("DRIVER_LOGOUT")){
+                if(!title.equals("DRIVER_LOGOUT") && !title.equalsIgnoreCase("BOOKING_PAYMENT_SUCCESS")){
 //                // app is in background, show the notification in notification tray
                     Intent resultIntent = new Intent(getApplicationContext(), DriverInfoBookingActivity.class);
 //                resultIntent.putExtra("message", message);

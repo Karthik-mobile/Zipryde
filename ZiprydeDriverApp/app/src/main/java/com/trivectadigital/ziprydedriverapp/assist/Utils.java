@@ -30,7 +30,8 @@ public class Utils {
     public static boolean fromNotification = false;
     public static Location firstLocation;
     public static GPSLocationService gpsLocationService;
-    public static String defaultIP = "52.10.57.172:8080";
+    //public static String defaultIP = "52.10.57.172:8080";
+    public static String defaultIP = "mobileservice.zipryde.com:8080";
     public static final Pattern IP_ADDRESS
             = Pattern.compile(
             "((25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\\.(25[0-5]|2[0-4]"

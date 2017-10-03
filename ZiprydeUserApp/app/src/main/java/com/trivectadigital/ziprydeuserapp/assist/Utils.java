@@ -27,7 +27,8 @@ import java.util.regex.Pattern;
 public class Utils {
 
     public static String countryCode = "";
-    public static String defaultIP = "52.10.57.172:8080";
+   // public static String defaultIP = "52.10.57.172:8080";
+   public static String defaultIP = "mobileservice.zipryde.com:8080";
     public static final Pattern IP_ADDRESS
             = Pattern.compile(
             "((25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\\.(25[0-5]|2[0-4]"
@@ -79,6 +80,18 @@ public class Utils {
     public static final int NETWORKERR_SESSIONTOKEN_EXPIRED= 405;
 
     public static final String SHARED_PREF = "ah_firebase";
+
+    public static final int SUCCESS_RESULT = 0;
+    public static final int FAILURE_RESULT = 1;
+    public static final String PACKAGE_NAME =
+            "com.fipl.udscustomer.Utils";
+    public static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";
+    public static final String RESULT_DATA_KEY = PACKAGE_NAME +
+            ".RESULT_DATA_KEY";
+    public static final String RESULT_MESSAGE = PACKAGE_NAME +
+            ".RESULT_MESSAGE";
+    public static final String LOCATION_DATA_EXTRA = PACKAGE_NAME +
+            ".LOCATION_DATA_EXTRA";
 
     // Check Network Availability
     public static boolean connectivity(Context c) {

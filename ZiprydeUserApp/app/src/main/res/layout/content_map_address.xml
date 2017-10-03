@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".SelectAddressFromMap"
+    tools:showIn="@layout/app_bar_map_address">
+
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+            <fragment
+                android:id="@+id/place_autocomplete_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+                />
+    </android.support.v7.widget.CardView>
+
+    <RelativeLayout
+        android:layout_above="@+id/footer"
+        android:layout_below="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <fragment
+        android:id="@+id/mapAddress"
+        class="com.google.android.gms.maps.MapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ImageView
+        android:id="@+id/on_move_marker"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:paddingBottom="32dp"
+       android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:src="@drawable/map_pin_orange"
+        android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/location_marker_current"
+            android:layout_centerHorizontal="true"
+            android:paddingBottom="32dp"
+            android:visibility="gone"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/map_pin_black"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/footer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:background="@color/colorAccent">
+        <Button
+            android:layout_width="match_parent"
+            android:onClick="ConfirmLocation"
+            android:layout_height="wrap_content"
+            android:text="CONFIRM LOCATION"
+            android:background="@color/colorAccent"
+            android:textColor="@color/secondaryText"
+            android:textSize="18dp" />
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_alignParentBottom="true"
+        android:id="@+id/llSelectservice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+    </LinearLayout>
+
+</RelativeLayout>

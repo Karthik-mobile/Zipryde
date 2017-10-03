@@ -480,7 +480,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
             handler.removeCallbacks(finalizer);
         }
 
-        if (!messageReceivedEvent.title.equals("BOOKING_CANCELLED")) {
+        if (messageReceivedEvent.title.equals("BOOKING_USER_CONFIRMATION")  ) {
             //snack.bar
 
             //Toast.makeText(this, messageReceivedEvent.message, Toast.LENGTH_SHORT).show();
@@ -1066,7 +1066,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     Intent ide = new Intent(DirectionConfirmationActivity.this, LoginActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
-                    // finish();
+                    finish();
                 }
             }
         });

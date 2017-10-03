@@ -50,7 +50,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="TOTAL FAIR"
+                android:text="TOTAL FARE"
                 android:textColor="@color/primaryText"
                 android:textSize="14dp"
                 android:textStyle="bold" />

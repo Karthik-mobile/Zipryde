@@ -336,13 +336,13 @@ public class CashDisplyActivity extends AppCompatActivity {
                     Intent ide = new Intent(CashDisplyActivity.this, LoginActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
-                    // finish();
+                    finish();
                 }else if(navType.equalsIgnoreCase("back")){
 
                     Intent ide = new Intent(CashDisplyActivity.this, NavigationMenuActivity.class);
                     ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(ide);
-                    //finish();
+                    finish();
                 }
             }
         });

@@ -539,6 +539,17 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
 
         //onShowPopup(view,messageReceivedEvent.message);
         if (!messageReceivedEvent.title.equals("BOOKING_PAYMENT_SUCCESS")) {
+
+            //Get the booking id from the message
+            String str = messageReceivedEvent.message;
+            String[] splitStr = str.split("\\s+");
+            String bookingId = splitStr[splitStr.length-1];
+           // ide.putExtra("bookingId", splitStr[splitStr.length-1]);
+            //ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+            if(bookingIdFinal.equalsIgnoreCase("") || bookingIdFinal.length() <=0){
+                bookingIdFinal = bookingId;
+            }
             SingleInstantParameters loginCredentials = new SingleInstantParameters();
             loginCredentials.bookingId = "" + bookingIdFinal;
             getBookingByBookingId(loginCredentials);

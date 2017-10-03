@@ -198,11 +198,13 @@ All drivers must meet the following requirements, which include;
 \n Agree to follow all ZipRyde rules and regulations</string>
 
 
-    <string name="help_text">\tThere is no need for you to gp outside and submit yourself to the hot,rain or cold.With only your smartphone you can choose your pickup location witn one tap or just enter your address manually.
-        \n\tWith one more tap your ZipRyde car is locked from their pickup location. Then by setting a drop-off point, you get a quote for the journey based on your pricing tariff to avid price haggling and you can also track the driver\'s estimate time of arrival.
+    <string name="help_text">
         \n\n website www.zipryde.com
 \n Email help@zipryde.com
-\n Tel 1-800-609-9070\t press 3 for help</string>
+\n Tel 1-800-609-9070\t   press 3 for help
+    \n\n\n Please use the below app to calculate your toll fees\n
+    https://play.google.com/store/apps/details?id=itoll.com.ntta
+    </string>
 
 
     <string name="disclaimer_text_new">
@@ -246,7 +248,7 @@ OF SUCH DAMAGES. ZIPRYDE SHALL NOT BE LIABLE FOR DELAY OR FAILURE
 IN PERFORMANCE RESULTING FROM CAUSES BEYOND ZIPRYDE\'S
 REASONABLE CONTROL. YOU ACKNOWLEDGE THAT THIRD PARTY
 PROVIDERS PROVIDING TRANSPORTATION SERVICES REQUESTED THROUGH
-SOME REQUEST PRODUCTS MAY OFFER RIDESHARING OR PEER-TO- PEER
+SOME REQUEST PRODUCTS MAY OFFER RIDE SHARING OR PEER-TO- PEER
 TRANSPORTATION SERVICES AND MAY NOT BE PROFESSIONALLY LICENSED
 OR PERMITTED.
 \nTHE SERVICES MAY BE USED BY YOU TO REQUEST AND SCHEDULE
@@ -265,13 +267,13 @@ JURISDICTIONS, ZIPRYDE\'S LIABILITY SHALL BE LIMITED TO THE EXTENT
 PERMITTED BY LAW. THIS PROVISION SHALL HAVE NO EFFECT ON ZIPRYDE\'S
 CHOICE OF LAW PROVISION SET FORTH BELOW.
 \nIndemnity.
-\nYou agree to indemnify and hold Zipryde and its affiliates and their officers, directors,
+\nYou agree to indemnify and hold ZipRyde and its affiliates and their officers, directors,
 employees, and agents harmless from any and all claims, demands, losses, liabilities, and
 expenses (including attorneys\' fees), arising out of or in connection with:
 \n(i) your use of the Services or services or goods obtained through your use of the
 Services;
 \n(ii) your breach or violation of any of these Terms;
-\n(iii) Zipryde\'s use of your User Content; or
+\n(iii) ZipRyde\'s use of your User Content; or
 \n(iv) your violation of the rights of any third party, including Third Party Providers.
     </string>
 

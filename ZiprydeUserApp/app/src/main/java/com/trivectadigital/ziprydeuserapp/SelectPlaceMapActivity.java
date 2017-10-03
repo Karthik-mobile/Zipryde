@@ -231,6 +231,7 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
             @Override
             public void onClick(View v) {
                 LatLng location = mMap.getCameraPosition().target;
+
                 if (intent.hasExtra("fromPlace")) {
                     Intent intent = new Intent(SelectPlaceMapActivity.this, FromToPlaceActivity.class);
                     intent.putExtra("latitude", "" + location.latitude);
@@ -320,9 +321,9 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
             final Place place = places.get(0);
 
             // Format details of the place for display and show it in a TextView.
-            Log.e(TAG, "" + formatPlaceDetails(getResources(), place.getName(),
-                    place.getId(), place.getAddress(), place.getPhoneNumber(),
-                    place.getWebsiteUri()));
+//            Log.e(TAG, "" + formatPlaceDetails(getResources(), place.getName(),
+//                    place.getId(), place.getAddress(), place.getPhoneNumber(),
+//                    place.getWebsiteUri()));
 
             LatLng geoLatLng = place.getLatLng();
             Log.e(TAG, "Lat : " + geoLatLng.latitude + " Lng : " + geoLatLng.longitude);
@@ -337,10 +338,10 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
 
 
             // Display the third party attributions if set.
-            final CharSequence thirdPartyAttribution = places.getAttributions();
-            if (thirdPartyAttribution != null) {
-                Log.e(TAG, "" + Html.fromHtml(thirdPartyAttribution.toString()));
-            }
+//            final CharSequence thirdPartyAttribution = places.getAttributions();
+//            if (thirdPartyAttribution != null) {
+//                Log.e(TAG, "" + Html.fromHtml(thirdPartyAttribution.toString()));
+//            }
 
             Log.i(TAG, "Place details received: " + place.getName());
 
@@ -417,10 +418,14 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
                 Log.e("longitude", "" + location.longitude);
                 address = getCompleteAddressString(location.latitude, location.longitude);
                 Log.e("address", "" + address);
-                mAutocompleteView.setText(address);
+                if(!address.isEmpty()) {
+                    mAutocompleteView.setText(address);
+                }
                 mAutocompleteView.setSelection(mAutocompleteView.getText().length());
                 clearsearchImageView.setVisibility(View.VISIBLE);
-                getNearByActiveDrivers("" + location.latitude, "" + location.longitude);
+                if(!address.isEmpty()) {
+                    getNearByActiveDrivers("" + location.latitude, "" + location.longitude);
+                }
             }
         });
     }
@@ -581,6 +586,19 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
                 dialog.dismiss();
                 if (navType.equalsIgnoreCase("gps")) {
                     startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_CHECK_SETTINGS);
+                }else if(navType.equalsIgnoreCase("logout")){
+
+                    SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+                    editor.remove("phoneNumber");
+                    editor.remove("password");
+                    editor.commit();
+                    SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+                    deditor.putString("disclaimer", "");
+                    deditor.commit();
+                    Intent ide = new Intent(SelectPlaceMapActivity.this, LoginActivity.class);
+                    ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(ide);
+                    finish();
                 }
             }
         });
@@ -775,7 +793,7 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
         }
     }
 
-    private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
+    private String getCompleteAddressStringto(double LATITUDE, double LONGITUDE) {
         String strAdd = "";
         Geocoder geocoder = new Geocoder(SelectPlaceMapActivity.this, Locale.getDefault());
         try {
@@ -788,15 +806,97 @@ public class SelectPlaceMapActivity extends AppCompatActivity implements OnMapRe
                     strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
                 }
                 strAdd = strReturnedAddress.toString();
-                Log.e("loction address", "" + strReturnedAddress.toString());
+                Log.e("location address", "" + strReturnedAddress.toString());
+               // Toast.makeText(this,"strAdd",Toast.LENGTH_SHORT).show();
             } else {
-                Log.e("loction address", "No Address returned!");
+                Log.e("location address", "No Address returned!");
+                //Toast.makeText(this,"No Address returned!",Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e("loction address", "Canont get Address!");
+            Log.e("location address", "Cann't get Address!");
+            //Toast.makeText(this,"Cann't get Address!",Toast.LENGTH_SHORT).show();
         }
         return strAdd;
     }
 
+
+    private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
+        String strAdd = "";
+        Geocoder geocoder = new Geocoder(SelectPlaceMapActivity.this, Locale.getDefault());
+        try {
+            int count = 0;
+            do {
+                List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
+                if (addresses != null) {
+                    Address returnedAddress = addresses.get(0);
+                    StringBuilder strReturnedAddress = new StringBuilder("");
+                    Log.e("Country CODE", "" + returnedAddress.getCountryCode());
+                    Utils.countryCode = returnedAddress.getCountryCode();
+                    Log.e("Country NAME", "" + returnedAddress.getCountryName());
+                    Log.e("Country Locality", "" + returnedAddress.getLocality());
+                    for (int i = 0; i < returnedAddress.getMaxAddressLineIndex(); i++) {
+                        strReturnedAddress.append(returnedAddress.getAddressLine(i)).append(", ");
+                    }
+                    strAdd = strReturnedAddress.toString();
+                    String formattedAdd = returnedAddress.getAddressLine(0)+ ", "+returnedAddress.getAddressLine(1)
+                            + ", "+returnedAddress.getLocality()+", "+returnedAddress.getCountryName()+"-"+returnedAddress.getPostalCode();
+
+                    strAdd = formattedAdd.replaceAll("null","");
+
+                   // Toast.makeText(this,"Address-->"+returnedAddress.toString(),Toast.LENGTH_SHORT).show();
+                    //Log.e("loction address", "" + strReturnedAddress.toString());
+                    if (strAdd.equalsIgnoreCase("") || strAdd.length() <= 0) {
+                    count = 6;
+                    }else {
+                        count = 11;
+                    }
+                } else {
+                    Log.e("loction address", "No Address returned!");
+                }
+            }while (count < 5 );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("loction address", "Cannot get Address!");
+
+        }
+        return strAdd;
+
+    }
+
+//    private class  MyGeoPoint extends AsyncTask<String, Void, Address> {
+//        @Override
+//        protected Address doInBackground(String... latlng) {
+//            try {
+//                Geocoder geoCoder = new Geocoder(SelectPlaceMapActivity.this);
+//                double latitude = latlng[0];
+//                double longitude = latlng[1];
+//                List<Address> addresses = geoCoder.getFromLocation(latitude, longitude, 1);
+//                if (addresses.size() > 0)
+//                    return addresses.get(0);
+//            } catch (IOException ex) {
+//                // log exception or do whatever you want to do with it!
+//            }
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Address address) {
+//            // do whatever you want/need to do with the address found
+//            // remember to check first that it's not null
+//            if (address != null) {
+//                //Address returnedAddress = addresses.get(0);
+//                StringBuilder strReturnedAddress = new StringBuilder("");
+//                Log.e("Country CODE", "" + address.getCountryCode());
+//                Utils.countryCode = address.getCountryCode();
+//                Log.e("Country NAME", "" + address.getCountryName());
+//                Log.e("Country Locality", "" + address.getLocality());
+//                for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+//                    strReturnedAddress.append(address.getAddressLine(i)).append(", ");
+//                }
+//                String strAdd = strReturnedAddress.toString();
+//            }
+//        }
+//    }
 }
