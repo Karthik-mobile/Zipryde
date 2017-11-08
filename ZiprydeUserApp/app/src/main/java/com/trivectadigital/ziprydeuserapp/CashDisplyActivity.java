@@ -21,7 +21,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydeuserapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydeuserapp.assist.MessageReceivedEvent;
@@ -55,9 +54,9 @@ public class CashDisplyActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cash_disply);
 
         SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = prefs.getString("LoginCredentials", "");
-        Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
+//        Gson gson = new Gson();
+//        String json = prefs.getString("LoginCredentials", "");
+       // Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
 
         apiService = ZiprydeApiClient.getClient(Utils.verifyLogInUserMobileInstantResponse.getAccessToken()).create(ZiprydeApiInterface.class);
 
@@ -71,7 +70,7 @@ public class CashDisplyActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT);
         toolbar.addView(mCustomView, layoutParams);
         TextView titleText = (TextView) mCustomView.findViewById(R.id.titleText);
-        titleText.setText("ZipRyde");
+        titleText.setText("Payment Details");
         ImageView backImg = (ImageView) mCustomView.findViewById(R.id.backImg);
         backImg.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -175,6 +174,7 @@ public class CashDisplyActivity extends AppCompatActivity {
     }
 
     public void onEventMainThread(MessageReceivedEvent messageReceivedEvent) {
+
         Log.e("Thread message", "" + messageReceivedEvent.message);
         Log.e("Thread title", "" + messageReceivedEvent.title);
         Log.e("PUSH_NOTIFICATION", "PUSH_NOTIFICATION");
@@ -182,8 +182,11 @@ public class CashDisplyActivity extends AppCompatActivity {
         editor.putString("bookingId", "");
         editor.commit();
 
-        //Toast.makeText(this, messageReceivedEvent.message, Toast.LENGTH_SHORT).show();
-        showInfoDlg(getString(R.string.information), getString(R.string.usermsg_tripcompletedreminder), getString(R.string.btn_ok), "back");
+        if(messageReceivedEvent.title.equalsIgnoreCase("BOOKING_PAYMENT_SUCCESS")) {
+
+            //Toast.makeText(this, messageReceivedEvent.message, Toast.LENGTH_SHORT).show();
+            showInfoDlg(getString(R.string.information), getString(R.string.usermsg_tripcompletedreminder), getString(R.string.btn_ok), "back");
+        }
 
     }
 
@@ -200,10 +203,10 @@ public class CashDisplyActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
-        Gson gson = new Gson();
-        String json = prefs.getString("LoginCredentials", "");
-        Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
+//        SharedPreferences prefs = getSharedPreferences("LoginCredentials", MODE_PRIVATE);
+//        Gson gson = new Gson();
+//        String json = prefs.getString("LoginCredentials", "");
+//        Utils.verifyLogInUserMobileInstantResponse = gson.fromJson(json, SingleInstantResponse.class);
         Intent intent = getIntent();
         if (intent != null) {
             bookingId = intent.getStringExtra("bookingId");

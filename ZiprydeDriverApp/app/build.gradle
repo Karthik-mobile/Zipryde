@@ -7,8 +7,8 @@ android {
         applicationId "com.trivectadigital.ziprydedriverapp"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.1"
+        versionCode 3
+        versionName "1.13"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -67,6 +67,7 @@ dependencies {
     compile 'com.squareup.okhttp3:logging-interceptor:3.4.0'
     compile 'com.github.safetysystemtechnology:location-tracker-background:v1.2'
     compile 'de.greenrobot:eventbus:2.4.0'
+    compile 'net.rimoto:intlphoneinput:1.0.1'
     testCompile 'junit:junit:4.12'
 }
 

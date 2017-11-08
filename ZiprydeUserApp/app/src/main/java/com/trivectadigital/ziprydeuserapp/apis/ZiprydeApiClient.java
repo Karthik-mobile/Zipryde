@@ -19,7 +19,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ZiprydeApiClient {
 
-//    private static final String BASE_URL = "http://54.218.115.164:8080/zipryde/";
     private static String BASE_URL = "http://"+Utils.defaultIP+"/zipryde/";
     private static Retrofit retrofit = null;
 

@@ -1534,7 +1534,7 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
                 mLastLocation = location;
                 if (mMap != null) {
                     crtLocation = new LatLng(mLastLocation.getLatitude(), (mLastLocation.getLongitude()));
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.micro_car_48)));
+                    Marker marker = mMap.addMarker(new MarkerOptions().position(crtLocation).icon(BitmapDescriptorFactory.fromResource(R.drawable.movingcar_48)));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(crtLocation));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(crtLocation, 18));
                     mMap.animateCamera(CameraUpdateFactory.zoomIn());

@@ -68,8 +68,8 @@
                 android:layout_height="50dp"
                 android:layout_marginTop="15dp"
                 android:background="@drawable/rounded_edittext"
-                android:hint="Phone Number"
-                android:inputType="number"
+                android:hint="Mobile Number"
+                android:inputType="phone"
                 android:paddingLeft="10dp"
                 android:editable="false"
                 android:focusableInTouchMode="false"
@@ -77,7 +77,20 @@
                 android:paddingTop="5dp"
                 android:imeOptions="actionNext"
                 android:paddingBottom="5dp"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:visibility="visible" />
+
+            <net.rimoto.intlphoneinput.IntlPhoneInput
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:textSize="14sp"
+                app:textColor="@color/black_overlay"
+                app:flagPaddingBottom="4dp"
+                app:flagPaddingEnd="4dp"
+                app:flagPaddingStart="4dp"
+                app:flagPaddingTop="4dp"
+                android:id="@+id/my_phone_input"
+                android:visibility="gone"/>
 
             <EditText
                 android:id="@+id/emailaddEdit"

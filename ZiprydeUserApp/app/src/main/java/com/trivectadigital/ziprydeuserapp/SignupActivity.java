@@ -3,6 +3,8 @@ package com.trivectadigital.ziprydeuserapp;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
@@ -29,6 +31,8 @@ import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
 
+import net.rimoto.intlphoneinput.IntlPhoneInput;
+
 import org.json.JSONObject;
 
 import okhttp3.MediaType;
@@ -42,6 +46,8 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
     EditText firstnameEdit, lastnameEdit, phonenoEdit, emailaddEdit, passwordEdit, confirmpasswordEdit;
 
     ZiprydeApiInterface apiService;
+    IntlPhoneInput phoneInputView;
+    String appVersionName, appVersionCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +77,23 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         emailaddEdit = (EditText) findViewById(R.id.emailaddEdit);
         passwordEdit = (EditText) findViewById(R.id.passwordEdit);
         confirmpasswordEdit = (EditText) findViewById(R.id.confirmpasswordEdit);
-        phonenoEdit.setText("" + Utils.getOTPByMobileInstantResponse.getMobileNumber());
+
+        phoneInputView = (IntlPhoneInput) findViewById(R.id.my_phone_input);
+
+        String phoneNumber = Utils.getOTPByMobileInstantResponse.getMobileNumber();
+        String get_Mo = phoneNumber.substring(phoneNumber.lastIndexOf(' ')+1);
+
+        phonenoEdit.setText(phoneNumber);
+        phoneInputView.setNumber(get_Mo);
         apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+
+        try {
+            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
+            appVersionName = pInfo.versionName;
+            appVersionCode = String.valueOf(pInfo.versionCode);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -91,7 +112,8 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
 
                 String firstname = firstnameEdit.getText().toString();
                 String lastname = lastnameEdit.getText().toString();
-                phoneno = phonenoEdit.getText().toString();
+                phoneno =  phonenoEdit.getText().toString();//phoneInputView.getNumber();// phonenoEdit.getText().toString();
+
                 String emailadd = emailaddEdit.getText().toString();
                 password = passwordEdit.getText().toString();
                 String confirmpassword = confirmpasswordEdit.getText().toString();
@@ -111,8 +133,6 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                 } else if (!password.equals(confirmpassword)) {
                     showInfoDlg("Information", "Password and Confirm Password are not matching", "OK", "info");
                 } else if (phoneno.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the Mobile Number", "OK", "info");
-                } else if (phoneno.length() != 10) {
                     showInfoDlg("Information", "Please enter valid Mobile Number", "OK", "info");
                 } else {
                     SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_PREF, 0);
@@ -186,6 +206,10 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                         loginCredentials.password = password;
                         loginCredentials.deviceToken = regId;
                         loginCredentials.overrideSessionToken=0;
+                        loginCredentials.mobileOS ="ANDROID";
+                        loginCredentials.buildNo =appVersionCode;
+                        loginCredentials.versionNumber = appVersionName;
+                        loginCredentials.appName = "ZIPRYDE";
 
 
                         callLoginTogetAccessToken(loginCredentials);

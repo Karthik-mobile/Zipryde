@@ -26,6 +26,8 @@ import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
 
+import net.rimoto.intlphoneinput.IntlPhoneInput;
+
 import org.json.JSONObject;
 
 import retrofit2.Call;
@@ -43,12 +45,14 @@ public class ForgetPasswordActivity extends AppCompatActivity {
 
     String mobileNo;
 
+    IntlPhoneInput phoneInputView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forget_password);
 
-        apiService = ZiprydeApiClient.getClient(Utils.verifyLogInUserMobileInstantResponse.getAccessToken()).create(ZiprydeApiInterface.class);
+        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
 
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -69,6 +73,8 @@ public class ForgetPasswordActivity extends AppCompatActivity {
         otpEdit = (EditText) findViewById(R.id.otpEdit);
         otpEdit.setFilters(new InputFilter[]{new InputFilter.AllCaps()});
         mobileNumberEdit = (EditText) findViewById(R.id.mobileNumberEdit);
+
+        phoneInputView = (IntlPhoneInput) findViewById(R.id.my_phone_input);
 
         verifyBtn = (Button) findViewById(R.id.verifyBtn);
         verifyBtn.setOnClickListener(new View.OnClickListener() {
@@ -99,12 +105,23 @@ public class ForgetPasswordActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String mobile = mobileNumberEdit.getText().toString().trim();
                 if (mobile.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the mobile number", "OK", "info");
-                } else if (mobile.length() != 10) {
                     showInfoDlg("Information", "Please enter valid mobile number", "OK", "info");
-                } else {
+                }  else {
                     callMobileService(mobile);
                 }
+
+//                if(!phoneInputView.isValid()){
+//                    showInfoDlg("Information", "Please enter valid mobile number", "OK", "info");
+//                }
+//                else {
+//
+//                    String myInternationalNumber = "";
+//                    if (phoneInputView.isValid()) {
+//                        myInternationalNumber = phoneInputView.getNumber();
+//                       // apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+//                        callMobileService(myInternationalNumber);
+//                    }
+//                }
             }
         });
 

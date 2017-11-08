@@ -2,6 +2,8 @@ package com.trivectadigital.ziprydedriverapp;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
@@ -24,10 +26,15 @@ import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiClient;
 import com.trivectadigital.ziprydedriverapp.apis.ZiprydeApiInterface;
 import com.trivectadigital.ziprydedriverapp.assist.Utils;
 
+import net.rimoto.intlphoneinput.IntlPhoneInput;
+
 public class SignupActivity extends AppCompatActivity implements View.OnClickListener {
 
     EditText firstnameEdit, lastnameEdit, phonenoEdit, emailaddEdit, vehiclenoEdit, passwordEdit, confirmpasswordEdit;
     ZiprydeApiInterface apiService;
+
+    IntlPhoneInput phoneInputView;
+    String appVersionName, appVersionCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +65,19 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
         passwordEdit = (EditText) findViewById(R.id.passwordEdit);
         confirmpasswordEdit = (EditText) findViewById(R.id.confirmpasswordEdit);
         vehiclenoEdit = (EditText) findViewById(R.id.vehiclenoEdit);
+
+        phoneInputView = (IntlPhoneInput) findViewById(R.id.my_phone_input);
+
         phonenoEdit.setText("" + Utils.getOTPByMobileInstantResponse.getMobileNumber());
+        phoneInputView.setNumber("" + Utils.getOTPByMobileInstantResponse.getMobileNumber());
+        try {
+            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
+            appVersionName = pInfo.versionName;
+            appVersionCode = String.valueOf(pInfo.versionCode);
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -74,7 +93,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
 
                 String firstname = firstnameEdit.getText().toString();
                 String lastname = lastnameEdit.getText().toString();
-                String phoneno = phonenoEdit.getText().toString();
+                String phoneno =  phonenoEdit.getText().toString();//phoneInputView.getNumber();//phonenoEdit.getText().toString();
                 String emailadd = emailaddEdit.getText().toString();
                 String password = passwordEdit.getText().toString();
                 //String vehicleno = vehiclenoEdit.getText().toString();
@@ -94,9 +113,7 @@ public class SignupActivity extends AppCompatActivity implements View.OnClickLis
                     showInfoDlg("Information", "Please enter the Confirm Password", "OK", "info");
                 } else if (!password.equals(confirmpassword)) {
                     showInfoDlg("Information", "Password and Confirm Password are not Matched", "OK", "info");
-                } else if (phoneno.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the Mobile Number", "OK", "info");
-                } else if (phoneno.length() != 10) {
+                }  else if (phoneno.length() <= 0) {
                     showInfoDlg("Information", "Please enter valid Mobile Number", "OK", "info");
                 }
 //                else if (vehicleno.isEmpty()) {

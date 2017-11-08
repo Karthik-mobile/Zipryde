@@ -30,7 +30,7 @@
         android:layout_marginRight="15dp"
         android:layout_marginTop="15dp"
         android:src="@drawable/ic_action_settings"
-        android:visibility="gone"/>
+        android:visibility="visible"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -54,13 +54,29 @@
             android:layout_marginTop="25dp"
             android:background="@drawable/rounded_edittext"
             android:hint="Mobile Number"
-            android:inputType="number"
+            android:inputType="phone"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:paddingTop="5dp"
             android:imeOptions="actionNext"
             android:paddingBottom="5dp"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:visibility="visible"/>
+
+        <net.rimoto.intlphoneinput.IntlPhoneInput
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            app:textSize="14sp"
+            app:textColor="@color/black_overlay"
+            app:flagPaddingBottom="4dp"
+            app:flagPaddingEnd="4dp"
+            app:flagPaddingStart="4dp"
+            app:flagPaddingTop="4dp"
+            android:hint="Mobile Number"
+            android:imeOptions="actionNext"
+            android:id="@+id/login_phone_input"
+            android:visibility="gone"/>
 
         <EditText
             android:id="@+id/passwordEdit"
@@ -92,7 +108,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:text="Forget Password?"
+            android:text="Forgot Password?"
             android:textColor="@color/primaryText"
             android:textSize="16dp"  />
 

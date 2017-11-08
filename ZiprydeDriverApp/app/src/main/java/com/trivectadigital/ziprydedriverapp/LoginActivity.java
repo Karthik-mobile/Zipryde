@@ -3,6 +3,8 @@ package com.trivectadigital.ziprydedriverapp;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -28,6 +30,8 @@ import com.trivectadigital.ziprydedriverapp.assist.Utils;
 import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydedriverapp.modelpost.SingleInstantParameters;
 
+import net.rimoto.intlphoneinput.IntlPhoneInput;
+
 import org.json.JSONObject;
 
 import retrofit2.Call;
@@ -40,6 +44,8 @@ public class LoginActivity extends AppCompatActivity {
     EditText phonenoEdit, passwordEdit;
     ZiprydeApiInterface apiService;
     TextView gotoRegister, gotoForgetPwd;
+    IntlPhoneInput phoneInputView;
+    String appVersionName, appVersionCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,10 +71,20 @@ public class LoginActivity extends AppCompatActivity {
         phonenoEdit = (EditText) findViewById(R.id.phonenoEdit);
         passwordEdit = (EditText) findViewById(R.id.passwordEdit);
 
+        phoneInputView = (IntlPhoneInput) findViewById(R.id.login_phone_input);
+        try {
+            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
+            appVersionName = pInfo.versionName;
+            appVersionCode = String.valueOf(pInfo.versionCode);
+
+        } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+        }
+
         sign_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                phoneno = phonenoEdit.getText().toString().trim();
+                phoneno = phonenoEdit.getText().toString().trim();//phoneInputView.getNumber();//phonenoEdit.getText().toString().trim();
                 password = passwordEdit.getText().toString().trim();
                 if (phoneno.isEmpty()) {
                     showInfoDlg("Information", "Please enter the phone number", "OK", "info");
@@ -84,6 +100,10 @@ public class LoginActivity extends AppCompatActivity {
                     loginCredentials.password = password;
                     loginCredentials.deviceToken = regId;
                     loginCredentials.overrideSessionToken=0;
+                    loginCredentials.mobileOS ="ANDROID";
+                    loginCredentials.buildNo = appVersionCode;
+                    loginCredentials.versionNumber = appVersionName;
+                    loginCredentials.appName = "ZIPRYDE";
                     Gson gson = new Gson();
                     String json = gson.toJson(loginCredentials);
                     Log.e("json", "" + json);
@@ -322,6 +342,10 @@ public class LoginActivity extends AppCompatActivity {
                     loginCredentials.password = password;
                     loginCredentials.deviceToken = regId;
                     loginCredentials.overrideSessionToken=1;
+                    loginCredentials.mobileOS ="ANDROID";
+                    loginCredentials.buildNo = appVersionCode;
+                    loginCredentials.versionNumber = appVersionName;
+                    loginCredentials.appName = "ZIPRYDE";
                     Gson gson = new Gson();
                     String json = gson.toJson(loginCredentials);
                     Log.e("json", "" + json);

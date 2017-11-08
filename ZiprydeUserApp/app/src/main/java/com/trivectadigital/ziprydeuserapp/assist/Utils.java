@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 public class Utils {
 
     public static String countryCode = "";
-   // public static String defaultIP = "52.10.57.172:8080";
+
    public static String defaultIP = "mobileservice.zipryde.com:8080";
     public static final Pattern IP_ADDRESS
             = Pattern.compile(

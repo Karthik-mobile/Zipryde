@@ -32,6 +32,10 @@ public class SingleInstantParameters {
     public String comments;
     public int overrideSessionToken;
     public String bookingDateTime;
+    public String versionNumber;
+    public String buildNo;
+    public String mobileOS;
+    public String appName;
 
 }
 

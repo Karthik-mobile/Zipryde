@@ -7,8 +7,8 @@ android {
         applicationId "com.trivectadigital.ziprydeuserapp"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.1"
+        versionCode 3
+        versionName "1.12"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -71,6 +71,7 @@ dependencies {
     compile 'de.greenrobot:eventbus:2.4.0'
     testCompile 'junit:junit:4.12'
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'net.rimoto:intlphoneinput:1.0.1'
 }
 
 // Add to the bottom of the file

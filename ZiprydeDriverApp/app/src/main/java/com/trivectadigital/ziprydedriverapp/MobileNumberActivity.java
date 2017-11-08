@@ -27,6 +27,8 @@ import com.trivectadigital.ziprydedriverapp.assist.Utils;
 import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydedriverapp.modelpost.SingleInstantParameters;
 
+import net.rimoto.intlphoneinput.IntlPhoneInput;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -40,6 +42,8 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
     private final Handler handler = new Handler();
     int countInc = 0;
     TextView percentageText;
+
+    IntlPhoneInput phoneInputView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,9 +69,16 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
         settingsPage = (ImageView) findViewById(R.id.settingsPage);
         settingsPage.setOnClickListener(this);
 
+        phoneInputView = (IntlPhoneInput) findViewById(R.id.my_phone_input);
+
         if (!Utils.fromSplash) {
-            mobileEdit.setText("" + Utils.getOTPByMobileInstantResponse.getMobileNumber());
+            if(Utils.getOTPByMobileInstantResponse != null) {
+                mobileEdit.setText("" + Utils.getOTPByMobileInstantResponse.getMobileNumber());
+                phoneInputView.setNumber("" + Utils.getOTPByMobileInstantResponse.getMobileNumber());
+            }
         }
+
+
     }
 
     @Override
@@ -76,13 +87,27 @@ public class MobileNumberActivity extends AppCompatActivity implements View.OnCl
             case R.id.pinBtn:
                 String mobile = mobileEdit.getText().toString().trim();
                 if (mobile.isEmpty()) {
-                    showInfoDlg("Info..!", "Please enter the mobile number", "OK", "info");
-                } else if (mobile.length() != 10) {
                     showInfoDlg("Info..!", "Please enter valid mobile number", "OK", "info");
-                } else {
+                }  else {
                     apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
                     callMobileService(mobile);
                 }
+
+//                if(mobile.isEmpty()){
+//                    showInfoDlg("Information", "Please enter valid mobile number", "OK", "info");
+//                }
+//                else {
+//
+//                    String myInternationalNumber = "";
+//                    if(phoneInputView.isValid()) {
+//                        myInternationalNumber = phoneInputView.getNumber();
+//                        //Toast.makeText(this,"",Toast.LENGTH_SHORT).show();
+//                        apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
+//                        callMobileService(myInternationalNumber);
+//                    }
+//
+//                }
+
                 break;
             case R.id.settingsPage:
                 Intent ide = new Intent(MobileNumberActivity.this, SettingsActivity.class);

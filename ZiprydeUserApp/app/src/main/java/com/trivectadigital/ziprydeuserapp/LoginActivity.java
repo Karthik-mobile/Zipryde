@@ -3,6 +3,8 @@ package com.trivectadigital.ziprydeuserapp;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
@@ -28,6 +30,8 @@ import com.trivectadigital.ziprydeuserapp.assist.Utils;
 import com.trivectadigital.ziprydeuserapp.modelget.SingleInstantResponse;
 import com.trivectadigital.ziprydeuserapp.modelpost.SingleInstantParameters;
 
+import net.rimoto.intlphoneinput.IntlPhoneInput;
+
 import org.json.JSONObject;
 
 import retrofit2.Call;
@@ -40,6 +44,10 @@ public class LoginActivity extends AppCompatActivity {
     EditText phonenoEdit, passwordEdit;
     ZiprydeApiInterface apiService;
     TextView gotoRegister, gotoForgetPwd;
+    String appVersionName, appVersionCode;
+
+    IntlPhoneInput phoneInputView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +66,16 @@ public class LoginActivity extends AppCompatActivity {
         TextView titleText = (TextView) mCustomView.findViewById(R.id.titleText);
         titleText.setText("Login");
 
+        try {
+            PackageInfo pInfo = this.getPackageManager().getPackageInfo(getPackageName(), 0);
+            appVersionName = pInfo.versionName;
+            appVersionCode = String.valueOf(pInfo.versionCode);
+        } catch (PackageManager.NameNotFoundException e) {
+        e.printStackTrace();
+        }
+       // buildNumber.setText(version);
+
+
         sign_btn = (Button) findViewById(R.id.sign_btn);
         gotoRegister = (TextView) findViewById(R.id.gotoRegister);
         gotoForgetPwd = (TextView) findViewById(R.id.gotoForgetPwd);
@@ -65,16 +83,21 @@ public class LoginActivity extends AppCompatActivity {
         phonenoEdit = (EditText) findViewById(R.id.phonenoEdit);
         passwordEdit = (EditText) findViewById(R.id.passwordEdit);
 
+        phoneInputView = (IntlPhoneInput) findViewById(R.id.login_phone_input);
+
         sign_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                phoneno = phonenoEdit.getText().toString().trim();
+                phoneno = phonenoEdit.getText().toString().trim();//phoneInputView.getNumber();//phonenoEdit.getText().toString().trim();
                 password = passwordEdit.getText().toString().trim();
-                if (phoneno.isEmpty()) {
-                    showInfoDlg("Information", "Please enter the Mobile Number", "OK", "info");
-                } else if (password.isEmpty()) {
+
+                if(phoneno.isEmpty()){
+                    showInfoDlg("Information", "Please enter valid mobile number", "OK", "info");
+                }
+                else if (password.isEmpty()) {
                     showInfoDlg("Information", "Please enter the Password", "OK", "info");
                 } else {
+
                     SharedPreferences pref = getApplicationContext().getSharedPreferences(Utils.SHARED_PREF, 0);
                     String regId = pref.getString("regId", null);
                     apiService = ZiprydeApiClient.getClient().create(ZiprydeApiInterface.class);
@@ -84,6 +107,12 @@ public class LoginActivity extends AppCompatActivity {
                     loginCredentials.password = password;
                     loginCredentials.deviceToken = regId;
                     loginCredentials.overrideSessionToken=0;
+                    loginCredentials.mobileOS ="ANDROID";
+                    loginCredentials.buildNo = appVersionCode;
+                    loginCredentials.versionNumber = appVersionName;
+                    loginCredentials.appName = "ZIPRYDE";
+
+
                     Gson gson = new Gson();
                     String json = gson.toJson(loginCredentials);
                     Log.e("json", "" + json);
@@ -274,6 +303,11 @@ public class LoginActivity extends AppCompatActivity {
                     loginCredentials.password = password;
                     loginCredentials.deviceToken = regId;
                     loginCredentials.overrideSessionToken=1;
+                    loginCredentials.mobileOS ="ANDROID";
+                    loginCredentials.buildNo =appVersionCode;
+                    loginCredentials.versionNumber = appVersionName;
+                    loginCredentials.appName = "ZIPRYDE";
+
                     Gson gson = new Gson();
                     String json = gson.toJson(loginCredentials);
                     Log.e("json", "" + json);
@@ -295,5 +329,10 @@ public class LoginActivity extends AppCompatActivity {
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         dialog.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+
     }
 }
