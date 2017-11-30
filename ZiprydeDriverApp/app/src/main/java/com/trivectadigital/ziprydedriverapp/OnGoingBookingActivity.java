@@ -262,27 +262,29 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
             getBookingByBookingId(loginCredentials, 1);
         } else {
             int position = intent.getIntExtra("position", 0);
-            listOfRequestedBooking = Utils.getBookingRequestedByDriverIdResponse.get(position);
-            bookingIdFinal = listOfRequestedBooking.getBookingId();
-            bookingStatusFinal = listOfRequestedBooking.getBookingStatusCode();
-            if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("ACCEPTED")) {
-                SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
-                editor.putString("bookingID", bookingIdFinal);
-                editor.commit();
-            } else {
-                SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
-                editor.putString("bookingID", "");
-                editor.commit();
-            }
-            SingleInstantParameters loginCredentials = new SingleInstantParameters();
-            loginCredentials.bookingId = "" + listOfRequestedBooking.getBookingId();
-            Gson gson = new Gson();
-            String json = gson.toJson(loginCredentials);
-            Log.e("json", "" + json);
-            getBookingByBookingId(loginCredentials, 1);
+            if(Utils.getBookingRequestedByDriverIdResponse != null) {
+                listOfRequestedBooking = Utils.getBookingRequestedByDriverIdResponse.get(position);
+                bookingIdFinal = listOfRequestedBooking.getBookingId();
+                bookingStatusFinal = listOfRequestedBooking.getBookingStatusCode();
+                if (!bookingStatusFinal.equals("CANCELLED") && !bookingStatusFinal.equals("PAID") && !bookingStatusFinal.equals("ACCEPTED")) {
+                    SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+                    editor.putString("bookingID", bookingIdFinal);
+                    editor.commit();
+                } else {
+                    SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+                    editor.putString("bookingID", "");
+                    editor.commit();
+                }
+                SingleInstantParameters loginCredentials = new SingleInstantParameters();
+                loginCredentials.bookingId = "" + listOfRequestedBooking.getBookingId();
+                Gson gson = new Gson();
+                String json = gson.toJson(loginCredentials);
+                Log.e("json", "" + json);
+                getBookingByBookingId(loginCredentials, 1);
 
-            if(bookingStatusFinal.equalsIgnoreCase("CANCELLED") ||bookingStatusFinal.equals("PAID") ){
-                mapLayout.setVisibility(View.GONE);
+                if (bookingStatusFinal.equalsIgnoreCase("CANCELLED") || bookingStatusFinal.equals("PAID")) {
+                    mapLayout.setVisibility(View.GONE);
+                }
             }
         }
 
@@ -1240,11 +1242,14 @@ public class OnGoingBookingActivity extends AppCompatActivity implements OnMapRe
 
     @Override
     public void onBackPressed() {
-        if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED") || bookingStatusFinal.equals("ACCEPTED")) {
-            Intent ide = new Intent(OnGoingBookingActivity.this, NewDashBoardActivity.class);
-            ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(ide);
-            finish();
+
+        if(bookingStatusFinal != null) {
+            if (bookingStatusFinal.equals("PAID") || bookingStatusFinal.equals("CANCELLED") || bookingStatusFinal.equals("ACCEPTED")) {
+                Intent ide = new Intent(OnGoingBookingActivity.this, NewDashBoardActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
+                finish();
+            }
         }
     }
 

@@ -179,8 +179,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 Log.e("noOfPassengers", "" + noofSeatsSpinner.getSelectedItem().toString().trim());
                 loginCredentials.noOfPassengers = Integer.parseInt(noofSeatsSpinner.getSelectedItem().toString().trim());
 
-                String km = Utils.parsedDistance.split(" ")[0].trim();
-                String kmtomile = "" + (Double.parseDouble(km.replaceAll(",", "")) * 0.6214);
+                String mtr = Utils.parsedDistanceInMeters;// Utils.parsedDistance.split(" ")[0].trim();
+                String kmtomile = "" + (Double.parseDouble(mtr) * 0.00062137); //"" + (Double.parseDouble(km.replaceAll(",", "")) * 0.6214);
                 GeoLocationRequest bookingObjects = new GeoLocationRequest();
                 Log.e("fromLatitude", "" + Utils.startingLatLan.latitude);
                 bookingObjects.fromLatitude = "" + new DecimalFormat("##.######").format(Utils.startingLatLan.latitude);
@@ -331,18 +331,22 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         getFareDetailsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectedCarType = Integer.parseInt(getFareDetailsBtn.getTag().toString().trim());
+                String cabTag = (String)getFareDetailsBtn.getTag();
+                selectedCarType = Integer.parseInt(cabTag);
                 SingleInstantParameters singleInstantParameters = new SingleInstantParameters();
                 singleInstantParameters.cabTypeId = selectedCarType;
-                String km = Utils.parsedDistance.split(" ")[0].trim();
-                String kmtomile = "" + (Double.parseDouble(km.replaceAll(",", "")) * 0.6214);
+                String mtr = Utils.parsedDistanceInMeters;// Utils.parsedDistance.split(" ")[0].trim();
+                String kmtomile = "" + (Double.parseDouble(mtr) * 0.00062137); //"" + (Double.parseDouble(km.replaceAll(",", "")) * 0.6214);
                 Log.e("kmtomile", "" + kmtomile);
                 Log.e("selectedCarType", "" + selectedCarType);
                 int count = Integer.parseInt(noofSeatsSpinner.getSelectedItem().toString().trim());
                 Log.e("count", "" + count);
                 singleInstantParameters.distanceInMiles = kmtomile;
                 singleInstantParameters.noOfPassengers = count;
-                getFairEstimateDetails(singleInstantParameters);
+
+                Toast.makeText(DirectionConfirmationActivity.this,"Estimated Distance-->"+Utils.parsedDistance,Toast.LENGTH_SHORT).show();
+
+                getFareEstimateDetails(singleInstantParameters);
             }
         });
 
@@ -549,8 +553,8 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         //Get the date and time.
         loginCredentials.bookingDateTime = schedulePickupTime;//"08-24-2017 21:30:00";
 
-        String km = Utils.parsedDistance.split(" ")[0].trim();
-        String kmtomile = "" + (Double.parseDouble(km.replaceAll(",", "")) * 0.6214);
+        String mtr = Utils.parsedDistanceInMeters;// Utils.parsedDistance.split(" ")[0].trim();
+        String kmtomile = "" + (Double.parseDouble(mtr) * 0.00062137); //"" + (Double.parseDouble(km.replaceAll(",", "")) * 0.6214);
         GeoLocationRequest bookingObjects = new GeoLocationRequest();
         Log.e("fromLatitude", "" + Utils.startingLatLan.latitude);
         bookingObjects.fromLatitude = "" + new DecimalFormat("##.######").format(Utils.startingLatLan.latitude);
@@ -884,7 +888,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
         }
     }
 
-    private void getFairEstimateDetails(SingleInstantParameters singleInstantParameters) {
+    private void getFareEstimateDetails(SingleInstantParameters singleInstantParameters) {
         if (Utils.connectivity(DirectionConfirmationActivity.this)) {
             final Dialog dialog = new Dialog(DirectionConfirmationActivity.this, android.R.style.Theme_Dialog);
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -1335,6 +1339,7 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                 Log.d("ParserTask", "Executing routes");
                 Log.d("ParserTask", routes.toString());
 
+
             } catch (Exception e) {
                 Log.d("ParserTask", e.toString());
                 e.printStackTrace();
@@ -1377,6 +1382,10 @@ public class DirectionConfirmationActivity extends AppCompatActivity implements 
                     lineOptions.addAll(points);
                     lineOptions.width(10);
                     lineOptions.color(Color.parseColor("#df722c"));
+
+                    //Display the distance in miles
+                    //Toast.makeText(DirectionConfirmationActivity.this,"Distance Value-->"+Utils.parsedDistanceInMeters+"\tDistance Text--"+Utils.parsedDistance,Toast.LENGTH_LONG).show();
+
 
                     Log.d("onPostExecute", "onPostExecute lineoptions decoded");
 

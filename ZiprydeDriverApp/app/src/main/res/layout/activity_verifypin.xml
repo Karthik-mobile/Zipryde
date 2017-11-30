@@ -41,7 +41,7 @@
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:layout_marginTop="15dp"
-            android:text="Please enter the Code sent to"
+            android:text="Please enter the code sent to"
             android:textColor="#696969"
             android:textSize="15dp" />
 
@@ -73,7 +73,9 @@
             android:layout_marginRight="15dp"
             android:layout_marginTop="15dp"
             android:paddingLeft="5dp"
-            android:paddingRight="5dp" />
+            android:paddingRight="5dp"
+            android:inputType="text"
+            android:imeOptions="actionDone"/>
 
         <Button
             android:id="@+id/verifyBtn"

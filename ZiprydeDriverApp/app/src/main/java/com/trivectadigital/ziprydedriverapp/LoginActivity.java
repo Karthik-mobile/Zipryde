@@ -370,7 +370,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Utils.gpsLocationService.stopUsingGPS();
-        finish();
+        //Utils.gpsLocationService.stopUsingGPS();
+       // finish();
     }
 }

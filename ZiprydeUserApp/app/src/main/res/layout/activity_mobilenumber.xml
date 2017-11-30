@@ -58,7 +58,8 @@
             android:inputType="phone"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:visibility="visible"/>
+            android:visibility="visible"
+            android:imeOptions="actionDone"/>
 
 
 

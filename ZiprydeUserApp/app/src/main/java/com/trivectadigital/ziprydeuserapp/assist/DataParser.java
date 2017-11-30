@@ -34,6 +34,8 @@ public class DataParser {
                 JSONObject stepsObj = jLegs.getJSONObject(0);
                 JSONObject distanceObj = stepsObj.getJSONObject("distance");
                 Utils.parsedDistance = distanceObj.getString("text");
+                Utils.parsedDistanceInMeters = distanceObj.getString("value");
+
                 Log.e("Utils.parsedDistance",""+Utils.parsedDistance);
                 distanceObj = stepsObj.getJSONObject("duration");
                 Utils.parsedDuration = distanceObj.getString("text");

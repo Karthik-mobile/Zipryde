@@ -186,11 +186,16 @@ public class GPSLocationService extends Service implements GoogleApiClient.Conne
 //                Log.e("response.isSuccessful", "" + response.isSuccessful());
                 SingleInstantResponse bookings = response.body();
 
-                if(bookings.getBooking().equalsIgnoreCase("y")){
-                    //Move to Ride Request Activity.
-                    ObservableObject.getInstance().updateValue(null);
-                }else{
-                    //Dont do anything here
+                if(bookings != null) {
+
+                    if(bookings.getBooking() != null) {
+                        if (bookings.getBooking().equalsIgnoreCase("y")) {
+                            //Move to Ride Request Activity.
+                            ObservableObject.getInstance().updateValue(null);
+                        } else {
+                            //Dont do anything here
+                        }
+                    }
                 }
 
             }

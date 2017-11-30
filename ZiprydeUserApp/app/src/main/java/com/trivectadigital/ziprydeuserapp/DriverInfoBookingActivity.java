@@ -586,27 +586,27 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
     public void getBookingByBookingId(SingleInstantParameters loginCredentials) {
         if (Utils.connectivity(DriverInfoBookingActivity.this)) {
 
-            final Dialog dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-            dialog.setContentView(R.layout.loadingimage_layout);
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.setCancelable(false);
-            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-            dialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            dialog.show();
+            final Dialog bookingDialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
+            bookingDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            bookingDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            bookingDialog.setContentView(R.layout.loadingimage_layout);
+            bookingDialog.setCanceledOnTouchOutside(false);
+            bookingDialog.setCancelable(false);
+            bookingDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+            bookingDialog.getWindow().setLayout(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            bookingDialog.show();
 
             Call<SingleInstantResponse> call = apiService.getBookingByBookingId(Utils.verifyLogInUserMobileInstantResponse.getAccessToken(),loginCredentials);
             call.enqueue(new Callback<SingleInstantResponse>() {
                 @Override
                 public void onResponse(Call<SingleInstantResponse> call, Response<SingleInstantResponse> response) {
                     int statusCode = response.code();
-                    Log.e("statusCode", "" + statusCode);
-                    Log.e("response.body", "" + response.body());
-                    Log.e("response.errorBody", "" + response.errorBody());
-                    Log.e("response.isSuccessful", "" + response.isSuccessful());
+//                    Log.e("statusCode", "" + statusCode);
+//                    Log.e("response.body", "" + response.body());
+//                    Log.e("response.errorBody", "" + response.errorBody());
+//                    Log.e("response.isSuccessful", "" + response.isSuccessful());
                     if (response.isSuccessful()) {
-                        dialog.dismiss();
+                        bookingDialog.dismiss();
                         Utils.requestBookingResponse = response.body();
                         bookingIdFinal = Utils.requestBookingResponse.getBookingId();
                         driverNameText.setText(Utils.requestBookingResponse.getDriverName());
@@ -616,8 +616,8 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                         bookingStatus.setText(Utils.requestBookingResponse.getBookingStatus());
                         bookingStatusFinal = Utils.requestBookingResponse.getBookingStatusCode();
                         bookingDriverMobileNumber = Utils.requestBookingResponse.getDriverMobileNumber();
-                        Log.e("DriverId", Utils.requestBookingResponse.getDriverId());
-                        Log.e("driverImage", "driverImage : " + Utils.requestBookingResponse.getDriverImage());
+//                        Log.e("DriverId", Utils.requestBookingResponse.getDriverId());
+//                        Log.e("driverImage", "driverImage : " + Utils.requestBookingResponse.getDriverImage());
                         String driverImage = "" + Utils.requestBookingResponse.getDriverImage();
                         if (driverImage != null) {
                             if (!driverImage.equalsIgnoreCase("null")) {
@@ -679,7 +679,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                         }
 
                     } else {
-                        dialog.dismiss();
+                        bookingDialog.dismiss();
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
                             if(response.code() == Utils.NETWORKERR_SESSIONTOKEN_EXPIRED){
@@ -703,7 +703,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                 public void onFailure(Call<SingleInstantResponse> call, Throwable t) {
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
-                    dialog.dismiss();
+                    bookingDialog.dismiss();
                     showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
                    // Toast.makeText(DriverInfoBookingActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
@@ -1120,11 +1120,11 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
                 driverArrivingTime.setVisibility(View.GONE);
             }
 
-            if (!bookingStatusFinal.equals("COMPLETED")) {
-                SingleInstantParameters loginCredentials = new SingleInstantParameters();
-                loginCredentials.userId = "" + Utils.requestBookingResponse.getDriverId();
-                //getGeoLocationByDriverId(loginCredentials);
-            }
+//            if (!bookingStatusFinal.equals("COMPLETED")) {
+//                SingleInstantParameters loginCredentials = new SingleInstantParameters();
+//                loginCredentials.userId = "" + Utils.requestBookingResponse.getDriverId();
+//                //getGeoLocationByDriverId(loginCredentials);
+//            }
 
             if (bookingStatusFinal.equals("CANCELLED")) {
                 showInfoDlg("Booking Cancelled", "Requested booking has been cancelled. Try after sometime", "Done", "requestCancelled");
@@ -1244,6 +1244,7 @@ public class DriverInfoBookingActivity extends AppCompatActivity implements OnMa
     }
 
     private void showInfoDlg(String title, String content, String btnText, final String navType) {
+
         final Dialog dialog = new Dialog(DriverInfoBookingActivity.this, android.R.style.Theme_Dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);

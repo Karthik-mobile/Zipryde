@@ -62,6 +62,7 @@ public class Utils {
     public static String backchkendingPlaceAddress = "";
 
     public static String parsedDistance = "";
+    public static String parsedDistanceInMeters = "";
     public static String parsedDuration = "";
 
     public static String cabparsedDuration = "";
