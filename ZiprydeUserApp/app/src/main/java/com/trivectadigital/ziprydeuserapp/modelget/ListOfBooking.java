@@ -50,6 +50,19 @@ public class ListOfBooking {
     @SerializedName("driverMobileNumber")
     private String driverMobileNumber;
 
+    @SerializedName("vehicleNumber")
+    private String vehicleNumber;
+    @SerializedName("make")
+    private String make;
+    @SerializedName("model")
+    private String model;
+    @SerializedName("licensePlateNumber")
+    private String licensePlateNumber;
+
+    @SerializedName("cabImage")
+    private String cabImage;
+
+
     public String getBookingStatusCode() {
         return bookingStatusCode;
     }
@@ -217,4 +230,46 @@ public class ListOfBooking {
     public void setDriverId(String driverId) {
         this.driverId = driverId;
     }
+
+    public String getVehicleNumber() {
+        return vehicleNumber;
+    }
+
+    public void setVehicleNumber(String cabNo) {
+        this.vehicleNumber = cabNo;
+    }
+
+    public String getMake() {
+        return make;
+    }
+
+    public void setMake(String cabMake) {
+        this.make = cabMake;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String cabModel) {
+        this.model = cabModel;
+    }
+
+    public String getLicensePlateNumber() {
+        return licensePlateNumber;
+    }
+
+    public void setLicensePlateNumber(String cabLicenseNo) {
+        this.licensePlateNumber = cabLicenseNo;
+
+    }
+
+    public String getCabImage() {
+        return cabImage;
+    }
+
+    public void setCabImage(String cabBinaryImage) {
+        this.cabImage = cabBinaryImage;
+    }
+
 }

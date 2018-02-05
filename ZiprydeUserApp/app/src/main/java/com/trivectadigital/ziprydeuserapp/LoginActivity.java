@@ -270,6 +270,12 @@ public class LoginActivity extends AppCompatActivity {
                         startActivity(ide);
                         finish();
                     }else{
+
+                        //Store the booking ID on the preferences
+                        SharedPreferences.Editor editor = getSharedPreferences("BookingCredentials", MODE_PRIVATE).edit();
+                        editor.putString("bookingId", bookingId);
+                        editor.commit();
+
                         Intent ide = new Intent(LoginActivity.this, DriverInfoBookingActivity.class);
                         ide.putExtra("bookingId",""+bookingId);
                         ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -441,23 +441,10 @@ public class NavigationMenuActivity extends AppCompatActivity
                     int statusCode = response.code();
 
                     dialog.dismiss();
-                    if (response.isSuccessful()) {
 
-                        SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
-                        editor.remove("phoneNumber");
-                        editor.remove("password");
-                        editor.commit();
-                        SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
-                        deditor.putString("disclaimer", "");
-                        deditor.commit();
-                        Intent ide = new Intent(NavigationMenuActivity.this, LoginActivity.class);
-                        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(ide);
-                        finish();
+                        gotoLogin();
 
-                        //Call Logout service from here.
-
-                    }
+                    //}
                 }
 
                 @Override
@@ -465,12 +452,14 @@ public class NavigationMenuActivity extends AppCompatActivity
                     // Log error here since request failed
                     Log.e("onFailure", t.toString());
                     dialog.dismiss();
-                    showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
+                    gotoLogin();
+                    //showInfoDlg(getString(R.string.error), "" + getString(R.string.errmsg_sessionexpired), getString(R.string.btn_ok), "logout");
                     //Toast.makeText(NavigationMenuActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
                 }
             });
         } else {
-            Toast.makeText(NavigationMenuActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+           // Toast.makeText(NavigationMenuActivity.this, "Either there is no network connectivity or server is not available.. Please try again later..", Toast.LENGTH_LONG).show();
+            gotoLogin();
         }
     }
 
@@ -497,6 +486,24 @@ public class NavigationMenuActivity extends AppCompatActivity
         }
 
 
+    }
+
+    private void gotoLogin(){
+
+
+        // if (response.isSuccessful()) {
+
+        SharedPreferences.Editor editor = getSharedPreferences("LoginCredentials", MODE_PRIVATE).edit();
+        editor.remove("phoneNumber");
+        editor.remove("password");
+        editor.commit();
+        SharedPreferences.Editor deditor = getSharedPreferences("DisclaimerCredentials", MODE_PRIVATE).edit();
+        deditor.putString("disclaimer", "");
+        deditor.commit();
+        Intent ide = new Intent(NavigationMenuActivity.this, LoginActivity.class);
+        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(ide);
+        finish();
     }
 
 }

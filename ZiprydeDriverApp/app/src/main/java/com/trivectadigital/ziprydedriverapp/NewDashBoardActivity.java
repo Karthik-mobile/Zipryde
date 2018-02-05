@@ -229,6 +229,17 @@ public class NewDashBoardActivity extends AppCompatActivity implements Observer 
 
         ObservableObject.getInstance().addObserver(this);
 
+        RelativeLayout driverInfo = (RelativeLayout) findViewById(R.id.driverProfileRelativeLayout);
+
+       // ImageView settingsPage = (ImageView) findViewById(R.id.settingsPage);
+        driverInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent ide = new Intent(NewDashBoardActivity.this, ProfileActivity.class);
+                ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(ide);
+            }
+        });
 
     }
 
@@ -246,6 +257,15 @@ public class NewDashBoardActivity extends AppCompatActivity implements Observer 
         }
 
     }
+
+//    public void driverImageClick(View view) {
+//        //Implement image click function
+//
+//        Intent ide = new Intent(NewDashBoardActivity.this, ProfileActivity.class);
+//        //ide.putExtra("schedule",1);
+//        ide.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//        startActivity(ide);
+//    }
 
 //    @Override
 //    public void onActivityChange(Observable observable,String token) {

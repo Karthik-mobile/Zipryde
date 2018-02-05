@@ -28,7 +28,7 @@ public class Utils {
 
     public static String countryCode = "";
 
-   public static String defaultIP = "mobileservice.zipryde.com:8080";
+   public static String defaultIP ="52.32.81.75:8080";//"mobileservice.zipryde.com:8080";
     public static final Pattern IP_ADDRESS
             = Pattern.compile(
             "((25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\\.(25[0-5]|2[0-4]"

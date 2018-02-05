@@ -26,6 +26,12 @@
     <string name="firstname">First Name</string>
     <string name="lastname">Last Name</string>
     <string name="email">E-Mail</string>
+    <string name="dlno">Driving License Number</string>
+    <string name="validOn">Valid From</string>
+    <string name="expried">Valid Thru</string>
+    <string name="make">Vehicle Make</string>
+    <string name="model">Vehicle Model</string>
+    <string name="licenseplateno">License Plate Number</string>
     <string name="mobileno">Mobile Number</string>
     <string name="enterotp">Enter OTP</string>
     <string name="password">Password</string>

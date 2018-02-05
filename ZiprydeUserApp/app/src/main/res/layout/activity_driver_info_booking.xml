@@ -13,8 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/colorAccent"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp">
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -39,7 +39,7 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
@@ -70,22 +70,33 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="vertical">
 
                     <ImageView
                         android:layout_width="35dp"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/suv_new_icon" />
+                        android:src="@drawable/suv_new_icon"
+                        android:visibility="gone"/>
 
                     <TextView
                         android:id="@+id/cabTypeText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
+
+                        android:padding="5dp"
+                        android:text=""
+                        android:textColor="@color/black_overlay"
+                        android:textSize="15dp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/cabLicenseNo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
                         android:padding="5dp"
                         android:text=""
                         android:textColor="@color/black_overlay"
@@ -198,6 +209,11 @@
         </LinearLayout>
 
     </LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -260,16 +276,16 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginBottom="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:gravity="center_vertical"
                 android:paddingLeft="15dp"
                 android:text="ZipRyde Status"
@@ -293,12 +309,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="5dp"
                 android:gravity="center_vertical"
                 android:textColor="@color/primaryText"
-                android:textSize="14dp"
+                android:textSize="12dp"
                 android:textStyle="bold" />
 
+
+            <TextView
+                android:id="@+id/crnNo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp"
+                android:gravity="center_vertical"
+                android:textColor="@color/primaryText"
+                android:textSize="15dp"
+                android:textStyle="bold" />
         </LinearLayout>
 
         <LinearLayout
@@ -350,7 +377,7 @@
             </RelativeLayout>
 
             <ImageView
-                android:layout_width="wrap_content"
+                android:layout_width="24dp"
                 android:layout_height="100dp"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="10dp"

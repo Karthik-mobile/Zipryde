@@ -4,6 +4,7 @@ import com.trivectadigital.ziprydedriverapp.modelget.ListOfBooking;
 import com.trivectadigital.ziprydedriverapp.modelget.ListOfPercentage;
 import com.trivectadigital.ziprydedriverapp.modelget.ListOfRequestedBooking;
 import com.trivectadigital.ziprydedriverapp.modelget.SingleInstantResponse;
+import com.trivectadigital.ziprydedriverapp.modelpost.DriverInfo;
 import com.trivectadigital.ziprydedriverapp.modelpost.SingleInstantParameters;
 
 import java.util.LinkedList;
@@ -96,5 +97,8 @@ public interface ZiprydeApiInterface {
 
     @POST("zipryde/updateDeviceToken")
     Call<Void> updateDeviceToken(@Header("access-token") String contentRange,@Body SingleInstantParameters parameters);
+
+    @POST("zipryde/getUserByUserId")
+    Call<DriverInfo> getUserByUserId(@Header("access-token") String contentRange, @Body SingleInstantParameters parameters);
 
 }
